@@ -41,8 +41,8 @@ const HomeContent = () => {
           </li>
         </ul>
         <Button
-          className="mt-10"
-          onClick={() => (window.location.href = "/Home")}
+          className="mt-10 bg-tealish hover:bg-teal-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => (window.location.href = "/Interview/questions")}
         >
           Take Test !
         </Button>

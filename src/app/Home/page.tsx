@@ -10,7 +10,7 @@ import BetaTop from "../Components/HomeComponents/BetaTop";
 
 export default function Home() {
   return (
-    <div className="MainHomeContainer flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-teal-50 flex flex-col items-center">
       <BetaTop/>
       {/* Centered Navigation */}
       <div className="homenavcontroller w-full flex justify-center py-4">
