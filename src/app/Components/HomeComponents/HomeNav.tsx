@@ -1,5 +1,5 @@
 import React from "react";
-import { lusitana } from "../../fonts/fonts";
+import { lusitana, poppins } from "../../fonts/fonts";
 import { Button } from "@/components/ui/button";
 
 const HomeNav = () => {
@@ -11,7 +11,7 @@ const HomeNav = () => {
       >
         <a
           href="/"
-          className={`${lusitana.className} text-tealish text-6xl mr-20`}
+          className={`${poppins.className} text-tealish text-6xl mr-20`}
         >
           Curex
         </a>
@@ -28,14 +28,22 @@ const HomeNav = () => {
           <a href="/contact" className="p-4">
             Contact
           </a>
-            <Button
-            className="bg-neutral-400 hover:bg-neutral-700 text-white hover:text-white font-bold rounded"
+          <Button
+            className="bg-gray-400 hover:bg-neutral-700 transition-all text-white hover:text-white font-bold rounded"
             size={"lg"}
             variant={"outline"}
-            >
-            Sign Up
-            </Button>
-          <Button className="bg-tealish hover:bg-teal-700 text-white font-bold rounded" size={"lg"}>
+            onClick={() => {
+              window.location.href = "/Register";
+            }}
+          >
+            Register
+          </Button>
+          <Button
+            className="bg-tealish hover:bg-teal-700 text-white transition-all font-bold rounded"
+            size={"lg"}
+            onClick={() => { window.location.href = "/Login"; }}
+            
+          >
             Login
           </Button>
         </div>

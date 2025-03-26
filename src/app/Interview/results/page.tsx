@@ -6,10 +6,8 @@ import { ArrowLeft, Users, MapPin } from "lucide-react"
 import dynamic from "next/dynamic"
   
 
-// Dynamically import Leaflet components with no SSR
 const MapComponent = dynamic(() => import("./map-component"), { ssr: false })
 
-// Sample data - in a real app, this would come from your backend
 const analysisResults = {
   possibleConditions: [
     { name: "Common Cold", probability: "High", description: "A viral infection of the upper respiratory tract." },

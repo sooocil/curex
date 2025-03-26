@@ -8,9 +8,7 @@ import "leaflet/dist/leaflet.css"
 
 
 
-// Fix Leaflet icon issues
 const fixLeafletIcon = () => {
-  // Only run on the client side
   if (typeof window !== "undefined" && window.L) {
     delete (window.L.Icon.Default.prototype as any)._getIconUrl
 
@@ -51,9 +49,7 @@ export default function MapComponent({
   handleHospitalClick,
 }: MapComponentProps) {
   useEffect(() => {
-    // Import Leaflet dynamically on the client
     import("leaflet").then((L) => {
-      // Make L available globally for Leaflet
       if (!window.L) {
         window.L = L
       }
@@ -136,10 +132,4 @@ export default function MapComponent({
   )
 }
 
-// Add global type for Leaflet
-declare global {
-  interface Window {
-    L: any
-  }
-}
 

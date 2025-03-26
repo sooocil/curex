@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/home',
+        destination: '/Home',
         permanent: true, // Use `false` for temporary redirect
       },
     ];
