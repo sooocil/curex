@@ -4,15 +4,28 @@ import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import React from "react";
 
-const UserLogin = () => {
+
+const page = () => {
+  const register = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle registration logic here
+    console.log("User registered");
+  };
+
+
   return (
+    <div className="grid">
+    <div className="main flex flex-col items-center justify-center">
+
+
+    <div className="AuthPopup RegisterPopup absolute shadow-2xl bg-white m-0 p-10 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
     <div className="flex flex-col gap-4 bg-white m-0 p-10 rounded-md  max-w-sm mx-auto">
       <h1 className="font-sans font-extrabold text-2xl text-center">User Login</h1>
       <p className="font-thin text-center text-gray-600">
         Hey, Enter your details to log in to your account
       </p>
       
-      <form className="flex flex-col items-center">
+      <form className="flex flex-col items-center" onSubmit={register}>
         <input
           type="email"
           placeholder="Email"
@@ -33,7 +46,7 @@ const UserLogin = () => {
         Don't have an account?{" "}
         <span
           className="underline text-teal-600 hover:text-teal-800 cursor-pointer"
-          onClick={() => (window.location.href = "/Register")}
+          onClick={() => (window.location.href = "/auth/Register")}
         >
           Register
         </span>
@@ -57,7 +70,10 @@ const UserLogin = () => {
         </Button>
       </div>
     </div>
+    </div>
+    </div>
+    </div>
   );
 };
 
-export default UserLogin;
+export default page;

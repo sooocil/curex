@@ -33,7 +33,7 @@ const HomeNav = () => {
             size={"lg"}
             variant={"outline"}
             onClick={() => {
-              window.location.href = "/Register";
+              window.location.href = "/auth/Register";
             }}
           >
             Register
@@ -41,7 +41,7 @@ const HomeNav = () => {
           <Button
             className="bg-tealish hover:bg-teal-700 text-white transition-all font-bold rounded"
             size={"lg"}
-            onClick={() => { window.location.href = "/Login"; }}
+            onClick={() => { window.location.href = "/auth/Login"; }}
             
           >
             Login

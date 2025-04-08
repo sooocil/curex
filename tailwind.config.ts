@@ -1,13 +1,12 @@
-/** @type {import('tailwindcss').Config} */
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
-export default {
+const config: Config = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{ts,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
@@ -20,32 +19,19 @@ export default {
     },
     extend: {
       colors: {
-        // Prioritizing Teal as the accent color
-        tealish: "#00AD9B",
-        "tealish-50": "#E6F9F8",
-        "tealish-100": "#C0F0EC",
-        "tealish-200": "#8BE6E0",
-        "tealish-300": "#56DCD4",
-        "tealish-400": "#21D2C8",
-
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-
         primary: {
-          DEFAULT: "#00AD9B", // Ensuring teal is primary
+          DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
-        accent: {
-          DEFAULT: "#00AD9B", // Teal prioritized as accent
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
@@ -53,6 +39,10 @@ export default {
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -62,12 +52,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
+        curex: {
+          DEFAULT: "#16B8A0", // Teal/turquoise accent color for Curex
+          light: "#5FDECB",
+          dark: "#0E8C78",
+          foreground: "#FFFFFF",
         },
       },
       borderRadius: {
@@ -77,12 +66,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0px" },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0px" },
+          to: { height: "0" },
         },
       },
       animation: {
@@ -92,4 +81,6 @@ export default {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+}
+
+export default config

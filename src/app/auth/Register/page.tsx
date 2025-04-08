@@ -1,11 +1,16 @@
-"use client";
+'use client';
 
-import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
-import { Button } from "@/components/ui/button";
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
 
-const UserRegister = () => {
+const page = () => {
   return (
+    <div className="grid">
+    <div className="main flex flex-col items-center justify-center">
+ 
+
+    <div className="AuthPopup RegisterPopup absolute  shadow-2xl bg-white m-0 p-10 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
     <div className="flex flex-col gap-4 bg-white m-0 p-10 rounded-md  max-w-sm mx-auto">
       <h1 className="font-sans font-extrabold text-2xl text-center">User Register</h1>
       <p className="font-thin text-center text-gray-600">
@@ -43,7 +48,7 @@ const UserRegister = () => {
         Already have an account?{" "}
         <span
           className="underline text-teal-600 hover:text-teal-800 cursor-pointer"
-          onClick={() => (window.location.href = "/Login")}
+          onClick={() => (window.location.href = "/auth/Login")}
         >
           Login
         </span>
@@ -67,7 +72,10 @@ const UserRegister = () => {
         </Button>
       </div>
     </div>
+    </div>
+    </div>
+    </div>
   );
 };
 
-export default UserRegister;
+export default page;
