@@ -39,7 +39,7 @@ const HomeNav = () => {
             Register
           </Button>
           <Button
-            className="bg-tealish hover:bg-teal-700 text-white transition-all font-bold rounded"
+            className="bg-teal-500 hover:bg-teal-700 text-white transition-all font-bold rounded"
             size={"lg"}
             onClick={() => { window.location.href = "/auth/Login"; }}
             
