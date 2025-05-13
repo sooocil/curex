@@ -4,15 +4,14 @@ import { NextResponse, NextRequest } from "next/server";
 import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/helpers/mailer";
 
-// Connect to database
 connectDB();
 
 export async function POST(request: NextRequest) {
+  
   try {
     const reqBody = await request.json();
     const { username, email, password } = reqBody;
 
-    // Validate input
     if (!username || !email || !password) {
       return NextResponse.json(
         { message: "username, email, and password are required." },
@@ -20,7 +19,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -29,11 +27,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
-    // Create new user
     const newUser = new User({
       username,
       email,
@@ -43,11 +39,10 @@ export async function POST(request: NextRequest) {
     const savedUser = await newUser.save();
     console.log("User created:", savedUser);
 
-    // Send verification email
     try {
       await sendEmail({
         email,
-        emailType: "VERIFY", // Ensure this matches your mailer logic
+        emailType: "VERIFY",
         userId: savedUser._id,
       });
     } catch (mailErr: any) {
@@ -58,7 +53,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Success response
     return NextResponse.json(
       {
         message: "User created successfully. Verification email sent.",

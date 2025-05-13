@@ -5,6 +5,18 @@ import { Button } from "@/components/ui/button";
 import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
 
 const page = () => {
+
+
+  const [user, setUser] = React.useState({
+    username: "",
+    email: "",
+    password: "",
+  })
+
+  const [buttonDisabled, setButtonDisabled] = React.useState(false);
+  
+
+
   return (
     <div className="grid">
     <div className="main flex flex-col items-center justify-center">

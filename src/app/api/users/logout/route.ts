@@ -14,44 +14,26 @@ export async function POST(request: NextRequest) {
     console.log(reqBody);
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
     console.log("User found", user);
 
-    const validPassword = bcrypt.compare(password, user.password);
-
-    if (!validPassword) {
-      return NextResponse.json(
-        { message: "Check Your Credentials" },
-        { status: 400 }
-      );
-    }
-    console.log("Valid password");
-
-    const tokenData = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    };
-
-    const token = await jwt.sign(tokenData, process.env.JWT_SECRET as string, {
-      expiresIn: "1h",
-    });
-
     const response = NextResponse.json(
-      { message: "Login Successful", token },
+      {
+        message: "Logout Successful",
+        success: true,
+      },
       { status: 200 }
     );
 
-    response.cookies.set("token", token, {
+    response.cookies.set("token", "", {
       httpOnly: true,
+      expires: new Date(0),
     });
+
     return response;
-
-
-} catch (error: String | any) {
+  } catch (error: String | any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
