@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
         source: '/',
         destination: '/Home',
         permanent: true, // Use `false` for temporary redirect
-      },
+      }
+      
     ];
   },
 

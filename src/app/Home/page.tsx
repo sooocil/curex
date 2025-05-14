@@ -15,6 +15,7 @@ export default function Home() {
       {/* Centered Navigation */}
       <div className="homenavcontroller w-full flex justify-center py-4">
         <HomeNav />
+        
       </div>
 
       {/* Main Content */}

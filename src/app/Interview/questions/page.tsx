@@ -77,7 +77,7 @@ export default function QuestionsPage() {
     setIsSubmitting(true)
     // Simulate API call
     setTimeout(() => {
-      router.push("/interview/results")
+      router.push("/Interview/results")
     }, 2000)
   }
 

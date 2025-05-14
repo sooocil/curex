@@ -1,19 +1,32 @@
 'use client';
 
-import React from "react";
+import React  from "react";
 import { Button } from "@/components/ui/button";
 import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
+import {useState} from "react";
 
 const page = () => {
 
 
-  const [user, setUser] = React.useState({
+  const [user, setUser] = useState({
     username: "",
     email: "",
     password: "",
   })
 
-  const [buttonDisabled, setButtonDisabled] = React.useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async()=>{
+    try {
+      
+    } catch (error : any) {
+      console.log("Signup Failed!");
+      console.log(error);
+
+      
+    }
+  }
   
 
 

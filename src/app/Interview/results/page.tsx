@@ -77,7 +77,7 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen max-h-20 overflow-hidden bg-gray-50">
       <div className="max-w-6xl mx-auto p-4 md:p-6">
         <button
           onClick={() => router.back()}
