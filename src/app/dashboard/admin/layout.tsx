@@ -4,8 +4,8 @@ import { AdminHeader } from "@/components/admin/header"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex h-screen overflow-hidden">
+    <div className="h-screen bg-gray-50 m-2  overflow-hidden ">
+      <div className="flex min-h-screen ">
         <AdminSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
           <AdminHeader />

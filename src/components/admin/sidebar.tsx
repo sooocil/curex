@@ -32,7 +32,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col">
+    <aside className="hidden  md:flex md:w-64 md:flex-col sticky">
       <div className="flex flex-col flex-1 min-h-0 bg-white border-r">
         <div className="flex items-center h-16 flex-shrink-0 px-4 border-b">
           <div className="flex items-center space-x-2">
@@ -44,7 +44,7 @@ export function AdminSidebar() {
             className="text-xl font-bold text-curex hover:cursor-pointer">Curex Admin</span>
           </div>
         </div>
-        <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+        <div className="flex-0  flex flex-col pt-5 pb-4 overflow-y-auto">
           <nav className="mt-5 flex-1 px-2 space-y-1">
             {sidebarLinks.map((link) => {
               const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`)

@@ -29,7 +29,7 @@ const HomeNav = () => {
             Contact
           </a>
           <Button
-            className="bg-gray-400 hover:bg-neutral-700 transition-all text-white hover:text-white font-bold rounded"
+            className="bg-teal-500 hover:bg-neutral-700 transition-all text-white shadow-md hover:text-white font-bold rounded"
             size={"lg"}
             variant={"outline"}
             onClick={() => {
@@ -39,12 +39,20 @@ const HomeNav = () => {
             Register
           </Button>
           <Button
-            className="bg-teal-500 hover:bg-teal-700 text-white transition-all font-bold rounded"
+            className="bg-gray-400 hover:bg-gray-700 text-white transition-all shadow-md font-bold rounded"
             size={"lg"}
             onClick={() => { window.location.href = "/auth/Login"; }}
             
           >
             Login
+          </Button>
+          <Button
+            className="bg-violet-500 hover:bg-violet-700 text-white transition-all shadow-md font-bold rounded"
+            size={"lg"}
+            onClick={() => { window.location.href = "/Doctor/Register"; }}
+            
+          >
+            Become a Doctor !
           </Button>
         </div>
       </nav>
