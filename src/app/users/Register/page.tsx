@@ -2,12 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FaApple, FaFacebook, FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import axios from "axios";
-import { FiEye } from "react-icons/fi";
-import { FiEyeOff } from "react-icons/fi";
-
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 interface User {
@@ -26,7 +24,6 @@ interface Errors {
 
 const RegisterPage = () => {
   const router = useRouter();
-
   const [user, setUser] = useState<User>({
     username: "",
     email: "",
@@ -42,9 +39,9 @@ const RegisterPage = () => {
   const [buttonDisabled, setButtonDisabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
-  // Password strength calculation for progress bar
   const getPasswordStrength = (password: string): number => {
     let strength = 0;
     if (password.length > 0) strength += 20;
@@ -55,7 +52,6 @@ const RegisterPage = () => {
     return strength;
   };
 
-  // Validation functions
   const validateUsername = (value: string): boolean => {
     return /^[a-zA-Z]{3,}$/.test(value);
   };
@@ -102,13 +98,13 @@ const RegisterPage = () => {
   };
 
   const handleRegister = async () => {
-    // Validate all fields before API call
     const isUsernameValid = validateUsername(user.username);
     const isEmailValid = validateEmail(user.email);
     const isPasswordValid = validatePassword(user.password);
-    const isConfirmPasswordValid = validateConfirmPassword(user.confirmPassword);
+    const isConfirmPasswordValid = validateConfirmPassword(
+      user.confirmPassword
+    );
 
-    // Update errors for non-password fields
     setErrors({
       username: isUsernameValid ? "" : "Invalid username",
       email: isEmailValid ? "" : "Invalid email",
@@ -116,7 +112,6 @@ const RegisterPage = () => {
       confirmPassword: isConfirmPasswordValid ? "" : "Passwords don't match",
     });
 
-    // Block API call if any validation fails
     if (
       !isUsernameValid ||
       !isEmailValid ||
@@ -124,33 +119,59 @@ const RegisterPage = () => {
       !isConfirmPasswordValid
     ) {
       toast.error("Please fix the errors and ensure a strong password.");
-      setButtonDisabled(true); // Ensure button is disabled
+      setButtonDisabled(true);
       return;
     }
 
     try {
       setLoading(true);
+
       const response = await axios.post(
-        "http://localhost:5000/api/users/signup",
+        "http://localhost:3000/api/users/signup",
         user
       );
-      console.log("User Registered Successfully!", response.data);
+      if (response.data.exists) {
+        toast.error("Username already exists. Please choose another one.");
+        setLoading(false);
+        return;
+      }
+
       toast.success("User Registered Successfully!");
+      console.log("User Registered Successfully!", response.data);
       router.push("/auth/Login");
+
+      return response.data;
     } catch (error: any) {
-      console.log("Signup Failed!", error);
-      toast.error("Registration failed. Please try again.");
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Registration failed. Please try again.";
+
+      if (errorMessage.includes("User already exists")) {
+        toast.error("Email already exists.");
+      } else if (
+        errorMessage.includes(
+          "User created, but failed to send verification email."
+        )
+      ) {
+        toast.error("User created, but failed to send verification email.");
+      } else if (errorMessage.includes("Username exists.")) {
+        toast.error("Username already exists.");
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Enable button only if all fields are valid
     const isUsernameValid = validateUsername(user.username);
     const isEmailValid = validateEmail(user.email);
     const isPasswordValid = validatePassword(user.password);
-    const isConfirmPasswordValid = validateConfirmPassword(user.confirmPassword);
+    const isConfirmPasswordValid = validateConfirmPassword(
+      user.confirmPassword
+    );
 
     setButtonDisabled(
       !(
@@ -165,15 +186,14 @@ const RegisterPage = () => {
   return (
     <div className="grid">
       <div className="main flex flex-col items-center justify-center">
-        <div className="AuthPopup RegisterPopup absolute shadow-2xl bg-white m-0 p-10 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="min-h-screen flex mt-[-50px] flex-col gap-4 bg-white m-0 p-10 rounded-md max-w-sm mx-auto">
+        <div className="absolute shadow-2xl bg-white m-0 p-10 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className=" flex mt-[-50px] flex-col gap-4 bg-white m-0 p-10 rounded-md max-w-sm mx-auto">
             <h1 className="font-sans font-extrabold text-2xl text-center">
               User Register
             </h1>
             <p className="font-thin text-center text-gray-600">
               Hey, Enter your details to create an account
             </p>
-
             <form className="flex flex-col items-center">
               <input
                 type="text"
@@ -196,7 +216,6 @@ const RegisterPage = () => {
               {errors.username && (
                 <p className="text-red-500 text-xs mt-1">{errors.username}</p>
               )}
-
               <input
                 type="email"
                 placeholder="Email"
@@ -216,7 +235,6 @@ const RegisterPage = () => {
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
               )}
-
               <div className="w-full relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -237,9 +255,9 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex items-center"
                 >
-                  {showPassword ? <FiEye size={20}/> : <FiEyeOff size={20} />}
+                  {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
                 </button>
                 <div className="w-full h-1 bg-gray-200 mt-1 rounded">
                   <div
@@ -248,10 +266,10 @@ const RegisterPage = () => {
                   ></div>
                 </div>
                 <p className="text-gray-500 text-xs mt-1">
-                  Password must be at least 8 characters, with one uppercase, one lowercase, and one number
+                  Password must be at least 8 characters, with one uppercase,
+                  one lowercase, and one number
                 </p>
               </div>
-
               <div className="w-full relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
@@ -274,19 +292,24 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 flex items-center"
                 >
-                  {showConfirmPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
+                  {showConfirmPassword ? (
+                    <FiEye size={20} />
+                  ) : (
+                    <FiEyeOff size={20} />
+                  )}
                 </button>
                 <div className="w-full h-1 bg-gray-200 mt-1 rounded">
                   <div
                     className="h-full bg-teal-500 rounded transition-all"
                     style={{
                       width: `${
-                        user.confirmPassword && user.confirmPassword === user.password
+                        user.confirmPassword &&
+                        user.confirmPassword === user.password
                           ? 100
                           : 0
-                        }%`,
+                      }%`,
                     }}
                   ></div>
                 </div>
@@ -296,12 +319,11 @@ const RegisterPage = () => {
                   </p>
                 )}
               </div>
-
               <Button
-                className={`w-full rounded-md mt-4 bg-teal-500 text-white ${
-                  buttonDisabled 
+                className={`w-full mt-4 rounded-md bg-teal-500 text-white ${
+                  buttonDisabled || loading
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-teal-700 cursor-pointer"
+                    : "hover:bg-teal-700"
                 }`}
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.preventDefault();
@@ -312,7 +334,6 @@ const RegisterPage = () => {
                 {loading ? "Please Wait..." : "Register"}
               </Button>
             </form>
-
             <p className="text-sm text-gray-600 text-center mt-4">
               Already have an account?{" "}
               <span
@@ -322,7 +343,6 @@ const RegisterPage = () => {
                 Login
               </span>
             </p>
-
             <div className="relative flex items-center my-4">
               <hr className="w-full border-gray-300" />
               <span className="px-3 text-sm text-gray-500 bg-white">
@@ -330,7 +350,6 @@ const RegisterPage = () => {
               </span>
               <hr className="w-full border-gray-300" />
             </div>
-
             <div className="flex justify-center gap-4">
               <Button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-md">
                 <FaGoogle size={30} className="text-red-500" />
@@ -345,8 +364,36 @@ const RegisterPage = () => {
           </div>
         </div>
       </div>
+      <Toaster
+        position="bottom-right"
+        reverseOrder={false}
+        toastOptions={{
+          // Define default options
+          className: "",
+          duration: 5000,
+          removeDelay: 1000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+
+          // Default options for specific types
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "green",
+              secondary: "black",
+            },
+          },
+          error: {
+            duration: 3000,
+            iconTheme: {
+              primary: "red",
+              secondary: "black",
+            },
+          },
+        }}
+      />
     </div>
   );
 };
-
-export default RegisterPage;

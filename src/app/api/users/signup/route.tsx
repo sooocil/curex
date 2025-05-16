@@ -4,11 +4,11 @@ import { NextResponse, NextRequest } from "next/server";
 import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/helpers/mailer";
 
-connectDB();
 
 export async function POST(request: NextRequest) {
   
   try {
+    await connectDB();
     const reqBody = await request.json();
     const { username, email, password } = reqBody;
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       console.error("Email sending error:", mailErr.message);
       return NextResponse.json(
         { message: "User created, but failed to send verification email." },
-        { status: 500 }
+        { status: 201 }
       );
     }
 
