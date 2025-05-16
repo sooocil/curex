@@ -4,9 +4,9 @@ import Image from "next/image";
 import { GiPlagueDoctorProfile } from "react-icons/gi";
 import { inter, lusitana } from "@/app/fonts/fonts";
 import { Button } from "@/components/ui/button";
-import HomeNav from "../Components/HomeComponents/HomeNav";
-import HomeContent from "../Components/HomeComponents/HomeContent";
-import BetaTop from "../Components/HomeComponents/BetaTop";
+import HomeNav from "@/components/HomeComponents/HomeNav";
+import HomeContent from "@/components/HomeComponents/HomeContent";
+import BetaTop from "@/components/HomeComponents/BetaTop";
 
 export default function Home() {
   return (

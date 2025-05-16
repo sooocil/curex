@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen flex flex-col ">
       <div className="flex items-center justify-center h-16 border-b bg-white">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-full bg-curex bg-teal-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-curex  flex items-center justify-center">
             <span className="text-white  font-bold text-xl">C</span>
           </div>
           <span 

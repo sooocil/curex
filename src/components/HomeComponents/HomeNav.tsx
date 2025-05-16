@@ -1,5 +1,5 @@
 import React from "react";
-import { lusitana, poppins } from "../../fonts/fonts";
+import { lusitana, poppins } from "@/app/fonts/fonts";
 import { Button } from "@/components/ui/button";
 
 const HomeNav = () => {
@@ -33,7 +33,7 @@ const HomeNav = () => {
             size={"lg"}
             variant={"outline"}
             onClick={() => {
-              window.location.href = "/auth/Register";
+              window.location.href = "/users/Register";
             }}
           >
             Register
@@ -41,7 +41,7 @@ const HomeNav = () => {
           <Button
             className="bg-gray-400 hover:bg-gray-700 text-white transition-all shadow-md font-bold rounded"
             size={"lg"}
-            onClick={() => { window.location.href = "/auth/Login"; }}
+            onClick={() => { window.location.href = "/users/Login"; }}
             
           >
             Login
