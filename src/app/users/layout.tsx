@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <span 
           onClick={() => (window.location.href = "/")}
           
-          className="text-3xl text-tealish font-bold text-curex hover:cursor-pointer">Curex</span>
+          className="text-3xl text-tealish font-bold text-curex hover:cursor-pointer" >Curex</span>
         </div>
       </div>
       <main className="flex-1 flex items-center justify-center bg-teal-50">{children}</main>

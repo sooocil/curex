@@ -10,8 +10,8 @@ const HomeNav = () => {
         role="navigation"
       >
         <a
-          href="/"
-          className={`${poppins.className} text-tealish text-6xl mr-20`}
+          href="/Home"
+          className={`${poppins.className} hover:cursor-pointer text-tealish text-6xl mr-20`}
         >
           Curex
         </a>

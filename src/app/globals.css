@@ -61,18 +61,65 @@
 @layer base {
   * {
     @apply border-border;
-  }
+  } 
   body {
     @apply bg-background text-foreground;
   }
 }
 
 
+.mainlogin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
 
+.mainlogin::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: 64px;
+  width: 100%;
+  height: calc(100% - 110px);
+  background-image: url('../../public/assets/pattern.jpg');
+  background-repeat: repeat;
+  filter: grayscale(100%);
+  z-index: -50;
+  
+}
+
+.mainRegister {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.mainRegister::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: 64px;
+  width: 100%;
+  height: calc(100% - 110px);
+  background-image: url('../../public/assets/pattern.jpg');
+  background-repeat: repeat;
+  filter: grayscale(100%);
+  z-index: -50;
+  
+}
 
 
 .AuthPopup {
-  width: 500px; 
-  height: 700px;
-  overflow: hidden; 
+  width: 450px; 
+  height: 500px;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5); 
 }

@@ -22,7 +22,7 @@ interface Errors {
   confirmPassword: string;
 }
 
-const RegisterPage = () => {
+const page = () => {
   const router = useRouter();
   const [user, setUser] = useState<User>({
     username: "",
@@ -185,7 +185,7 @@ const RegisterPage = () => {
 
   return (
     <div className="grid">
-      <div className="main flex flex-col items-center justify-center">
+      <div rel="preload"  className="mainRegister flex flex-col items-center justify-center">
         <div className="absolute shadow-2xl bg-white m-0 p-10 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className=" flex mt-[-50px] flex-col gap-4 bg-white m-0 p-10 rounded-md max-w-sm mx-auto">
             <h1 className="font-sans font-extrabold text-2xl text-center">
@@ -338,29 +338,12 @@ const RegisterPage = () => {
               Already have an account?{" "}
               <span
                 className="underline text-teal-600 hover:text-teal-800 cursor-pointer"
-                onClick={() => (window.location.href = "/auth/Login")}
+                onClick={() => (window.location.href = "/users/Login")}
               >
                 Login
               </span>
             </p>
-            <div className="relative flex items-center my-4">
-              <hr className="w-full border-gray-300" />
-              <span className="px-3 text-sm text-gray-500 bg-white">
-                or continue with
-              </span>
-              <hr className="w-full border-gray-300" />
-            </div>
-            <div className="flex justify-center gap-4">
-              <Button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-md">
-                <FaGoogle size={30} className="text-red-500" />
-              </Button>
-              <Button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-md">
-                <FaApple size={30} className="text-black" />
-              </Button>
-              <Button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-md">
-                <FaFacebook size={30} className="text-blue-600" />
-              </Button>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -397,3 +380,6 @@ const RegisterPage = () => {
     </div>
   );
 };
+
+
+export default page;
