@@ -138,7 +138,7 @@ const page = () => {
 
       toast.success("User Registered Successfully!");
       console.log("User Registered Successfully!", response.data);
-      router.push("/auth/Login");
+      router.push("/Login");
 
       return response.data;
     } catch (error: any) {
@@ -214,7 +214,7 @@ const page = () => {
                 className="border-2 border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               {errors.username && (
-                <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+                <p className="text-red-500 text-xs  mt-1">{errors.username}</p>
               )}
               <input
                 type="email"
@@ -338,7 +338,7 @@ const page = () => {
               Already have an account?{" "}
               <span
                 className="underline text-teal-600 hover:text-teal-800 cursor-pointer"
-                onClick={() => (window.location.href = "/users/Login")}
+                onClick={() => (window.location.href = "/Login")}
               >
                 Login
               </span>

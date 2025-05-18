@@ -37,7 +37,7 @@ export function DoctorVerificationActions({ id }: { id: string }) {
 
       // Redirect after a short delay
       setTimeout(() => {
-        router.push("/dashboard/admin/doctor-applications")
+        router.push("/admin/doctor-applications")
       }, 1500)
     } catch (error) {
       toast({

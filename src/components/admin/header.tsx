@@ -10,17 +10,17 @@ import { LayoutDashboard, ClipboardCheck, Users, Settings, LogOut } from "lucide
 const sidebarLinks = [
   {
     name: "Dashboard",
-    href: "/dashboard/admin",
+    href: "/admin",
     icon: LayoutDashboard,
   },
   {
     name: "Doctor Applications",
-    href: "/dashboard/admin/doctor-applications",
+    href: "/admin/doctor-applications",
     icon: ClipboardCheck,
   },
   {
     name: "Doctors",
-    href: "/dashboard/admin/doctors",
+    href: "/admin/doctors",
     icon: Users,
   },
   {

@@ -9,32 +9,36 @@ export async function POST(request: NextRequest) {
     const reqBody = await request.json();
     const { token } = reqBody;
 
-    console.log(token);
+    console.log("Token received:", token);
+
     const user = await User.findOneAndUpdate({
       verifyToken: token,
       verifyTokenExipry: { $gt: Date.now() },
     });
+
     if (!user) {
       return NextResponse.json(
         { error: "Invalid or expired token" },
         { status: 400 }
       );
-    }
-    console.log(user);
+   }
 
     user.isVerified = true;
     user.verifyToken = undefined;
     user.verifyTokenExipry = undefined;
+
     await user.save();
+    console.log("User verified:", user);
 
     return NextResponse.json(
-      { message: "Email verified successfully",
+      {
+        message: "Email verified successfully",
         success: true,
-       }, 
+      },
       { status: 200 }
     );
   } catch (error: any) {
-    console.log(error);
+    console.error("Verification error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+
 import { connectDB } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextResponse, NextRequest } from "next/server";
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
     console.log("User found", user);
 
-    const validPassword = bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
       return NextResponse.json(
@@ -36,12 +37,12 @@ export async function POST(request: NextRequest) {
       email: user.email,
     };
 
-    const token = await jwt.sign(tokenData, process.env.JWT_SECRET as string, {
+    const token =  jwt.sign(tokenData, process.env.JWT_SECRET as string, {
       expiresIn: "1h",
     });
 
     const response = NextResponse.json(
-      { message: "Login Successful", token },
+      { message: "Login Successful", userId: user._id },
       { status: 200 }
     );
 
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
 
 
 } catch (error: String | any) {
+    console.error("Error in login:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

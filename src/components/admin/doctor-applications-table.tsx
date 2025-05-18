@@ -126,7 +126,7 @@ export function DoctorApplicationsTable() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/dashboard/admin/doctor-applications/${application.id}`}>
+                      <Link href={`/admin/doctor-applications/${application.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
                         View Details
                       </Link>

@@ -18,7 +18,7 @@ export default function DoctorsPage() {
         <div className="flex items-center gap-4">
           <DoctorsFilter />
           <Button asChild className="bg-curex hover:bg-curex-dark text-white">
-            <Link href="/dashboard/admin/doctors/add">
+            <Link href="/admin/doctors/add">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Doctor
             </Link>

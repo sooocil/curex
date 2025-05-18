@@ -3,48 +3,56 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, ClipboardCheck, Users, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, ClipboardList, Users, Calendar, User, Settings, LogOut } from "lucide-react"
 
 const sidebarLinks = [
   {
     name: "Dashboard",
-    href: "/admin",
+    href: "/user/${userId}/dashboard",
     icon: LayoutDashboard,
   },
   {
-    name: "Doctor Applications",
-    href: "/admin/doctor-applications",
-    icon: ClipboardCheck,
+    name: "Test History",
+    href: "//user/${userId}/dashboard/tests",
+    icon: ClipboardList,
   },
   {
-    name: "Doctors",
-    href: "/admin/doctors",
+    name: "Find Doctors",
+    href: "/user/${userId}/dashboard/doctors",
     icon: Users,
   },
   {
+    name: "Appointments",
+    href: "/user/${userId}/dashboard/appointments",
+    icon: Calendar,
+  },
+  {
+    name: "Profile",
+    href: "/user/${userId}/dashboard/profile",
+    icon: User,
+  },
+  {
     name: "Settings",
-    href: "/admin/settings",
+    href: "/user/${userId}/dashboard/settings",
     icon: Settings,
   },
 ]
 
-export function AdminSidebar() {
+export function UserSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden  md:flex md:w-64 md:flex-col sticky">
+    <aside className="hidden md:flex md:w-64 md:flex-col">
       <div className="flex flex-col flex-1 min-h-0 bg-white border-r">
         <div className="flex items-center h-16 flex-shrink-0 px-4 border-b">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-curex flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
-            <span 
-            onClick={() => window.location.href = "/admin"}
-            className="text-xl font-bold text-curex hover:cursor-pointer">Curex Admin</span>
+            <span className="text-xl font-bold text-curex">Curex</span>
           </div>
         </div>
-        <div className="flex-0  flex flex-col pt-5 pb-4 overflow-y-auto">
+        <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <nav className="mt-5 flex-1 px-2 space-y-1">
             {sidebarLinks.map((link) => {
               const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`)
@@ -76,7 +84,7 @@ export function AdminSidebar() {
           <button className="flex-shrink-0 w-full group block">
             <div className="flex items-center">
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Admin User</p>
+                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">John Doe</p>
                 <div className="flex items-center text-xs font-medium text-gray-500 group-hover:text-gray-700">
                   <LogOut className="mr-1 h-4 w-4" />
                   Sign out

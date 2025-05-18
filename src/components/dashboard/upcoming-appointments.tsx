@@ -3,77 +3,66 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-const recentApplications = [
+const upcomingAppointments = [
   {
     id: "app-1",
-    name: "Dr. Sarah Johnson",
+    doctor: "Dr. Sarah Johnson",
     specialty: "Cardiologist",
-    hospital: "City General Hospital",
-    date: "2023-04-08",
-    status: "pending",
+    date: "2023-04-20",
+    time: "10:00 AM",
   },
   {
     id: "app-2",
-    name: "Dr. Michael Chen",
+    doctor: "Dr. Michael Chen",
     specialty: "Dermatologist",
-    hospital: "Westside Medical Center",
-    date: "2023-04-07",
-    status: "pending",
+    date: "2023-04-25",
+    time: "2:30 PM",
   },
   {
     id: "app-3",
-    name: "Dr. Emily Rodriguez",
+    doctor: "Dr. Emily Rodriguez",
     specialty: "Pediatrician",
-    hospital: "Children's Hospital",
-    date: "2023-04-06",
-    status: "pending",
-  },
-  {
-    id: "app-4",
-    name: "Dr. James Wilson",
-    specialty: "Neurologist",
-    hospital: "University Medical Center",
-    date: "2023-04-05",
-    status: "pending",
+    date: "2023-05-05",
+    time: "9:15 AM",
   },
 ]
 
-export function RecentDoctorApplications() {
+export function UpcomingAppointments() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Applications</CardTitle>
-        <CardDescription>You have {recentApplications.length} pending applications to review.</CardDescription>
+        <CardTitle>Upcoming Appointments</CardTitle>
+        <CardDescription>Your scheduled doctor appointments</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {recentApplications.map((application) => (
-            <div key={application.id} className="flex items-center justify-between">
+          {upcomingAppointments.map((appointment) => (
+            <div key={appointment.id} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Avatar>
                   <AvatarFallback className="bg-curex/10 text-curex">
-                    {application.name
+                    {appointment.doctor
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{application.name}</p>
+                  <p className="font-medium">{appointment.doctor}</p>
                   <p className="text-sm text-muted-foreground">
-                    {application.specialty} • {application.hospital}
+                    {appointment.specialty} • {appointment.date} • {appointment.time}
                   </p>
                 </div>
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/admin/doctor-applications/${application.id}`}>Review</Link>
+                <Link href={`/dashboard/appointments/${appointment.id}`}>Details</Link>
               </Button>
             </div>
           ))}
         </div>
         <div className="mt-4 text-center">
           <Button asChild variant="link" className="text-curex">
-            <Link href="/admin/doctor-applications">View all applications</Link>
+            <Link href="/dashboard/appointments">View all appointments</Link>
           </Button>
         </div>
       </CardContent>
