@@ -1,22 +1,30 @@
-import { lusitana } from "@/app/fonts/fonts";
-import React from "react";
-import { FaStar } from "react-icons/fa";
+"use client"
+
+import { useState } from "react"
+import { X } from "lucide-react"
 
 const BetaTop = () => {
-  return (
-    <div className="w-full h-14 bg-purple-700 text-white text-xl flex items-center justify-center py-2 sticky top-0 left-0 z-50">
-      <span className="flex items-center gap-2 bg-white/20 px-2 py-1 rounded-md text-xs font-semibold">
-        <FaStar className="text-yellow-300" />
-        BETA
-      </span>
-      <span className={`${lusitana.className } ml-3`}>
-        Help us improve.{" "}
-        <a href="#" className=" font-medium hover:text-gray-200">
-          Try out our new Features
-        </a>
-      </span>
-    </div>
-  );
-};
+  const [isVisible, setIsVisible] = useState(true)
 
-export default BetaTop;
+  if (!isVisible) return null
+
+  return (
+    <div className="w-full bg-curex text-white py-2 px-4">
+      <div className="container mx-auto flex items-center justify-between">
+        <div className="flex items-center">
+          <span className="bg-white text-curex text-xs font-bold px-2 py-1 rounded-full mr-2">BETA</span>
+          <p className="text-sm">Curex is currently in beta. Some features may not be available yet.</p>
+        </div>
+        <button
+          onClick={() => setIsVisible(false)}
+          className="text-white hover:text-gray-200 focus:outline-none"
+          aria-label="Close beta notification"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default BetaTop

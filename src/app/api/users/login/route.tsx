@@ -31,6 +31,12 @@ export async function POST(request: NextRequest) {
     }
     console.log("Valid password");
 
+    interface TokenData {
+      id: string;
+      name: string;
+      email: string;
+    }
+
     const tokenData = {
       id: user._id,
       name: user.name,

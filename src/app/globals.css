@@ -61,9 +61,22 @@
 @layer base {
   * {
     @apply border-border;
-  } 
+  }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Fix for horizontal scrollbar */
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Ensure images don't cause overflow */
+  img {
+    max-width: 100%;
+    height: auto;
   }
 }
 

@@ -1,27 +1,50 @@
-"use client";
-
-import Image from "next/image";
-import { GiPlagueDoctorProfile } from "react-icons/gi";
-import { inter, lusitana } from "@/app/fonts/fonts";
-import { Button } from "@/components/ui/button";
-import HomeNav from "@/components/HomeComponents/HomeNav";
-import HomeContent from "@/components/HomeComponents/HomeContent";
-import BetaTop from "@/components/HomeComponents/BetaTop";
+import HomeNav from "@/components/HomeComponents/HomeNav"
+import HomeHero from "@/components/HomeComponents/HomeHero"
+import BetaTop from "@/components/HomeComponents/BetaTop"
+import Testimonials from "@/components/HomeComponents/Testimonials"
+import HowItWorks from "@/components/HomeComponents/HowItWorks"
+import AboutCurex from "@/components/HomeComponents/AboutCurex"
+import Footer from "@/components/HomeComponents/Footer"
+import ClientChatWrapper from "@/components/HomeComponents/ClientChatWrapper"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-teal-50 flex flex-col items-center">
-      <BetaTop/>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-teal-50 flex flex-col">
+      <BetaTop />
+
       {/* Centered Navigation */}
-      <div className="homenavcontroller w-full flex justify-center py-4">
+      <div className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b">
         <HomeNav />
-        
       </div>
 
       {/* Main Content */}
-      <div className="MainContentContainer mt-40 ">
-        <HomeContent />
+      <div className="flex flex-col w-full">
+        {/* Hero Section */}
+        <section className="py-16 md:py-24">
+          <HomeHero />
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="py-16 bg-white">
+          <Testimonials />
+        </section>
+
+        {/* How It Works Section */}
+        <section className="py-16 bg-gray-50">
+          <HowItWorks />
+        </section>
+
+        {/* About Curex Section */}
+        <section className="py-16 bg-white">
+          <AboutCurex />
+        </section>
+
+        {/* Footer */}
+        <Footer />
       </div>
+
+      {/* Chat Popup - Client side only */}
+      <ClientChatWrapper />
     </div>
-  );
+  )
 }
