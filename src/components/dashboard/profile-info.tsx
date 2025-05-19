@@ -1,23 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Pencil, Save } from "lucide-react"
-import axios from "axios"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pencil, Save } from "lucide-react";
+import axios from "axios";
 
 export function ProfileInfo() {
-  const [isEditing, setIsEditing] = useState(false)
-
-  
+  const [isEditing, setIsEditing] = useState(false);
 
   const [profileData, setProfileData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
+    name: "",
+    email: "",
+    phone: "",
     dob: "1985-06-15",
     gender: "Male",
     address: "123 Main St, New York, NY 10001",
@@ -25,20 +29,63 @@ export function ProfileInfo() {
     bloodType: "O+",
     allergies: "Penicillin",
     medications: "None",
-  })
+  });
 
- 
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/users/me");
+        console.log("Profile data fetched:", response.data);
+        setProfileData((prev) => ({
+          ...prev,
+          name: response.data.username,
+          email: response.data.email,
+          //defailt values
+          phone: response.data.phone || "",
+          dob: response.data.dob || "1985-06-15",
+          address: response.data.address || "123 Main St, New York, NY 10001",
+          emergencyContact: response.data.emergencyContact || "Jane Doe (+1 555-987-6543)",
+          bloodType: response.data.bloodType || "O+",
+          allergies: response.data.allergies || "Penicillin",
+          medications: response.data.medications || "None",
 
-  
+        }));
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
+
+    fetchProfileData();
+  },[]);
 
   const handleChange = (field: string, value: string) => {
-    setProfileData((prev) => ({ ...prev, [field]: value }))
-  }
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const handleSave = () => {
-    // Here you would typically save the data to your backend
-    setIsEditing(false)
+ const handleSave = async () => {
+  try {
+    // Save data to backend
+    await axios.put("http://localhost:3000/api/users/me", profileData);
+    setIsEditing(false);
+    // Optionally re-fetch updated profile data
+    const response = await axios.get("http://localhost:3000/api/users/me");
+    setProfileData((prev) => ({
+      ...prev,
+      name: response.data.username,
+      email: response.data.email,
+      phone: response.data.phone || "",
+      dob: response.data.dob || "1985-06-15",
+      address: response.data.address || "123 Main St, New York, NY 10001",
+      emergencyContact: response.data.emergencyContact || "Jane Doe (+1 555-987-6543)",
+      bloodType: response.data.bloodType || "O+",
+      allergies: response.data.allergies || "Penicillin",
+      medications: response.data.medications || "None",
+    }));
+  } catch (error) {
+    console.error("Error saving profile data:", error);
   }
+};
+
 
   return (
     <div className="space-y-6">
@@ -73,7 +120,10 @@ export function ProfileInfo() {
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex flex-col items-center space-y-2">
               <Avatar className="h-24 w-24">
-                <AvatarImage src="/placeholder.svg?height=96&width=96" alt="Profile" />
+                <AvatarImage
+                  src="/placeholder.svg?height=96&width=96"
+                  alt="Profile"
+                />
                 <AvatarFallback className="text-lg">JD</AvatarFallback>
               </Avatar>
               {isEditing && (
@@ -86,7 +136,11 @@ export function ProfileInfo() {
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 {isEditing ? (
-                  <Input id="name" value={profileData.name} onChange={(e) => handleChange("name", e.target.value)} />
+                  <Input
+                    id="name"
+                    value={profileData.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                  />
                 ) : (
                   <div className="text-sm">{profileData.name}</div>
                 )}
@@ -107,7 +161,11 @@ export function ProfileInfo() {
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
                 {isEditing ? (
-                  <Input id="phone" value={profileData.phone} onChange={(e) => handleChange("phone", e.target.value)} />
+                  <Input
+                    id="phone"
+                    value={profileData.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                  />
                 ) : (
                   <div className="text-sm">{profileData.phone}</div>
                 )}
@@ -167,7 +225,9 @@ export function ProfileInfo() {
                 <Input
                   id="emergency"
                   value={profileData.emergencyContact}
-                  onChange={(e) => handleChange("emergencyContact", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("emergencyContact", e.target.value)
+                  }
                 />
               ) : (
                 <div className="text-sm">{profileData.emergencyContact}</div>
@@ -213,5 +273,5 @@ export function ProfileInfo() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

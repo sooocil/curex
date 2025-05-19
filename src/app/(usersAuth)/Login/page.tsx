@@ -25,7 +25,8 @@ const Page = () => {
       setLoading(true);
       const response = await axios.post(
         "http://localhost:3000/api/users/login",
-        user
+        user,
+        { withCredentials: true }
       );
       const userId = response.data.userId;
 
@@ -44,8 +45,6 @@ const Page = () => {
       }, 1500);
 
       console.log("Login response:", response.data);
-
-      router.push(`/user/${userId}/dashboard`);
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Login failed. Please try again.";

@@ -25,31 +25,42 @@ const sidebarLinks = [
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    isDone: true,
   },
   {
     name: "Test History",
     href: "/dashboard/tests",
     icon: ClipboardList,
+    isDone: false,
   },
   {
     name: "Find Doctors",
     href: "/dashboard/doctors",
     icon: Users,
+    isDone: true,
+
+
   },
   {
     name: "Appointments",
     href: "/dashboard/appointments",
     icon: Calendar,
+    isDone: false,
+
   },
   {
     name: "Profile",
     href: "/dashboard/profile",
     icon: User,
+    isDone: true,
+
   },
   {
     name: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
+    isDone: false,
+
   },
 ];
 

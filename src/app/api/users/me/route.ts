@@ -9,6 +9,7 @@ connectDB();
 export async function GET(request: NextRequest) {
   //extract data from token
   const userId = await getDataFromToken(request);
+  
 
   const user = await User.findById({ _id: userId }).select(
     "-password -username"
@@ -16,11 +17,14 @@ export async function GET(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ message: "User not found" }, { status: 404 });
+
   }
   if (user) {
     return NextResponse.json(
       { message: "User Found!", data: user },
       { status: 200 }
+    //
+    
     );
   }
 }

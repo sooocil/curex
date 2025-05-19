@@ -1,4 +1,3 @@
-
 import { connectDB } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextResponse, NextRequest } from "next/server";
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
     };
 
-    const token =  jwt.sign(tokenData, process.env.JWT_SECRET as string, {
+    const token = jwt.sign(tokenData, process.env.JWT_SECRET as string, {
       expiresIn: "1h",
     });
 
@@ -52,13 +51,17 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    response.cookies.set("token", token, {
+    response.cookies.set({
+      name: "token",
+      value: token,
       httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
+
     return response;
-
-
-} catch (error: String | any) {
+  } catch (error: String | any) {
     console.error("Error in login:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

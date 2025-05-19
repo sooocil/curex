@@ -16,4 +16,8 @@ const nextConfig: NextConfig = {
 
 };
 
+module.exports = {
+  middleware:true,
+};
+
 export default nextConfig;

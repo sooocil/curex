@@ -27,11 +27,12 @@ export default function SymptomAssessment() {
     q10: "", // Other symptoms
   });
 
+
   const pushToBackend = async (data: any) => {
     try {
       const response = await axios.post(
         "https://localhost:3000/api/symptom-assessment",
-        data
+        {userId:{}},...data
       );
       if (response.status === 200) {
         console.log("Data pushed to backend successfully");
@@ -68,6 +69,7 @@ export default function SymptomAssessment() {
   };
 
   const handleSubmit = () => {
+    pushToBackend(answers);
     console.log("Form submitted with answers:", answers);
     // router.push("/Interview/results")
   };
