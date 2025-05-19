@@ -1,304 +1,215 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { ChevronRight, ChevronLeft, Loader2 } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import QuestionStep from "./question-step";
+import axios from "axios";
+import toast from "react-hot-toast";
 
-export default function QuestionsPage() {
-  const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, any>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [questions, setQuestions] = useState<Question[]>(initialQuestions)
+export default function SymptomAssessment() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const totalSteps = 10;
 
-  // Update questions based on answers
-  useEffect(() => {
-    const updatedQuestions = [...initialQuestions]
+  const [answers, setAnswers] = useState({
+    q1: "", // Main symptom
+    q2: "", // Duration
+    q3: "", // Fever (Yes/No)
+    q4: 98.6, // Temperature
+    q5: "", // Cough (Yes/No)
+    q6: "", // Cough type
+    q7: 0, // Pain level
+    q8: "", // Fatigue (Yes/No)
+    q9: "", // Contact with sick person (Yes/No)
+    q10: "", // Other symptoms
+  });
 
-    // Add conditional questions based on answers
-    if (answers["q1"] === "Yes") {
-      // If user has fever, add follow-up questions about fever
-      if (!updatedQuestions.some((q) => q.id === "q6")) {
-        updatedQuestions.splice(2, 0, {
-          id: "q6",
-          text: "How high is your fever?",
-          type: "slider",
-          min: 97,
-          max: 105,
-          step: 0.1,
-          unit: "°F",
-        })
+  const pushToBackend = async (data: any) => {
+    try {
+      const response = await axios.post(
+        "https://localhost:3000/api/symptom-assessment",
+        data
+      );
+      if (response.status === 200) {
+        console.log("Data pushed to backend successfully");
+        toast.success("Data pushed to backend successfully");
+      } else {
+        console.error("Failed to push data to backend");
+        toast.error("Failed to push data to backend");
       }
+    } catch (error) {
+      console.error("Error pushing data to backend:", error);
+      toast.error("Error pushing data to backend");
     }
+  };
 
-    if (answers["q2"] === "Yes") {
-      // If user has cough, add follow-up questions about cough
-      if (!updatedQuestions.some((q) => q.id === "q7")) {
-        updatedQuestions.splice(3, 0, {
-          id: "q7",
-          text: "What type of cough are you experiencing?",
-          type: "radio",
-          options: ["Dry", "Wet/Productive", "Both"],
-        })
-      }
-    }
-
-    if (answers["q3"] && Number.parseInt(answers["q3"]) >= 7) {
-      // If pain level is high, add follow-up question
-      if (!updatedQuestions.some((q) => q.id === "q8")) {
-        updatedQuestions.splice(4, 0, {
-          id: "q8",
-          text: "Does the pain radiate to other areas?",
-          type: "radio",
-          options: ["Yes", "No"],
-        })
-      }
-    }
-
-    setQuestions(updatedQuestions)
-  }, [answers])
+  const updateAnswer = (question: string, value: string | number) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [question]: value,
+    }));
+  };
 
   const handleNext = () => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      handleSubmit()
+    if (step < totalSteps) {
+      setStep(step + 1);
+      window.scrollTo(0, 0);
     }
-  }
+  };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+    if (step > 1) {
+      setStep(step - 1);
+      window.scrollTo(0, 0);
     }
-  }
+  };
 
   const handleSubmit = () => {
-    setIsSubmitting(true)
-    // Simulate API call
-    setTimeout(() => {
-      router.push("/Interview/results")
-    }, 2000)
-  }
+    console.log("Form submitted with answers:", answers);
+    // router.push("/Interview/results")
+  };
 
-  const handleAnswerChange = (questionId: string, value: any) => {
-    setAnswers({
-      ...answers,
-      [questionId]: value,
-    })
-  }
+  const getStepTitle = () => {
+    switch (step) {
+      case 1:
+        return "What symptom are you experiencing the most?";
+      case 2:
+        return "How long have you had this symptom?";
+      case 3:
+        return "Do you have a fever?";
+      case 4:
+        return "What is your fever temperature (if any)?";
+      case 5:
+        return "Do you have a cough?";
+      case 6:
+        return "What type of cough?";
+      case 7:
+        return "Rate your overall pain level";
+      case 8:
+        return "Are you experiencing fatigue or tiredness?";
+      case 9:
+        return "Have you had contact with a sick person recently?";
+      case 10:
+        return "Do you have other symptoms to report?";
+      default:
+        return "Symptom Assessment";
+    }
+  };
 
-  const currentQuestion = questions[currentStep]
-  const progress = ((currentStep + 1) / questions.length) * 100
+  const isNextDisabled = () => {
+    switch (step) {
+      case 1:
+        return !answers.q1;
+      case 2:
+        return !answers.q2;
+      case 3:
+        return !answers.q3;
+      case 5:
+        return !answers.q5;
+      case 6:
+        return answers.q5 === "Yes" && !answers.q6;
+      case 8:
+        return !answers.q8;
+      case 9:
+        return !answers.q9;
+      default:
+        return false;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 relative">
-        {/* Progress bar */}
-        <div className="w-full h-2 bg-gray-200 rounded-full mb-8">
-          <div
-            className="h-full bg-[#00AD9B] rounded-full transition-all duration-300 ease-in-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center text-gray-600 hover:text-[#00AD9B] mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to home
+        </button>
 
         <div className="mb-8">
-          <span className="text-sm text-gray-500">
-            Step {currentStep + 1} of {questions.length}
-          </span>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Symptom Assessment
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Please answer the following questions to help us understand your
+            symptoms better.
+          </p>
         </div>
 
-        {/* Question content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="min-h-[200px]"
-          >
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">{currentQuestion.text}</h2>
+        <div className="mb-6">
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>
+              Step {step} of {totalSteps}
+            </span>
+            <span>{Math.round((step / totalSteps) * 100)}% Complete</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div
+              className="bg-[#00AD9B] h-2.5 rounded-full transition-all duration-300 ease-in-out"
+              style={{ width: `${(step / totalSteps) * 100}%` }}
+            ></div>
+          </div>
+        </div>
 
-            {/* Different input types based on question type */}
-            {currentQuestion.type === "radio" && (
-              <div className="space-y-3">
-                {currentQuestion.options?.map((option) => (
-                  <label
-                    key={option}
-                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
-                      answers[currentQuestion.id] === option
-                        ? "border-[#00AD9B] bg-[#00AD9B]/10"
-                        : "border-gray-200 hover:border-[#00AD9B]/50"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={currentQuestion.id}
-                      value={option}
-                      checked={answers[currentQuestion.id] === option}
-                      onChange={() => handleAnswerChange(currentQuestion.id, option)}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${
-                        answers[currentQuestion.id] === option ? "border-[#00AD9B]" : "border-gray-300"
-                      }`}
-                    >
-                      {answers[currentQuestion.id] === option && <div className="w-3 h-3 rounded-full bg-[#00AD9B]" />}
-                    </div>
-                    <span>{option}</span>
-                  </label>
-                ))}
-              </div>
-            )}
+        <Card className="rounded-2xl shadow-lg border-none overflow-hidden">
+          <div className="bg-[#00AD9B] text-white py-4 px-6">
+            <h2 className="text-xl font-semibold">{getStepTitle()}</h2>
+          </div>
 
-            {currentQuestion.type === "slider" && (
-              <div className="space-y-4">
-                <input
-                  type="range"
-                  min={currentQuestion.min}
-                  max={currentQuestion.max}
-                  step={currentQuestion.step}
-                  value={answers[currentQuestion.id] || currentQuestion.min}
-                  onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#00AD9B]"
-                />
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">
-                    {currentQuestion.min}
-                    {currentQuestion.unit}
-                  </span>
-                  <span className="text-lg font-medium text-[#00AD9B]">
-                    {answers[currentQuestion.id] || currentQuestion.min}
-                    {currentQuestion.unit}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {currentQuestion.max}
-                    {currentQuestion.unit}
-                  </span>
-                </div>
-              </div>
-            )}
+          <div className="p-6">
+            <QuestionStep
+              step={step}
+              answers={answers}
+              updateAnswer={updateAnswer}
+            />
 
-            {currentQuestion.type === "dropdown" && (
-              <select
-                value={answers[currentQuestion.id] || ""}
-                onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AD9B] focus:border-transparent"
+            <div className="flex justify-between mt-8">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={step === 1}
+                className="border-gray-300 hover:bg-gray-100"
               >
-                <option value="" disabled>
-                  Select an option
-                </option>
-                {currentQuestion.options?.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            )}
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
 
-            {currentQuestion.type === "text" && (
-              <input
-                type="text"
-                value={answers[currentQuestion.id] || ""}
-                onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                placeholder={currentQuestion.placeholder}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00AD9B] focus:border-transparent"
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+              {step < totalSteps ? (
+                <Button
+                  onClick={handleNext}
+                  className="bg-[#00AD9B] hover:bg-[#009688] text-white"
+                  disabled={isNextDisabled()}
+                >
+                  Next
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  className="bg-[#00AD9B] hover:bg-[#009688] text-white"
+                >
+                  Submit Assessment
+                </Button>
+              )}
+            </div>
+          </div>
+        </Card>
 
-        {/* Navigation buttons */}
-        <div className="flex justify-between mt-10">
-          <button
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className={`flex items-center px-4 py-2 rounded-lg transition-all ${
-              currentStep === 0 ? "text-gray-400 cursor-not-allowed" : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Back
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={!answers[currentQuestion.id] || isSubmitting}
-            className={`flex items-center px-6 py-2 rounded-lg text-white transition-all ${
-              !answers[currentQuestion.id] || isSubmitting
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-[#00AD9B] hover:bg-[#009688]"
-            }`}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing
-              </>
-            ) : currentStep === questions.length - 1 ? (
-              "Submit"
-            ) : (
-              <>
-                Next
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </>
-            )}
-          </button>
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-800">
+          <h3 className="font-semibold mb-2">Important Note</h3>
+          <p className="text-sm">
+            This symptom assessment is not a medical diagnosis. The information
+            provided will be used to guide you to appropriate healthcare
+            resources. If you're experiencing severe symptoms, please seek
+            immediate medical attention.
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-// Types
-interface Question {
-  id: string
-  text: string
-  type: "radio" | "slider" | "dropdown" | "text"
-  options?: string[]
-  min?: number
-  max?: number
-  step?: number
-  unit?: string
-  placeholder?: string
-}
-
-// Initial questions
-const initialQuestions: Question[] = [
-  {
-    id: "q1",
-    text: "Are you experiencing fever?",
-    type: "radio",
-    options: ["Yes", "No"],
-  },
-  {
-    id: "q2",
-    text: "Do you have a cough?",
-    type: "radio",
-    options: ["Yes", "No"],
-  },
-  {
-    id: "q3",
-    text: "On a scale of 1-10, how would you rate your pain?",
-    type: "slider",
-    min: 1,
-    max: 10,
-    step: 1,
-    unit: "",
-  },
-  {
-    id: "q4",
-    text: "How long have you been experiencing these symptoms?",
-    type: "dropdown",
-    options: ["Less than 24 hours", "1-3 days", "4-7 days", "More than a week"],
-  },
-  {
-    id: "q5",
-    text: "Please describe any other symptoms you are experiencing",
-    type: "text",
-    placeholder: "Type your answer here...",
-  },
-]
-

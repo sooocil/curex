@@ -12,9 +12,9 @@ const HomeNav = () => {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/about", label: "About" },
-    { href: "/services", label: "Services" },
-    { href: "/contact", label: "Contact" },
+    { href: "#", label: "About" },
+    { href: "#", label: "Services" },
+    { href: "#", label: "Contact" },
   ]
 
   return (
