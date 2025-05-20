@@ -27,12 +27,17 @@ export default function SymptomAssessment() {
     q10: "", // Other symptoms
   });
 
-
   const pushToBackend = async (data: any) => {
     try {
+      //Get userId from local storage or token or session
+      const userId = localStorage.getItem("userId") || "defaultUserId";
+
       const response = await axios.post(
-        "https://localhost:3000/api/symptom-assessment",
-        {userId:{}},...data
+        "http://localhost:3000/api/symptom-assessment", 
+        {
+          ...data,
+          userId: userId, 
+        }
       );
       if (response.status === 200) {
         console.log("Data pushed to backend successfully");
@@ -71,7 +76,7 @@ export default function SymptomAssessment() {
   const handleSubmit = () => {
     pushToBackend(answers);
     console.log("Form submitted with answers:", answers);
-    // router.push("/Interview/results")
+    router.push("/Interview/results")
   };
 
   const getStepTitle = () => {
