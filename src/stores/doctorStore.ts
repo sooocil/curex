@@ -32,6 +32,7 @@ export const useDoctorStore = create<DoctorState>((set) => ({
       doctors: [...state.doctors, doctor],
       error: null,
     })),
+
   fetchDoctors: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -49,7 +50,6 @@ export const useDoctorStore = create<DoctorState>((set) => ({
           return;
         }
         if (res.status === 404) {
-          // Handle missing endpoint gracefully
           set({
             doctors: [],
             isLoading: false,
@@ -64,6 +64,9 @@ export const useDoctorStore = create<DoctorState>((set) => ({
       if (!contentType?.includes("application/json")) {
         throw new Error("Received non-JSON response from server");
       }
+
+      // Simulated delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const doctorList = {
         doctors: [
@@ -105,7 +108,6 @@ export const useDoctorStore = create<DoctorState>((set) => ({
           },
         ],
       };
-      //   const data = await res.json();
 
       set({ doctors: doctorList.doctors, isLoading: false, error: null });
     } catch (error) {

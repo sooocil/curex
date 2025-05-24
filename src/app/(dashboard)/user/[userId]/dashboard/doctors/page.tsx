@@ -1,5 +1,5 @@
 import { DoctorsFilter } from "@/components/admin/doctors-filter"
-import { DoctorsList } from "@/components/dashboard/doctors-filter"
+import { DoctorsList } from "@/components/dashboard/doctors-list"
 import type { Metadata } from "next"
 
 

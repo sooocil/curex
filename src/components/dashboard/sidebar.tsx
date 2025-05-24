@@ -54,7 +54,6 @@ export function UserSidebar() {
 
         let decoded = decodeURIComponent(userCookieRaw);
 
-        // Handle double-encoding
         if (decoded.startsWith("%7B")) {
           decoded = decodeURIComponent(decoded);
         }
@@ -137,35 +136,7 @@ export function UserSidebar() {
       ]
     : [];
 
-  if (loading) {
-    return (
-      <aside className="hidden md:flex md:w-64 md:flex-col animate-pulse">
-        <div className="flex flex-col flex-1 min-h-0 bg-white border-r">
-          <div className="flex items-center h-16 px-4 border-b">
-            <div className="w-8 h-8 rounded-full bg-gray-300" />
-            <div className="ml-2 h-4 bg-gray-300 rounded w-20" />
-          </div>
-
-          <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <nav className="mt-5 flex-1 px-2 space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-6 bg-gray-300 rounded-md w-3/4" />
-              ))}
-            </nav>
-          </div>
-
-          <div className="border-t p-4">
-            <div className="flex items-center justify-between">
-              <div className="h-4 bg-gray-300 rounded w-24" />
-              <div className="h-6 bg-gray-300 rounded w-16" />
-            </div>
-          </div>
-        </div>
-      </aside>
-    );
-  }
-
-  if (!user) return null;
+  if (loading || !user) return null;
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col">
@@ -176,6 +147,7 @@ export function UserSidebar() {
               <span className="text-white font-bold text-sm">C</span>
             </div>
             <span className="text-xl font-bold text-curex">Curex</span>
+            <span className="text-lg ml-2 text-secondary-foreground">User</span>
           </div>
         </div>
 
@@ -228,4 +200,5 @@ export function UserSidebar() {
     </aside>
   );
 }
+
 export default UserSidebar;
