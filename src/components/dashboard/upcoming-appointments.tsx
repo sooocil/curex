@@ -6,22 +6,22 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 const upcomingAppointments = [
   {
     id: "app-1",
-    doctor: "Dr. Sarah Johnson",
-    specialty: "Cardiologist",
+    doctor: "",
+    specialty: "",
     date: "2023-04-20",
     time: "10:00 AM",
   },
   {
     id: "app-2",
-    doctor: "Dr. Michael Chen",
-    specialty: "Dermatologist",
+    doctor: "",
+    specialty: "",
     date: "2023-04-25",
     time: "2:30 PM",
   },
   {
     id: "app-3",
-    doctor: "Dr. Emily Rodriguez",
-    specialty: "Pediatrician",
+    doctor: "",
+    specialty: "",
     date: "2023-05-05",
     time: "9:15 AM",
   },

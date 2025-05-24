@@ -34,7 +34,11 @@ const recentTests = [
   },
 ]
 
-export function RecentTests() {
+const filteredTests = recentTests.filter((test) => test.status === "completed")
+const sortedTests = filteredTests.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+
+export function RecentTests(test = sortedTests) {
   return (
     <Card>
       <CardHeader>
@@ -43,7 +47,7 @@ export function RecentTests() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {recentTests.map((test) => (
+          {sortedTests.map((test) => (
             <div key={test.id} className="flex items-center justify-between">
               <div>
                 <p className="font-medium">{test.name}</p>
@@ -66,7 +70,7 @@ export function RecentTests() {
         </div>
         <div className="mt-4 text-center">
           <Button asChild variant="link" className="text-curex">
-            <Link href="/dashboard/tests">View all tests</Link>
+            <Link href="/user/${userId}/dashboard/tests">View all tests</Link>
           </Button>
         </div>
       </CardContent>

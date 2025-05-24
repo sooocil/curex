@@ -13,7 +13,7 @@ const sidebarLinks = [
   },
   {
     name: "Test History",
-    href: "//user/${userId}/dashboard/tests",
+    href: "/user/${userId}/dashboard/tests",
     icon: ClipboardList,
   },
   {

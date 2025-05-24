@@ -12,12 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Filter } from "lucide-react"
 
-
-
-export function DoctorApplicationsFilter() {
+export function AppointmentHistoryFilter() {
   return (
     <div className="flex flex-col sm:flex-row gap-3">
-      <Input placeholder="Search applications..." className="sm:w-[250px]" />
+      <Input placeholder="Search by doctor or patient..." className="sm:w-[250px]" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="flex items-center">
@@ -26,20 +24,16 @@ export function DoctorApplicationsFilter() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[200px]">
-          <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+          <DropdownMenuLabel>Status</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem checked>All</DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem>Pending</DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem>Approved</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>Rejected</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>Info Needed</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem>Completed</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem>Cancelled</DropdownMenuCheckboxItem>
           <DropdownMenuSeparator />
-          <DropdownMenuLabel>Filter by Date</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem checked>All Time</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>Today</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>This Week</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>This Month</DropdownMenuCheckboxItem>
+          <DropdownMenuLabel>Mode</DropdownMenuLabel>
+          <DropdownMenuCheckboxItem>Online</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem>Offline</DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

@@ -1,74 +1,27 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Eye, Download, Share } from "lucide-react"
-
-const testHistory = [
-  {
-    id: "test-1",
-    name: "Complete Blood Count",
-    date: "2023-04-15",
-    doctor: "Dr. Sarah Johnson",
-    result: "Normal",
-  },
-  {
-    id: "test-2",
-    name: "Lipid Panel",
-    date: "2023-04-10",
-    doctor: "Dr. Michael Chen",
-    result: "Abnormal",
-  },
-  {
-    id: "test-3",
-    name: "Thyroid Function",
-    date: "2023-03-28",
-    doctor: "Dr. Emily Rodriguez",
-    result: "Normal",
-  },
-  {
-    id: "test-4",
-    name: "Vitamin D",
-    date: "2023-03-15",
-    doctor: "Dr. James Wilson",
-    result: "Low",
-  },
-  {
-    id: "test-5",
-    name: "Comprehensive Metabolic Panel",
-    date: "2023-02-20",
-    doctor: "Dr. Sarah Johnson",
-    result: "Normal",
-  },
-  {
-    id: "test-6",
-    name: "Hemoglobin A1C",
-    date: "2023-02-10",
-    doctor: "Dr. Michael Chen",
-    result: "High",
-  },
-  {
-    id: "test-7",
-    name: "Urinalysis",
-    date: "2023-01-25",
-    doctor: "Dr. Emily Rodriguez",
-    result: "Normal",
-  },
-  {
-    id: "test-8",
-    name: "Liver Function",
-    date: "2023-01-15",
-    doctor: "Dr. James Wilson",
-    result: "Normal",
-  },
-]
+import { useTestStore } from "@/stores/testStore"
 
 export function TestHistoryTable() {
-  const [tests] = useState(testHistory)
+  const tests = useTestStore((state) => state.tests)
 
   const getResultBadge = (result: string) => {
     switch (result) {
@@ -83,6 +36,17 @@ export function TestHistoryTable() {
       default:
         return <Badge>{result}</Badge>
     }
+  }
+
+  if (tests.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center bg-white rounded-lg shadow p-8 text-center">
+        <p className="text-gray-500 mb-4 text-lg">No tests you have done till now.</p>
+        <Link href="/Interview/questions">
+          <Button>Take Test</Button>
+        </Link>
+      </div>
+    )
   }
 
   return (

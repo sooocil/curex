@@ -18,7 +18,7 @@ export function TestHistoryFilter() {
       <Input placeholder="Search tests..." className="sm:w-[250px]" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="flex items-center">
+          <Button variant="outline" size="sm"  className="flex items-center">
             <Filter className="mr-2 h-4 w-4" />
             Filter
           </Button>

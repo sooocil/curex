@@ -1,14 +1,20 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token");
 
-  const protectedRoutes = ["/user/${userId}/dashboard", "/user/${userId}/settings", "/user/${userId}/profile"];
+  const protectedRoutes = [
+    "/interview/questions",
+    "/interview/results",
+  ];
 
-  const isProtected = protectedRoutes.some((path) =>
+  const isUserRoute = request.nextUrl.pathname.startsWith("/user");
+  const isProtectedInterviewRoute = protectedRoutes.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
+
+  const isProtected = isUserRoute || isProtectedInterviewRoute;
 
   if (isProtected && !token) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -18,5 +24,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/user/:path*"], // only apply to /user/* routes
+  matcher: ["/user/:path*", "/interview/:path*"],
 };

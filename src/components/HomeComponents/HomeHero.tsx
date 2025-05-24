@@ -1,10 +1,28 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { lusitana } from "@/app/fonts/fonts"
 import { Button } from "@/components/ui/button"
 import { TiTick } from "react-icons/ti"
+import { MustLoginModal } from "@/components/Modal/must-login-modal"
 
 const HomeHero = () => {
+  const [openModal, setOpenModal] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const token = document.cookie.includes("token=")
+    setIsLoggedIn(token)
+  }, [])
+
+  const handleAssessmentClick = () => {
+    if (isLoggedIn) {
+      window.location.href = "/Interview/questions"
+    } else {
+      setOpenModal(true)
+    }
+  }
+
   return (
     <div className="container mx-auto px-4">
       <div className="flex flex-col md:flex-row items-center justify-between gap-8">
@@ -40,7 +58,7 @@ const HomeHero = () => {
             <Button
               size="lg"
               className="bg-curex hover:bg-curex-dark text-white"
-              onClick={() => (window.location.href = "/Interview/questions")}
+              onClick={handleAssessmentClick}
             >
               Take Health Assessment
             </Button>
@@ -57,9 +75,15 @@ const HomeHero = () => {
         </div>
 
         <div className="w-full md:w-1/2 mt-8 md:mt-0">
-          <img src="/HomeDoctors.svg" className="select-none w-full h-auto max-w-lg mx-auto" alt="Online Doctor Consultation" />
+          <img
+            src="/HomeDoctors.svg"
+            className="select-none w-full h-auto max-w-lg mx-auto"
+            alt="Online Doctor Consultation"
+          />
         </div>
       </div>
+
+      <MustLoginModal open={openModal} setOpen={setOpenModal} />
     </div>
   )
 }
