@@ -31,46 +31,9 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
     await new Promise((r) => setTimeout(r, 1000));
 
     // Dummy data, can replace with real fetch call
-    const upcomingAppointments: Appointment[] = [
-      {
-        id: "app-1",
-        doctor: "Dr. Ram Bahadur",
-        specialty: "Cardiology",
-        date: "2023-04-20",
-        time: "10:00 AM",
-      },
-      {
-        id: "app-2",
-        doctor: "Dr. Shreesh Shrestha",
-        specialty: "Dermatology",
-        date: "2023-04-25",
-        time: "2:30 PM",
-      },
-      {
-        id: "app-3",
-        doctor: "Dr. Sarita Rana",
-        specialty: "Pediatrics",
-        date: "2023-05-05",
-        time: "9:15 AM",
-      },
-    ];
+    const upcomingAppointments: Appointment[] = [];
 
-    const historyAppointments: Appointment[] = [
-      {
-        id: "app-2",
-        doctor: "Dr. Shreesh Shrestha",
-        specialty: "Dermatology",
-        date: "2023-04-25",
-        time: "2:30 PM",
-      },
-      {
-        id: "app-3",
-        doctor: "Dr. Sarita Rana",
-        specialty: "Pediatrics",
-        date: "2023-05-05",
-        time: "9:15 AM",
-      },
-    ];
+    const historyAppointments: Appointment[] = [];
 
     set({
       upcoming: upcomingAppointments,

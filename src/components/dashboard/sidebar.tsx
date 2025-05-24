@@ -71,8 +71,10 @@ export function UserSidebar() {
         });
       } catch (error) {
         console.error("Auth error:", error);
-        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-        document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+        document.cookie =
+          "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+        document.cookie =
+          "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
         router.push("/Login");
       } finally {
         setLoading(false);
@@ -86,7 +88,8 @@ export function UserSidebar() {
     try {
       setLoading(true);
       await axios.post("/api/users/logout");
-      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+      document.cookie =
+        "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       setUser(null);
       toast.success("Logged out successfully");
@@ -101,20 +104,62 @@ export function UserSidebar() {
 
   const sidebarLinks = user?._id
     ? [
-        { name: "Dashboard", href: `/user/${user._id}/dashboard`, icon: LayoutDashboard },
-        { name: "Test History", href: `/user/${user._id}/dashboard/tests`, icon: ClipboardList },
-        { name: "Find Doctors", href: `/user/${user._id}/dashboard/doctors`, icon: Users },
-        { name: "Appointments", href: `/user/${user._id}/dashboard/appointments`, icon: Calendar },
-        { name: "Profile", href: `/user/${user._id}/dashboard/profile`, icon: User },
-        { name: "Settings", href: `/user/${user._id}/dashboard/settings`, icon: Settings },
+        {
+          name: "Dashboard",
+          href: `/user/${user._id}/dashboard`,
+          icon: LayoutDashboard,
+        },
+        {
+          name: "Test History",
+          href: `/user/${user._id}/dashboard/tests`,
+          icon: ClipboardList,
+        },
+        {
+          name: "Find Doctors",
+          href: `/user/${user._id}/dashboard/doctors`,
+          icon: Users,
+        },
+        {
+          name: "Appointments",
+          href: `/user/${user._id}/dashboard/appointments`,
+          icon: Calendar,
+        },
+        {
+          name: "Profile",
+          href: `/user/${user._id}/dashboard/profile`,
+          icon: User,
+        },
+        {
+          name: "Settings",
+          href: `/user/${user._id}/dashboard/settings`,
+          icon: Settings,
+        },
       ]
     : [];
 
   if (loading) {
     return (
-      <aside className="hidden md:flex md:w-64 md:flex-col">
-        <div className="flex items-center justify-center h-full">
-          <div className="p-4 text-gray-500">Loading...</div>
+      <aside className="hidden md:flex md:w-64 md:flex-col animate-pulse">
+        <div className="flex flex-col flex-1 min-h-0 bg-white border-r">
+          <div className="flex items-center h-16 px-4 border-b">
+            <div className="w-8 h-8 rounded-full bg-gray-300" />
+            <div className="ml-2 h-4 bg-gray-300 rounded w-20" />
+          </div>
+
+          <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+            <nav className="mt-5 flex-1 px-2 space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-6 bg-gray-300 rounded-md w-3/4" />
+              ))}
+            </nav>
+          </div>
+
+          <div className="border-t p-4">
+            <div className="flex items-center justify-between">
+              <div className="h-4 bg-gray-300 rounded w-24" />
+              <div className="h-6 bg-gray-300 rounded w-16" />
+            </div>
+          </div>
         </div>
       </aside>
     );
@@ -137,7 +182,8 @@ export function UserSidebar() {
         <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <nav className="mt-5 flex-1 px-2 space-y-1">
             {sidebarLinks.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const isActive =
+                pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <Link
                   key={link.name}
@@ -152,7 +198,9 @@ export function UserSidebar() {
                   <link.icon
                     className={cn(
                       "mr-3 h-5 w-5",
-                      isActive ? "text-curex" : "text-gray-400 group-hover:text-gray-500"
+                      isActive
+                        ? "text-curex"
+                        : "text-gray-400 group-hover:text-gray-500"
                     )}
                     aria-hidden="true"
                   />

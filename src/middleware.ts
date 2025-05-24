@@ -9,6 +9,7 @@ export function middleware(req: NextRequest) {
     "/user",
     "/profile",
     "/Interview",
+    "/admin",
   ];
   const { pathname } = req.nextUrl;
 
@@ -16,6 +17,41 @@ export function middleware(req: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
+
+  //protected route for /admin
+  if (pathname.startsWith("/admin")) {
+    const token = req.cookies.get("token")?.value;
+    const user = req.cookies.get("user")?.value;
+    const role = req.cookies.get("role")?.value;
+    if (!token || !user || role !== "admin") {
+      return NextResponse.redirect(new URL("/adminLogin", req.url));
+    }
+  }
+
+  // Check if admin is already logged in when visiting adminLogin page
+  if (pathname === "/adminLogin") {
+    const token = req.cookies.get("token")?.value;
+    const user = req.cookies.get("user")?.value;
+    const role = req.cookies.get("role")?.value;
+    
+    if (token && user && role === "admin") {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
+  }
+  // Check if user is already logged in when visiting Login page
+  if (pathname === "/Login") {
+    const token = req.cookies.get("token")?.value;
+    const user = req.cookies.get("user")?.value;
+    const role = req.cookies.get("role")?.value;
+    
+    if (token && user) {
+      if (role === "admin") {
+        return NextResponse.redirect(new URL("/admin", req.url));
+      } else {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
+    }
+  }
 
   if (isProtectedRoute) {
     const token = req.cookies.get("token")?.value;
@@ -38,5 +74,6 @@ export const config = {
     "/user/:path*",
     "/profile/:path*",
     "/Interview/:path*",
+    "/admin/:path*",
   ],
 };

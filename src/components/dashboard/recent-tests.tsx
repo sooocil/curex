@@ -92,13 +92,13 @@ export function RecentTests() {
                   </div>
                 ))
               ) : (
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-md">
                   No tests in the last 30 days.
                 </p>
               )}
             </div>
 
-            <div className="mt-4 text-center">
+            <div className=" mt-36  text-center">
               <Button asChild variant="link" className="text-curex">
                 <Link href="/user/$%7BuserId%7D/dashboard/tests">View all tests</Link>
               </Button>

@@ -1,83 +1,16 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Star } from "lucide-react"
-
-const doctorsList = [
-  {
-    id: "doc-1",
-    name: "Dr. Sarah Johnson",
-    specialty: "Cardiologist",
-    hospital: "City General Hospital",
-    location: "New York, NY",
-    rating: 4.9,
-    reviews: 124,
-    availability: "Mon, Wed, Fri",
-    rate: 120,
-  },
-  {
-    id: "doc-2",
-    name: "Dr. Michael Chen",
-    specialty: "Dermatologist",
-    hospital: "Westside Medical Center",
-    location: "Los Angeles, CA",
-    rating: 4.8,
-    reviews: 98,
-    availability: "Tue, Thu",
-    rate: 100,
-  },
-  {
-    id: "doc-3",
-    name: "Dr. Emily Rodriguez",
-    specialty: "Pediatrician",
-    hospital: "Children's Hospital",
-    location: "Chicago, IL",
-    rating: 4.7,
-    reviews: 156,
-    availability: "Mon-Fri",
-    rate: 90,
-  },
-  {
-    id: "doc-4",
-    name: "Dr. James Wilson",
-    specialty: "Neurologist",
-    hospital: "University Medical Center",
-    location: "Boston, MA",
-    rating: 4.9,
-    reviews: 112,
-    availability: "Wed, Fri",
-    rate: 150,
-  },
-  {
-    id: "doc-5",
-    name: "Dr. Lisa Thompson",
-    specialty: "Oncologist",
-    hospital: "Cancer Treatment Center",
-    location: "Houston, TX",
-    rating: 4.8,
-    reviews: 87,
-    availability: "Mon, Thu",
-    rate: 130,
-  },
-  {
-    id: "doc-6",
-    name: "Dr. Robert Garcia",
-    specialty: "Orthopedic Surgeon",
-    hospital: "Sports Medicine Clinic",
-    location: "Miami, FL",
-    rating: 4.6,
-    reviews: 92,
-    availability: "Tue, Thu, Sat",
-    rate: 140,
-  },
-]
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Star } from "lucide-react";
+import { useDoctorStore } from "@/stores/doctorStore";
 
 export const DoctorsList = () => {
-  const [doctors] = useState(doctorsList)
+  const doctorsList = useDoctorStore((state) => state.doctors);
+  const [doctors] = useState(doctorsList);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -97,7 +30,9 @@ export const DoctorsList = () => {
                   </Avatar>
                   <div>
                     <h3 className="font-medium">{doctor.name}</h3>
-                    <p className="text-sm text-muted-foreground">{doctor.specialty}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {doctor.specialty}
+                    </p>
                   </div>
                 </div>
                 <Badge className="bg-curex">${doctor.rate}/min</Badge>
@@ -108,16 +43,21 @@ export const DoctorsList = () => {
                     <Star className="h-4 w-4 fill-current" />
                   </div>
                   <span className="font-medium">{doctor.rating}</span>
-                  <span className="text-muted-foreground ml-1">({doctor.reviews} reviews)</span>
+                  <span className="text-muted-foreground ml-1">
+                    ({doctor.reviews} reviews)
+                  </span>
                 </div>
                 <p className="text-sm">
-                  <span className="text-muted-foreground">Hospital:</span> {doctor.hospital}
+                  <span className="text-muted-foreground">Hospital:</span>{" "}
+                  {doctor.hospital}
                 </p>
                 <p className="text-sm">
-                  <span className="text-muted-foreground">Location:</span> {doctor.location}
+                  <span className="text-muted-foreground">Location:</span>{" "}
+                  {doctor.location}
                 </p>
                 <p className="text-sm">
-                  <span className="text-muted-foreground">Available:</span> {doctor.availability}
+                  <span className="text-muted-foreground">Available:</span>{" "}
+                  {doctor.availability}
                 </p>
               </div>
             </div>
@@ -125,11 +65,13 @@ export const DoctorsList = () => {
               <Button className="flex-1 rounded-none bg-white text-curex hover:bg-gray-50 hover:text-curex-dark">
                 View Profile
               </Button>
-              <Button className="flex-1 rounded-none bg-curex hover:bg-curex-dark text-white">Book Appointment</Button>
+              <Button className="flex-1 rounded-none bg-curex hover:bg-curex-dark text-white">
+                Book Appointment
+              </Button>
             </div>
           </CardContent>
         </Card>
       ))}
     </div>
-  )
-}
+  );
+};
