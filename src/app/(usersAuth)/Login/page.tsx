@@ -1,3 +1,4 @@
+// src/app/(userAuth)/Login/page.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
+import { startTransition } from "react";
 
 const Page = () => {
   const router = useRouter();
@@ -18,17 +20,34 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  // Helper function to set cookies
+  const setCookie = (name: string, value: string, days: number = 1) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+  };
+
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       setLoading(true);
-      const response = await axios.post(
-        "http://localhost:3000/api/users/login",
-        user,
-        { withCredentials: true }
-      );
-      const userId = response.data.userId;
+      const response = await axios.post("/api/users/login", user, {
+        withCredentials: true,
+      });
+      
+      const { userId, token, user: userData } = response.data;
+
+      // Set cookies on client side as fallback
+      if (token) {
+        setCookie("token", token);
+        console.log("Token cookie set on client:", token);
+      }
+      
+      if (userData) {
+        setCookie("user", encodeURIComponent(JSON.stringify(userData)));
+        console.log("User cookie set on client:", userData);
+      }
 
       if (rememberMe) {
         localStorage.setItem("rememberEmail", user.email);
@@ -40,11 +59,13 @@ const Page = () => {
 
       toast.success("Login successful!");
 
+      // Add a small delay to ensure cookies are set
       setTimeout(() => {
-        router.push(`/user/${userId}/dashboard`);
-      }, 1500);
-
-      console.log("Login response:", response.data);
+        startTransition(() => {
+          router.push(`/user/${userId}/dashboard`);
+        });
+      }, 100);
+      
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Login failed. Please try again.";
@@ -61,7 +82,8 @@ const Page = () => {
       setUser({ email: savedEmail, password: savedPassword });
       setRememberMe(true);
     }
-  }, []);
+    setButtonDisabled(!user.email || !user.password);
+  }, [user.email, user.password]);
 
   return (
     <div className="mainlogin flex flex-col items-center justify-center min-h-screen">
@@ -124,7 +146,6 @@ const Page = () => {
         position="bottom-right"
         reverseOrder={false}
         toastOptions={{
-          // Define default options
           className: "",
           duration: 5000,
           removeDelay: 1000,
@@ -132,8 +153,6 @@ const Page = () => {
             background: "#363636",
             color: "#fff",
           },
-
-          // Default options for specific types
           success: {
             duration: 3000,
             iconTheme: {
@@ -149,7 +168,7 @@ const Page = () => {
             },
           },
         }}
-      />{" "}
+      />
     </div>
   );
 };

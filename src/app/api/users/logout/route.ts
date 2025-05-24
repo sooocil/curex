@@ -1,39 +1,17 @@
-import { connectDB } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
-import { NextResponse, NextRequest } from "next/server";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-
-connectDB();
+// src/app/api/users/logout/route.ts
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const reqBody = await request.json();
-    const { email, password } = reqBody;
-    //validation
-    console.log(reqBody);
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
-    console.log("User found", user);
-
-    const response = NextResponse.json(
-      {
-        message: "Logout Successful",
-        success: true,
-      },
-      { status: 200 }
-    );
-
-    response.cookies.set("token", "", {
-      httpOnly: true,
-      expires: new Date(0),
-    });
-
+    const response = NextResponse.json({ message: "Logout successful" }, { status: 200 });
+    response.cookies.set("token", "", { httpOnly: true, path: "/", maxAge: 0 });
+    response.cookies.set("user", "", { httpOnly: true, path: "/", maxAge: 0 });
     return response;
-  } catch (error: String | any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: any) {
+    console.error("Logout error:", error);
+    return NextResponse.json(
+      { message: "Internal server error", error: error.message },
+      { status: 500 }
+    );
   }
 }

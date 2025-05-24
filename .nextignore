@@ -1,0 +1,5 @@
+# Avoid watching these during dev
+public/videos/*
+logs/*
+*.log
+*.json

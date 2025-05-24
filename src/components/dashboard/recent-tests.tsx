@@ -1,78 +1,110 @@
+"use client"
+
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react"
+import { useTestStore } from "@/stores/testStore"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 
-const recentTests = [
-  {
-    id: "test-1",
-    name: "Complete Blood Count",
-    date: "2023-04-15",
-    status: "completed",
-    result: "Normal",
-  },
-  {
-    id: "test-2",
-    name: "Lipid Panel",
-    date: "2023-04-10",
-    status: "completed",
-    result: "Abnormal",
-  },
-  {
-    id: "test-3",
-    name: "Thyroid Function",
-    date: "2023-03-28",
-    status: "completed",
-    result: "Normal",
-  },
-  {
-    id: "test-4",
-    name: "Vitamin D",
-    date: "2023-03-15",
-    status: "completed",
-    result: "Low",
-  },
-]
+export function RecentTests() {
+  const { tests, isLoading, fetchTests } = useTestStore()
+  const [recentTests, setRecentTests] = useState<any[]>([])
 
-const filteredTests = recentTests.filter((test) => test.status === "completed")
-const sortedTests = filteredTests.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  useEffect(() => {
+    fetchTests()
+  }, [fetchTests])
 
+  useEffect(() => {
+    const today = new Date()
+    const past30Days = new Date(today.setDate(today.getDate() - 30))
 
-export function RecentTests(test = sortedTests) {
+    const filtered = tests
+      .filter((test) => new Date(test.date) >= past30Days)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+    setRecentTests(filtered)
+  }, [tests])
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Recent Tests</CardTitle>
-        <CardDescription>Your most recent medical tests and results</CardDescription>
+        <CardDescription>
+          Your tests from the past 30 days
+        </CardDescription>
       </CardHeader>
+
       <CardContent>
-        <div className="space-y-4">
-          {sortedTests.map((test) => (
-            <div key={test.id} className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">{test.name}</p>
-                <p className="text-sm text-muted-foreground">{test.date}</p>
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div>
+                  <Skeleton className="h-4 w-40 mb-2" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Badge
-                  className={
-                    test.result === "Normal" ? "bg-green-500" : test.result === "Low" ? "bg-yellow-500" : "bg-red-500"
-                  }
-                >
-                  {test.result}
-                </Badge>
-                <Button asChild variant="outline" size="sm">
-                  <Link href={`/dashboard/tests/${test.id}`}>View</Link>
-                </Button>
-              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {recentTests.length > 0 ? (
+                recentTests.map((test) => (
+                  <div
+                    key={test.id}
+                    className="flex items-center justify-between"
+                  >
+                    <div>
+                      <p className="font-medium">{test.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {test.date}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        className={
+                          test.result === "Normal"
+                            ? "bg-green-500"
+                            : test.result === "Low"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }
+                      >
+                        {test.result}
+                      </Badge>
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/dashboard/tests/${test.id}`}>View</Link>
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground">
+                  No tests in the last 30 days.
+                </p>
+              )}
             </div>
-          ))}
-        </div>
-        <div className="mt-4 text-center">
-          <Button asChild variant="link" className="text-curex">
-            <Link href="/user/${userId}/dashboard/tests">View all tests</Link>
-          </Button>
-        </div>
+
+            <div className="mt-4 text-center">
+              <Button asChild variant="link" className="text-curex">
+                <Link href="/user/$%7BuserId%7D/dashboard/tests">View all tests</Link>
+              </Button>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   )

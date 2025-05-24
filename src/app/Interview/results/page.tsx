@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Users, MapPin } from "lucide-react"
 import dynamic from "next/dynamic"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
   
 
 const MapComponent = dynamic(() => import("./map-component"), { ssr: false })
@@ -134,9 +136,11 @@ export default function ResultsPage() {
                 This analysis is not a medical diagnosis. Always consult with a healthcare professional for proper
                 medical advice.
               </p>
-              <button className="bg-white text-[#00AD9B] px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+              <Button  className="bg-white text-[#00AD9B] px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                <Link href="/user/$%7BuserId%7D/dashboard/doctors">
                 Find a Doctor
-              </button>
+                </Link>
+              </Button>
             </div>
           </div>
 

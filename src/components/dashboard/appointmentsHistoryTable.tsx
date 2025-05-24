@@ -1,49 +1,64 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye } from "lucide-react"
-
-// Replace with your real data fetched via props or useEffect
-const appointments = [
-  {
-    id: "apt-1",
-    patientName: "Krishna Sharma",
-    doctorName: "Dr. Ram Bahadur",
-    date: "2025-05-22",
-    mode: "online",
-    status: "pending",
-  },
-  {
-    id: "apt-2",
-    patientName: "Hari Singh",
-    doctorName: "Dr. Shreesh Shrestha",
-    date: "2025-05-19",
-    mode: "offline",
-    status: "completed",
-  },
-]
+import { useEffect } from "react";
+import Link from "next/link";
+import { useAppointmentStore } from "@/stores/appointmentStore";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Eye } from "lucide-react";
 
 export function AppointmentHistoryTable() {
-  const [data] = useState(appointments)
+  const { history, loading, fetchAppointments } = useAppointmentStore();
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge className="bg-yellow-400">Pending</Badge>
+        return <Badge className="bg-yellow-400">Pending</Badge>;
       case "approved":
-        return <Badge className="bg-blue-500">Approved</Badge>
+        return <Badge className="bg-blue-500">Approved</Badge>;
       case "completed":
-        return <Badge className="bg-green-500">Completed</Badge>
+        return <Badge className="bg-green-500">Completed</Badge>;
       case "cancelled":
-        return <Badge className="bg-red-500">Cancelled</Badge>
+        return <Badge className="bg-red-500">Cancelled</Badge>;
       default:
-        return <Badge>{status}</Badge>
+        return <Badge>{status}</Badge>;
     }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow overflow-hidden animate-pulse p-6">
+        <div className="h-6 w-full bg-gray-200 rounded mb-4"></div>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex justify-between mb-3">
+            <div className="h-5 w-24 bg-gray-200 rounded" />
+            <div className="h-5 w-24 bg-gray-200 rounded" />
+            <div className="h-5 w-20 bg-gray-200 rounded" />
+            <div className="h-5 w-16 bg-gray-200 rounded" />
+            <div className="h-5 w-20 bg-gray-200 rounded" />
+            <div className="h-5 w-16 bg-gray-200 rounded" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -60,13 +75,13 @@ export function AppointmentHistoryTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((apt) => (
+          {history.map((apt:any) => (
             <TableRow key={apt.id}>
               <TableCell>{apt.patientName}</TableCell>
               <TableCell>{apt.doctorName}</TableCell>
               <TableCell>{apt.date}</TableCell>
               <TableCell className="capitalize">{apt.mode}</TableCell>
-              <TableCell>{getStatusBadge(apt.status)}</TableCell>
+              <TableCell>{getStatusBadge(apt.status || "")}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -90,5 +105,5 @@ export function AppointmentHistoryTable() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

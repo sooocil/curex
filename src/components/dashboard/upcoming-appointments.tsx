@@ -1,33 +1,51 @@
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+"use client";
 
-const upcomingAppointments = [
-  {
-    id: "app-1",
-    doctor: "",
-    specialty: "",
-    date: "2023-04-20",
-    time: "10:00 AM",
-  },
-  {
-    id: "app-2",
-    doctor: "",
-    specialty: "",
-    date: "2023-04-25",
-    time: "2:30 PM",
-  },
-  {
-    id: "app-3",
-    doctor: "",
-    specialty: "",
-    date: "2023-05-05",
-    time: "9:15 AM",
-  },
-]
+import Link from "next/link";
+import { useEffect } from "react";
+import { useAppointmentStore } from "@/stores/appointmentStore";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function UpcomingAppointments() {
+  const { upcoming, loading, fetchAppointments } = useAppointmentStore();
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
+  if (loading) {
+    // Simple skeleton loader, can be improved
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Upcoming Appointments</CardTitle>
+          <CardDescription>Your scheduled doctor appointments</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between animate-pulse"
+                style={{ minHeight: 56 }}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-200" />
+                  <div className="space-y-2">
+                    <div className="w-24 h-4 bg-gray-200 rounded" />
+                    <div className="w-48 h-3 bg-gray-200 rounded" />
+                  </div>
+                </div>
+                <div className="w-20 h-8 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -36,14 +54,14 @@ export function UpcomingAppointments() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {upcomingAppointments.map((appointment) => (
+          {upcoming.map((appointment:any) => (
             <div key={appointment.id} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Avatar>
                   <AvatarFallback className="bg-curex/10 text-curex">
                     {appointment.doctor
                       .split(" ")
-                      .map((n) => n[0])
+                      .map((n:any) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
@@ -67,5 +85,5 @@ export function UpcomingAppointments() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
