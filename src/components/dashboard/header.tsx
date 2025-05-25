@@ -73,7 +73,7 @@ export function UserHeader() {
       const res = await axios.post("http://localhost:3000/api/users/logout", )
       if (res.status === 200) {
         localStorage.removeItem("userId");
-        window.location.href = "/login";
+        window.location.href = "/";
       }
       console.log("Logout response:", res.data);
       toast.success("Logout successful!");

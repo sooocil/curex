@@ -48,7 +48,7 @@ export function middleware(req: NextRequest) {
       if (role === "admin") {
         return NextResponse.redirect(new URL("/admin", req.url));
       } else {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        return NextResponse.redirect(new URL(`/user/${user}/dashboard`, req.url));
       }
     }
   }

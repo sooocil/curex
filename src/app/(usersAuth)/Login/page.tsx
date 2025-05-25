@@ -1,29 +1,56 @@
-// src/app/(userAuth)/Login/page.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { startTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner"; // Assuming you have a Loader component
 
 const Page = () => {
+  const [user, setUser] = useState({ email: "", password: "" });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
-  const [user, setUser] = useState({
-    email: "",
-    password: "",
-  });
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const hasToken = document.cookie.includes("token");
+        const hasUser = document.cookie.includes("user");
 
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+        if (hasToken && hasUser) {
+          setIsAuthenticated(true);
+          const userData = localStorage.getItem("userData");
+          const userId = userData ? JSON.parse(userData).id : "dashboard";
+          router.replace(`/user/${userId}/dashboard`);
+        }
+      } catch (error) {
+        console.error("Authentication check failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Helper function to set cookies
+    checkAuthStatus();
+  }, [router]);
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberEmail");
+    const savedPassword = localStorage.getItem("rememberPassword");
+    if (savedEmail && savedPassword) {
+      setUser({ email: savedEmail, password: savedPassword });
+      setRememberMe(true);
+    }
+    setButtonDisabled(!user.email || !user.password);
+  }, [user.email, user.password]);
+
   const setCookie = (name: string, value: string, days: number = 1) => {
     const expires = new Date();
-    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000*60);
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
   };
 
@@ -35,15 +62,14 @@ const Page = () => {
       const response = await axios.post("/api/users/login", user, {
         withCredentials: true,
       });
-      
+
       const { userId, token, user: userData } = response.data;
 
-      // Set cookies on client side as fallback
       if (token) {
         setCookie("token", token);
         console.log("Token cookie set on client:", token);
       }
-      
+
       if (userData) {
         setCookie("user", encodeURIComponent(JSON.stringify(userData)));
         console.log("User cookie set on client:", userData);
@@ -58,14 +84,11 @@ const Page = () => {
       }
 
       toast.success("Login successful!");
-
-      // Add a small delay to ensure cookies are set
       setTimeout(() => {
         startTransition(() => {
           router.push(`/user/${userId}/dashboard`);
         });
-      }, 100);
-      
+      }, 1000);
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Login failed. Please try again.";
@@ -75,15 +98,13 @@ const Page = () => {
     }
   };
 
-  useEffect(() => {
-    const savedEmail = localStorage.getItem("rememberEmail");
-    const savedPassword = localStorage.getItem("rememberPassword");
-    if (savedEmail && savedPassword) {
-      setUser({ email: savedEmail, password: savedPassword });
-      setRememberMe(true);
-    }
-    setButtonDisabled(!user.email || !user.password);
-  }, [user.email, user.password]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner /> {/* Replace with your actual loader component */}
+      </div>
+    );
+  }
 
   return (
     <div className="mainlogin flex flex-col items-center justify-center min-h-screen">
