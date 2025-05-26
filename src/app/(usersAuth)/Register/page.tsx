@@ -7,6 +7,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { GoHomeFill } from "react-icons/go";
 
 interface User {
   username: string;
@@ -185,9 +186,20 @@ const page = () => {
 
   return (
     <div className="grid">
-      <div rel="preload"  className="mainRegister flex flex-col items-center justify-center">
-        <div className="absolute shadow-2xl bg-white m-0 p-10 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className=" flex mt-[-50px] flex-col gap-4 bg-white m-0 p-10 rounded-md max-w-sm mx-auto">
+      <div
+        rel="preload"
+        className="mainRegister flex flex-col items-center justify-center"
+      >
+        <div className="absolute flex flex-col align-middle justify-between items-center max-h-full shadow-2xl bg-white m-0 p-10 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <GoHomeFill
+              onClick={() => {
+                router.push("/Home");
+              }}
+              size={35}
+              className=" text-teal-600 hover:cursor-pointer hover:scale-[1.1] active:scale-[1] ease-in-out transition-all duration-300 mb-4"
+            />
+          <div className=" flex  flex-col gap-4 bg-white m-0 p-10 rounded-md max-w-sm mx-auto">
+
             <h1 className="font-sans font-extrabold text-2xl text-center">
               User Register
             </h1>
@@ -343,7 +355,6 @@ const page = () => {
                 Login
               </span>
             </p>
-            
           </div>
         </div>
       </div>
@@ -380,6 +391,5 @@ const page = () => {
     </div>
   );
 };
-
 
 export default page;

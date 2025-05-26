@@ -1,3 +1,4 @@
+import { Resend } from "resend";
 import { Trash, User as LucidUser } from "lucide-react";
 import { Html } from "next/document";
 import nodemailer from "nodemailer";
@@ -26,8 +27,8 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
       port: 2525,
       auth: {
         user: "581068644d0231",
-        pass: "7f6532f2c625f7"
-      }
+        pass: "7f6532f2c625f7",
+      },
     });
 
     const mailOptions = {
@@ -49,6 +50,15 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
         </p>
       `,
     };
+
+    const resend = new Resend("re_xxxxxxxxx");
+
+    await resend.emails.send({
+      from: "Acme <onboarding@resend.dev>",
+      to: ["delivered@resend.dev"],
+      subject: "hello world",
+      html: "<p>it works!</p>",
+    });
 
     const mailResponse = await transporter.sendMail(mailOptions);
     return mailResponse;

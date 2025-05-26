@@ -6,7 +6,7 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { startTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner"; // Assuming you have a Loader component
+import { GoHomeFill } from "react-icons/go";
 
 const Page = () => {
   const [user, setUser] = useState({ email: "", password: "" });
@@ -98,17 +98,20 @@ const Page = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner /> {/* Replace with your actual loader component */}
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex bg-transparent items-center justify-center min-h-screen">
+  //       <Spinner /> {/* Replace with your actual loader component */}
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="mainlogin flex flex-col items-center justify-center min-h-screen">
-      <div className="AuthPopup RegisterPopup absolute shadow-2xl bg-white rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 w-full max-w-sm">
+      <div className="AuthPopup RegisterPopup flex flex-col align-middle justify-between items-center absolute shadow-2xl bg-white rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 w-full max-w-sm">
+       
+          <GoHomeFill onClick={()=>{router.push("/Home")}} size={35} className=" text-teal-600 hover:cursor-pointer hover:scale-[1.1] active:scale-[1] ease-in-out transition-all duration-300 mb-4"/>
+        
         <h1 className="font-sans font-extrabold text-2xl text-center">
           User Login
         </h1>

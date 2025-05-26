@@ -13,7 +13,7 @@ const BetaTop = () => {
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <span className="bg-white text-curex text-xs font-bold px-2 py-1 rounded-full mr-2">BETA</span>
-          <p className="text-sm">Curex is currently in beta. Some features may not be available yet.</p>
+          <p className="text-2xl">Curex is currently in beta. Most of the features may not be available yet.</p>
         </div>
         <button
           onClick={() => setIsVisible(false)}
