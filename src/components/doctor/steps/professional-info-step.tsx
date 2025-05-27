@@ -1,17 +1,60 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
+const medicalSpecialties = [
+  "Cardiology",
+  "Dermatology",
+  "Endocrinology",
+  "Gastroenterology",
+  "General Medicine",
+  "Neurology",
+  "Oncology",
+  "Pediatrics",
+  "Psychiatry",
+  "Surgery",
+];
 const formSchema = z.object({
-  specialty: z.string().min(2, {
-    message: "Specialty must be at least 2 characters.",
-  }),
+  specialty: z.enum(
+    [
+      "Cardiology",
+      "Dermatology",
+      "Endocrinology",
+      "Gastroenterology",
+      "General Medicine",
+      "Neurology",
+      "Oncology",
+      "Pediatrics",
+      "Psychiatry",
+      "Surgery",
+    ],
+    {
+      errorMap: () => ({ message: "Please select a valid specialty." }),
+    }
+  ),
   hospital: z.string().min(2, {
     message: "Hospital/Clinic name must be at least 2 characters.",
   }),
@@ -27,16 +70,21 @@ const formSchema = z.object({
   bio: z.string().min(10, {
     message: "Bio must be at least 10 characters.",
   }),
-})
+});
 
 interface ProfessionalInfoStepProps {
-  formData: any
-  updateFormData: (data: any) => void
-  onNext: () => void
-  onPrev: () => void
+  formData: any;
+  updateFormData: (data: any) => void;
+  onNext: () => void;
+  onPrev: () => void;
 }
 
-export function ProfessionalInfoStep({ formData, updateFormData, onNext, onPrev }: ProfessionalInfoStepProps) {
+export function ProfessionalInfoStep({
+  formData,
+  updateFormData,
+  onNext,
+  onPrev,
+}: ProfessionalInfoStepProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,18 +95,20 @@ export function ProfessionalInfoStep({ formData, updateFormData, onNext, onPrev 
       availability: formData.availability || "",
       bio: formData.bio || "",
     },
-  })
+  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateFormData(values)
-    onNext()
+    updateFormData(values);
+    onNext();
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold">Professional Details</h2>
-        <p className="text-sm text-gray-500">Tell us about your medical practice</p>
+        <p className="text-sm text-gray-500">
+          Tell us about your medical practice
+        </p>
       </div>
 
       <Form {...form}>
@@ -71,7 +121,20 @@ export function ProfessionalInfoStep({ formData, updateFormData, onNext, onPrev 
                 <FormItem>
                   <FormLabel>Medical Specialty</FormLabel>
                   <FormControl>
-                    <Input placeholder="Cardiologist" {...field} />
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a specialty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {medicalSpecialties.map((specialty) => (
+                            <SelectItem key={specialty} value={specialty}>
+                              {specialty}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,7 +175,9 @@ export function ProfessionalInfoStep({ formData, updateFormData, onNext, onPrev 
                   <FormControl>
                     <Input placeholder="120" {...field} />
                   </FormControl>
-                  <FormDescription>Set your rate for online consultations</FormDescription>
+                  <FormDescription>
+                    Set your rate for online consultations
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -128,7 +193,9 @@ export function ProfessionalInfoStep({ formData, updateFormData, onNext, onPrev 
                 <FormControl>
                   <Input placeholder="Mon, Wed, Fri: 9AM-5PM" {...field} />
                 </FormControl>
-                <FormDescription>When you are available for consultations</FormDescription>
+                <FormDescription>
+                  When you are available for consultations
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -147,7 +214,9 @@ export function ProfessionalInfoStep({ formData, updateFormData, onNext, onPrev 
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>Describe your experience and specializations</FormDescription>
+                <FormDescription>
+                  Describe your experience and specializations
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -157,12 +226,20 @@ export function ProfessionalInfoStep({ formData, updateFormData, onNext, onPrev 
             <Button type="button" variant="outline" onClick={onPrev}>
               Back
             </Button>
-            <Button type="submit" className="bg-curex hover:bg-curex-dark text-white">
+            <Button
+              type="submit"
+              className={`${
+                form.formState.isValid
+                  ? "bg-curex hover:bg-curex-dark text-white "
+                  : "bg-gray-300 text-gray-500 hover:cursor-not-allowed"
+              } bg-curex hover:bg-curex-dark text-white`}
+              disabled={!form.formState.isValid}
+            >
               Continue
             </Button>
           </div>
         </form>
       </Form>
     </div>
-  )
+  );
 }

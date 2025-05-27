@@ -10,6 +10,7 @@ import { EducationStep } from "@/components/doctor/steps/education-step"
 import { DocumentsStep } from "@/components/doctor/steps/documents-step"
 import { ReviewStep } from "@/components/doctor/steps/review-step"
 import { toast } from "@/hooks/use-toast"
+import axios from "axios"
 
 const steps = [
   { id: "basic-info", title: "Basic Information" },
@@ -76,9 +77,7 @@ export function DoctorRegistrationForm() {
 
   const handleSubmit = async () => {
     try {
-      // This would be replaced with your actual API call to MongoDB
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
+      const response = await axios.post("/api/doctorApi/docregisterform", formData);
       toast({
         title: "Registration submitted successfully",
         description: "Your application is now pending review by our team.",
@@ -86,6 +85,7 @@ export function DoctorRegistrationForm() {
 
       router.push("/doctor/registration-success")
     } catch (error) {
+      console.error("Registration submission failed due to :", error)
       toast({
         title: "Something went wrong",
         description: "Your registration could not be submitted. Please try again.",

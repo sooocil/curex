@@ -1,16 +1,24 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -19,9 +27,25 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  specialty: z.string().min(2, {
-    message: "Specialty must be at least 2 characters.",
-  }),
+  //specialty is enum so we can use z.enum() if we have predefined specialties
+  specialty: z.enum(
+    [
+      "Cardiology",
+      "Dermatology",
+      "Endocrinology",
+      "Gastroenterology",
+      "General Medicine",
+      "Neurology",
+      "Oncology",
+      "Pediatrics",
+      "Psychiatry",
+      "Surgery",
+    ],
+    {
+      errorMap: () => ({ message: "Please select a valid specialty." }),
+    }
+  ),
+
   hospital: z.string().min(2, {
     message: "Hospital name must be at least 2 characters.",
   }),
@@ -37,47 +61,47 @@ const formSchema = z.object({
   bio: z.string().min(10, {
     message: "Bio must be at least 10 characters.",
   }),
-})
+});
 
 export function AddDoctorForm() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
-      specialty: "",
+      specialty: "General Medicine", 
       hospital: "",
       location: "",
       rate: "",
       availability: "",
       bio: "",
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // This would be replaced with your actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast({
         title: "Doctor added successfully",
         description: `${values.name} has been added to the platform.`,
-      })
+      });
 
-      router.push("/admin/doctors")
+      router.push("/admin/doctors");
     } catch (error) {
       toast({
         title: "Something went wrong",
         description: "The doctor could not be added. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -105,7 +129,11 @@ export function AddDoctorForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="doctor@example.com" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="doctor@example.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -118,7 +146,7 @@ export function AddDoctorForm() {
               <FormItem>
                 <FormLabel>Specialty</FormLabel>
                 <FormControl>
-                  <Input placeholder="Cardiologist" {...field} />
+                  <Input placeholder="General Medicine" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -174,7 +202,9 @@ export function AddDoctorForm() {
               <FormControl>
                 <Input placeholder="Mon, Wed, Fri: 9AM-5PM" {...field} />
               </FormControl>
-              <FormDescription>When the doctor is available for consultations</FormDescription>
+              <FormDescription>
+                When the doctor is available for consultations
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -197,15 +227,23 @@ export function AddDoctorForm() {
           )}
         />
         <div className="flex justify-end space-x-4">
-          <Button variant="outline" onClick={() => router.back()} disabled={isLoading}>
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
-          <Button type="submit" className="bg-curex hover:bg-curex-dark text-white" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="bg-curex hover:bg-curex-dark text-white"
+            disabled={isLoading}
+          >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Add Doctor
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }
