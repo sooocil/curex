@@ -90,6 +90,8 @@ export function BasicInfoStep({ formData, updateFormData, onNext }: BasicInfoSte
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormDescription>At least 8 characters</FormDescription>
+                  <FormDescription className="text-sm text-red-500">Note password somewhere</FormDescription>
+
                   <FormMessage />
                 </FormItem>
               )}

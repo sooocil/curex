@@ -13,16 +13,19 @@ import { Label as UILable } from "@/components/ui/label";
 const educationItemSchema = z.object({
   degree: z.string(),
   institution: z.string().min(2, { message: "Institution is required" }),
-  year: z
+  year: z.coerce
     .number()
-    .min(1900, { message: "Year must be a valid year" })
+    .min(1900, { message: "Year must be greater than 1900" })
     .max(new Date().getFullYear(), { message: "Year cannot be in the future" }),
 });
 
 const certificationItemSchema = z.object({
   name: z.string(),
   issuer: z.string().min(2, { message: "Issuer is required" }),
-  year: z.string().min(4, { message: "Year is required" }),
+  year: z.coerce
+    .number()
+    .min(1900, { message: "Year must be greater than 1900 " })
+    .max(new Date().getFullYear(), { message: "Year cannot be in the future" }),
 });
 
 const formSchema = z.object({
@@ -164,6 +167,7 @@ export function EducationStep({
                       </UILable>
                       <Input
                         id={`education.${index}.year`}
+                        type="number"
                         value={edu.year}
                         onChange={(e) =>
                           handleEducationChange(index, "year", e.target.value)
@@ -225,7 +229,7 @@ export function EducationStep({
                             e.target.value
                           )
                         }
-                        placeholder="American Board of Internal Medicine"
+                        placeholder="Nepal Medical Council (NMC)"
                         className="mt-1"
                       />
                       {form.formState.errors.certifications?.[index]

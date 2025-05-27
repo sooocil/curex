@@ -248,7 +248,7 @@ const page = () => {
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
               )}
               <div className="w-full relative">
-                <input
+                <input 
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   id="password"
@@ -281,6 +281,7 @@ const page = () => {
                   Password must be at least 8 characters, with one uppercase,
                   one lowercase, and one number
                 </p>
+                
               </div>
               <div className="w-full relative">
                 <input

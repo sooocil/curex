@@ -36,7 +36,7 @@ export const useDoctorStore = create<DoctorState>((set) => ({
   fetchDoctors: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch("/api/doctors", {
+      const res = await fetch("/api/doctorsApi/fetchdoctors", {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -69,44 +69,8 @@ export const useDoctorStore = create<DoctorState>((set) => ({
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const doctorList = {
-        doctors: [
-          {
-            id: "doc-1",
-            name: "Dr. Ravi Sharma",
-            specialty: "Cardiologist",
-            contact: "123-456-7890",
-            rate: 65,
-            rating: 4.5,
-            reviews: 120,
-            hospital: "Chitwan Medical College",
-            location: "Downtown",
-            availability: "Mon-Fri, 9 AM - 5 PM",
-          },
-          {
-            id: "doc-2",
-            name: "Dr. Anita Gupta",
-            specialty: "Dermatologist",
-            contact: "987-654-3210",
-            rate: 40,
-            rating: 4.5,
-            reviews: 120,
-            hospital: "Tandi Hospital",
-            location: "Downtown",
-            availability: "Mon-Fri, 9 AM - 5 PM",
-          },
-          {
-            id: "doc-3",
-            name: "Dr. Sanjay Pandey",
-            specialty: "Pediatrician",
-            contact: "555-555-5555",
-            rate: 30,
-            rating: 4.5,
-            reviews: 120,
-            hospital: "Purano Medical College",
-            location: "Downtown",
-            availability: "Mon-Fri, 9 AM - 5 PM",
-          },
-        ],
+        
+        doctors: await res.json(),
       };
 
       set({ doctors: doctorList.doctors, isLoading: false, error: null });

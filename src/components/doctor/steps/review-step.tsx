@@ -1,29 +1,35 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Loader2, CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Loader2, CheckCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast"; // Import toast for local error handling
+import { useState } from "react";
 
 interface ReviewStepProps {
-  formData: any
-  onSubmit: () => Promise<void>
-  onPrev: () => void
+  formData: any;
+  onSubmit: () => Promise<void>;
+  onPrev: () => void;
+  isSubmitting: boolean; // Use prop instead of local state
 }
 
-export function ReviewStep({ formData, onSubmit, onPrev }: ReviewStepProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [termsAccepted, setTermsAccepted] = useState(false)
+export function ReviewStep({ formData, onSubmit, onPrev, isSubmitting }: ReviewStepProps) {
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleSubmit = async () => {
-    if (!termsAccepted) return
+    if (!termsAccepted) {
+      toast({
+        title: "Terms Not Accepted",
+        description: "Please accept the terms and conditions to proceed.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setIsSubmitting(true)
-    await onSubmit()
-    setIsSubmitting(false)
-  }
+    await onSubmit(); // Call the passed onSubmit function
+  };
 
   return (
     <div className="space-y-6">
@@ -126,8 +132,8 @@ export function ReviewStep({ formData, onSubmit, onPrev }: ReviewStepProps) {
               <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
               <span>Medical License</span>
               <span className="ml-auto text-xs text-gray-500">
-                {formData.documents.medicalLicense?.name} ({(formData.documents.medicalLicense?.size / 1024).toFixed(2)}{" "}
-                KB)
+                {formData.documents.medicalLicense?.name} (
+                {(formData.documents.medicalLicense?.size / 1024).toFixed(2)} KB)
               </span>
             </div>
             <div className="flex items-center p-2 border rounded-md">
@@ -139,11 +145,19 @@ export function ReviewStep({ formData, onSubmit, onPrev }: ReviewStepProps) {
               </span>
             </div>
             <div className="flex items-center p-2 border rounded-md">
-              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-              <span>Hospital Privileges</span>
-              <span className="ml-auto text-xs text-gray-500">
-                {formData.documents.hospitalPrivileges?.name} (
-                {(formData.documents.hospitalPrivileges?.size / 1024).toFixed(2)} KB)
+              <span>
+                Hospital Privileges{" "}
+                {formData.documents.hospitalPrivileges ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2 inline" />
+                    <span className="ml-auto text-xs text-gray-500">
+                      {formData.documents.hospitalPrivileges?.name} (
+                      {(formData.documents.hospitalPrivileges?.size / 1024).toFixed(2)} KB)
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xs text-gray-500">(Not uploaded)</span>
+                )}
               </span>
             </div>
           </CardContent>
@@ -151,11 +165,15 @@ export function ReviewStep({ formData, onSubmit, onPrev }: ReviewStepProps) {
       </div>
 
       <div className="flex items-start space-x-2 py-4">
-        <Checkbox id="terms" checked={termsAccepted} onCheckedChange={(checked) => setTermsAccepted(!!checked)} />
+        <Checkbox
+          id="terms"
+          checked={termsAccepted}
+          onCheckedChange={(checked) => setTermsAccepted(!!checked)}
+        />
         <div className="grid gap-1.5 leading-none">
           <Label
             htmlFor="terms"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            className="text-md font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             I confirm that all information provided is accurate and complete
           </Label>
@@ -186,5 +204,5 @@ export function ReviewStep({ formData, onSubmit, onPrev }: ReviewStepProps) {
         </Button>
       </div>
     </div>
-  )
+  );
 }

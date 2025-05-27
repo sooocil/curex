@@ -54,8 +54,8 @@ export const DoctorsList = () => {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {doctors.map((doctor) => (
-        <Card key={doctor.id} className="overflow-hidden">
+      {doctors.map((doctor, index) => (
+        <Card key={doctor.id ? doctor.id : `doctor-${index}`} className="overflow-hidden">
           <CardContent className="p-0">
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">

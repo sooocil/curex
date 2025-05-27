@@ -39,18 +39,7 @@ const medicalSpecialties = [
 ];
 const formSchema = z.object({
   specialty: z.enum(
-    [
-      "Cardiology",
-      "Dermatology",
-      "Endocrinology",
-      "Gastroenterology",
-      "General Medicine",
-      "Neurology",
-      "Oncology",
-      "Pediatrics",
-      "Psychiatry",
-      "Surgery",
-    ],
+    medicalSpecialties as [string, ...string[]],
     {
       errorMap: () => ({ message: "Please select a valid specialty." }),
     }
