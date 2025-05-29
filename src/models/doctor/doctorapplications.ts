@@ -30,6 +30,10 @@ const doctorapplicationSchema = new mongoose.Schema({
     boardCertification: { type: String }, // Stores Base64 string
     hospitalPrivileges: { type: String }, // Stores Base64 string
   },
+  status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+  createdAt: { type: Date, default: Date.now },
+
+  
 });
 
 export default mongoose.models.Doctorapplications || mongoose.model("Doctorapplications", doctorapplicationSchema);

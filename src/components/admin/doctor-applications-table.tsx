@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   MoreHorizontal,
   Eye,
@@ -31,18 +32,36 @@ import { useDocApplicationStore } from "@/stores/doctorStores/docApplicationStor
 export function DoctorApplicationsTable() {
   const { applications, fetchApplications, updateApplicationStatus } = useDocApplicationStore();
   const [loading, setLoading] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState({});
 
   useEffect(() => {
-    async function load() {
+    async function load(filters = {}) {
       setLoading(true);
-      await fetchApplications();
+      setCurrentFilters(filters);
+      await fetchApplications(filters);
       setLoading(false);
     }
     load();
+
+    const handleRefresh = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      load(customEvent.detail || {});
+    };
+
+    window.addEventListener("refresh-doctor-applications", handleRefresh);
+    return () => {
+      window.removeEventListener("refresh-doctor-applications", handleRefresh);
+    };
   }, [fetchApplications]);
 
-  const handleStatusChange = (id: string, newStatus: string) => {
-    updateApplicationStatus(id, newStatus);
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    await updateApplicationStatus(id, newStatus);
+    if (newStatus === "rejected") {
+      const event = new CustomEvent("refresh-doctor-applications", {
+        detail: currentFilters,
+      });
+      window.dispatchEvent(event);
+    }
   };
 
   const getStatusBadge = (status?: string) => {
@@ -76,11 +95,34 @@ export function DoctorApplicationsTable() {
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRow key="loading">
-              <TableCell colSpan={7} className="text-center py-6 text-gray-500">
-                Loading applications...
-              </TableCell>
-            </TableRow>
+            Array.from({ length: 3 }).map((_, index) => (
+              <TableRow key={`loading-${index}`}>
+                <TableCell>
+                  <div className="flex items-center space-x-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Skeleton className="h-4 w-28" />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-16" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="h-8 w-8 ml-auto" />
+                </TableCell>
+              </TableRow>
+            ))
           ) : applications.length === 0 ? (
             <TableRow key="empty">
               <TableCell colSpan={7} className="text-center py-6 text-gray-500">
@@ -113,7 +155,13 @@ export function DoctorApplicationsTable() {
                   {application.location}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {application.date || "-"}
+                  {application.createdAt
+                    ? new Date(application.createdAt).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
+                    : "-"}
                 </TableCell>
                 <TableCell>{getStatusBadge(application.status)}</TableCell>
                 <TableCell className="text-right">
@@ -133,7 +181,7 @@ export function DoctorApplicationsTable() {
                       <DropdownMenuItem
                         onClick={() => handleStatusChange(application.id, "approved")}
                       >
-                        <CheckCircle className="mr-2 h-4 w-4 text-green condensing-500" />
+                        <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                         Approve
                       </DropdownMenuItem>
                       <DropdownMenuItem

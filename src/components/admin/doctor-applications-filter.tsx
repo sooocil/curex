@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Filter } from "lucide-react"
+import { Filter, RefreshCcw } from "lucide-react"
 
 
 
@@ -18,6 +18,19 @@ export function DoctorApplicationsFilter() {
   return (
     <div className="flex flex-col sm:flex-row gap-3">
       <Input placeholder="Search applications..." className="sm:w-[250px]" />
+      <Button
+        variant="outline"
+        size="sm"
+        className="flex items-center"
+        onClick={() => {
+          const event = new CustomEvent("refresh-doctor-applications");
+          window.dispatchEvent(event);
+        }}
+        title="Refresh applications"
+      >
+        <RefreshCcw className="mr-2 h-4 w-4" />
+        Refresh
+      </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="flex items-center">

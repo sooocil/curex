@@ -2,11 +2,46 @@ import { connectDB } from "@/dbConfig/dbConfig";
 import { NextResponse } from "next/server";
 import doctorApplicationModel from "@/models/doctor/doctorapplications";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await connectDB();
-    const applications = await doctorApplicationModel.find({}).lean();
-    
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search") || "";
+    const status = searchParams.get("status") || "";
+    const date = searchParams.get("date") || "";
+
+    const query: any = {};
+
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    if (date && date !== "all") {
+      const now = new Date();
+      let startDate: Date;
+      switch (date) {
+        case "today":
+          startDate = new Date(now.setHours(0, 0, 0, 0));
+          break;
+        case "this_week":
+          startDate = new Date(now.setDate(now.getDate() - now.getDay()));
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case "this_month":
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        default:
+          startDate = new Date(0);
+      }
+      query.createdAt = { $gte: startDate };
+    }
+
+    const applications = await doctorApplicationModel.find(query).lean();
+
     if (!applications || applications.length === 0) {
       return NextResponse.json({ error: "No doctor applications found" }, { status: 404 });
     }
