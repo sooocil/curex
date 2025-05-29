@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
-import { useDoctorStore } from "@/stores/doctorStore";
+import { useDoctorStore } from "@/stores/doctorStores/doctorStore";
 
 export const DoctorsList = () => {
   const doctors = useDoctorStore((state) => state.doctors);

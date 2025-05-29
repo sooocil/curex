@@ -77,8 +77,8 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const doctor = new doctorapplicationSchema(doctorData);
-    const savedDoctor = await doctor.save();
+    const doctorapplication = new doctorapplicationSchema(doctorData);
+    const savedDoctor = await doctorapplication.save();
 
     return NextResponse.json({ message: "Doctor registered successfully", data: savedDoctor }, { status: 201 });
   } catch (error: any) {

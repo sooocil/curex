@@ -32,4 +32,4 @@ const doctorapplicationSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.models.Doctor || mongoose.model("Doctor", doctorapplicationSchema);
+export default mongoose.models.Doctorapplications || mongoose.model("Doctorapplications", doctorapplicationSchema);

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { useAppointmentStore } from "@/stores/appointmentStore";
+import { useAppointmentStore } from "@/stores/doctorStores/appointmentStore";
 import {
   Table,
   TableBody,
