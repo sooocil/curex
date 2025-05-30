@@ -22,7 +22,6 @@ export interface DoctorApplication {
   id: string;
   name: string;
   email: string;
-  password?: string;
   phone: string;
   specialty: string;
   hospital: string;
@@ -51,16 +50,22 @@ interface DocApplicationStore {
 export const useDocApplicationStore = create<DocApplicationStore>((set) => ({
   applications: [],
 
-  setApplications: (applications) => set({ applications }),
+  setApplications: (applications) =>
+    set({
+      applications: applications.map((app) => ({
+        ...app,
+        id: app.id || "", // Ensure id is always a string
+      })),
+    }),
 
   updateApplicationStatus: async (id, status) => {
     if (!id || !status) {
-      console.error("Invalid id or status provided");
+      console.error("Invalid id or status:", { id, status });
       return;
     }
 
     try {
-      const res = await fetch("/api/doctorsApi/docapplications/update", {
+      const res = await fetch("/api/doctorsApi/docapplications/rejectapp", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status }),
@@ -77,8 +82,8 @@ export const useDocApplicationStore = create<DocApplicationStore>((set) => ({
           app.id === id ? { ...app, status: application.status } : app
         ),
       }));
-    } catch (error: any) {
-      console.error("Failed to update application status:", error.message);
+    } catch (error) {
+      console.error("Failed to update application status:", error);
     }
   },
 
@@ -96,10 +101,15 @@ export const useDocApplicationStore = create<DocApplicationStore>((set) => ({
       }
       const data = await res.json();
       set({
-        applications: Array.isArray(data.applications) ? data.applications : [],
+        applications: Array.isArray(data.applications)
+          ? data.applications.map((app: any) => ({
+              ...app,
+              id: app._id?.toString() || app.id || "", // Handle MongoDB _id or id
+            }))
+          : [],
       });
-    } catch (error: any) {
-      console.error("Failed to fetch applications:", error.message);
+    } catch (error) {
+      console.error("Failed to fetch applications:", error);
     }
   },
 }));

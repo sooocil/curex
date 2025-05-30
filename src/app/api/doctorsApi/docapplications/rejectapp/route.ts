@@ -1,28 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/dbConfig/dbConfig";
+import doctorapplications from "@/models/doctor/doctorapplications";
 
-// Mock function to reject a doctor application in your database
-async function rejectDoctorApplication(applicationId: string, reason?: string) {
-  // Replace this with your actual DB logic
-  // Example: await db.doctorApplications.update({ id: applicationId }, { status: 'rejected', rejectionReason: reason });
-  return { success: true };
-}
-
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   try {
-    const { applicationId, reason } = await req.json();
+    const { id, status } = await req.json();
 
-    if (!applicationId) {
-      return NextResponse.json({ error: 'Application ID is required.' }, { status: 400 });
+    if (!id || !status) {
+      return NextResponse.json({ error: "Missing id or status" }, { status: 400 });
     }
 
-    const result = await rejectDoctorApplication(applicationId, reason);
+    await connectDB();
 
-    if (result.success) {
-      return NextResponse.json({ message: 'Application rejected successfully.' });
-    } else {
-      return NextResponse.json({ error: 'Failed to reject application.' }, { status: 500 });
+    const updated = await doctorapplications.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updated) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
+
+    return NextResponse.json({
+      message: "Status updated",
+      application: { ...updated.toObject(), id: updated._id.toString() },
+    });
   } catch (error) {
-    return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
+    console.error("Error updating application status:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

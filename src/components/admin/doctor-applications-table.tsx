@@ -20,13 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  MoreHorizontal,
-  Eye,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-} from "lucide-react";
+import { MoreHorizontal, Eye, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { useDocApplicationStore } from "@/stores/doctorStores/docApplicationStore";
 
 export function DoctorApplicationsTable() {
@@ -35,33 +29,22 @@ export function DoctorApplicationsTable() {
   const [currentFilters, setCurrentFilters] = useState({});
 
   useEffect(() => {
-    async function load(filters = {}) {
+    const load = async (filters = {}) => {
       setLoading(true);
       setCurrentFilters(filters);
       await fetchApplications(filters);
       setLoading(false);
-    }
+    };
     load();
-
-    const handleRefresh = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      load(customEvent.detail || {});
-    };
-
-    window.addEventListener("refresh-doctor-applications", handleRefresh);
-    return () => {
-      window.removeEventListener("refresh-doctor-applications", handleRefresh);
-    };
   }, [fetchApplications]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
-    await updateApplicationStatus(id, newStatus);
-    if (newStatus === "rejected") {
-      const event = new CustomEvent("refresh-doctor-applications", {
-        detail: currentFilters,
-      });
-      window.dispatchEvent(event);
+    if (!id) {
+      console.error("No ID provided for status change");
+      return;
     }
+    await updateApplicationStatus(id, newStatus);
+    await fetchApplications(currentFilters);
   };
 
   const getStatusBadge = (status?: string) => {
@@ -96,7 +79,7 @@ export function DoctorApplicationsTable() {
         <TableBody>
           {loading ? (
             Array.from({ length: 3 }).map((_, index) => (
-              <TableRow key={`loading-${index}`}>
+              <TableRow key={`skeleton-${index}`}>
                 <TableCell>
                   <div className="flex items-center space-x-3">
                     <Skeleton className="h-10 w-10 rounded-full" />
@@ -130,30 +113,26 @@ export function DoctorApplicationsTable() {
               </TableCell>
             </TableRow>
           ) : (
-            applications.map((application, index) => (
-              <TableRow key={application.id || `fallback-${index}`}>
+            applications.map((application) => (
+              <TableRow key={application.id || `fallback-${application.name}`}>
                 <TableCell>
                   <div className="flex items-center space-x-3">
                     <Avatar>
-                      <AvatarFallback className="bg-curex/10 text-curex">
+                      <AvatarFallback>
                         {application.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                          ? application.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                          : "N/A"}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-medium">{application.name}</p>
-                    </div>
+                    <p className="font-medium">{application.name || "Unknown"}</p>
                   </div>
                 </TableCell>
-                <TableCell>{application.specialty}</TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {application.hospital}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {application.location}
-                </TableCell>
+                <TableCell>{application.specialty || "N/A"}</TableCell>
+                <TableCell className="hidden md:table-cell">{application.hospital || "N/A"}</TableCell>
+                <TableCell className="hidden md:table-cell">{application.location || "N/A"}</TableCell>
                 <TableCell className="hidden md:table-cell">
                   {application.createdAt
                     ? new Date(application.createdAt).toLocaleDateString(undefined, {
@@ -161,37 +140,45 @@ export function DoctorApplicationsTable() {
                         month: "2-digit",
                         day: "2-digit",
                       })
-                    : "-"}
+                    : "N/A"}
                 </TableCell>
                 <TableCell>{getStatusBadge(application.status)}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" aria-label="Actions">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Actions"
+                        disabled={!application.id}
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/admin/doctor-applications/${application.id}`}>
+                        <Link href={`/admin/doctor-applications/${application.id || ""}`}>
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleStatusChange(application.id, "approved")}
+                        onClick={() => application.id && handleStatusChange(application.id, "approved")}
+                        disabled={!application.id}
                       >
                         <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                         Approve
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleStatusChange(application.id, "rejected")}
+                        onClick={() => application.id && handleStatusChange(application.id, "rejected")}
+                        disabled={!application.id}
                       >
                         <XCircle className="mr-2 h-4 w-4 text-red-500" />
                         Reject
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleStatusChange(application.id, "info_needed")}
+                        onClick={() => application.id && handleStatusChange(application.id, "info_needed")}
+                        disabled={!application.id}
                       >
                         <AlertCircle className="mr-2 h-4 w-4 text-blue-500" />
                         Request Info
