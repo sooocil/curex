@@ -19,7 +19,7 @@ const doctorapplicationSchema = new mongoose.Schema({
     },
   ],
   certifications: [
-    {
+    { 
       name: { type: String, required: true },
       issuer: { type: String, required: true },
       year: { type: String, required: true },

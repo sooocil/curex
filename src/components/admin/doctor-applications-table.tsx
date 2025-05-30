@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast, Toaster } from "react-hot-toast";
 import {
   Table,
   TableBody,
@@ -20,11 +21,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, Eye, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import {
+  MoreHorizontal,
+  Eye,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 import { useDocApplicationStore } from "@/stores/doctorStores/docApplicationStore";
 
 export function DoctorApplicationsTable() {
-  const { applications, fetchApplications, updateApplicationStatus } = useDocApplicationStore();
+  const { applications, fetchApplications, updateApplicationStatus } =
+    useDocApplicationStore();
   const [loading, setLoading] = useState(false);
   const [currentFilters, setCurrentFilters] = useState({});
 
@@ -39,12 +47,38 @@ export function DoctorApplicationsTable() {
   }, [fetchApplications]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
-    if (!id) {
-      console.error("No ID provided for status change");
-      return;
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/doctorsApi/docapplications/approveapp/`, {
+        method: "POST",
+        body: JSON.stringify({ id, status: newStatus }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+     
+
+      const data = await res.json();
+      console.log("API response:", data);
+
+      if (!res.ok) {
+        if(res.status === 500) {
+          toast.error("Doctors already exists with this email.");
+        }
+        throw new Error(data.error || "Failed to update status");
+      }
+
+      toast.success("Status updated successfully");
+      await updateApplicationStatus(id, newStatus);
+      await fetchApplications(currentFilters);
+    } catch (error) {
+      console.error("API error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    } finally {
+      setLoading(false);
     }
-    await updateApplicationStatus(id, newStatus);
-    await fetchApplications(currentFilters);
   };
 
   const getStatusBadge = (status?: string) => {
@@ -127,19 +161,28 @@ export function DoctorApplicationsTable() {
                           : "N/A"}
                       </AvatarFallback>
                     </Avatar>
-                    <p className="font-medium">{application.name || "Unknown"}</p>
+                    <p className="font-medium">
+                      {application.name || "Unknown"}
+                    </p>
                   </div>
                 </TableCell>
                 <TableCell>{application.specialty || "N/A"}</TableCell>
-                <TableCell className="hidden md:table-cell">{application.hospital || "N/A"}</TableCell>
-                <TableCell className="hidden md:table-cell">{application.location || "N/A"}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {application.hospital || "N/A"}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {application.location || "N/A"}
+                </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {application.createdAt
-                    ? new Date(application.createdAt).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })
+                    ? new Date(application.createdAt).toLocaleDateString(
+                        undefined,
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )
                     : "N/A"}
                 </TableCell>
                 <TableCell>{getStatusBadge(application.status)}</TableCell>
@@ -157,27 +200,38 @@ export function DoctorApplicationsTable() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/admin/doctor-applications/${application.id || ""}`}>
+                        <Link
+                          href={`/admin/doctor-applications/${application.id || ""}`}
+                        >
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => application.id && handleStatusChange(application.id, "approved")}
+                        onClick={() =>
+                          application.id &&
+                          handleStatusChange(application.id, "approved")
+                        }
                         disabled={!application.id}
                       >
                         <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                         Approve
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => application.id && handleStatusChange(application.id, "rejected")}
+                        onClick={() =>
+                          application.id &&
+                          handleStatusChange(application.id, "rejected")
+                        }
                         disabled={!application.id}
                       >
                         <XCircle className="mr-2 h-4 w-4 text-red-500" />
                         Reject
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => application.id && handleStatusChange(application.id, "info_needed")}
+                        onClick={() =>
+                          application.id &&
+                          handleStatusChange(application.id, "info_needed")
+                        }
                         disabled={!application.id}
                       >
                         <AlertCircle className="mr-2 h-4 w-4 text-blue-500" />
@@ -191,6 +245,7 @@ export function DoctorApplicationsTable() {
           )}
         </TableBody>
       </Table>
+      <Toaster/>
     </div>
   );
 }

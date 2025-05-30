@@ -17,69 +17,79 @@ type DoctorState = {
   doctors: Doctor[];
   isLoading: boolean;
   error: string | null;
-  setDoctors: (doctors: Doctor[]) => void;
-  addDoctor: (doctor: Doctor) => void;
   fetchDoctors: () => Promise<void>;
+  deleteDoctor: (id: string) => Promise<void>;
+  setDoctors: (doctors: Doctor[]) => void;
 };
 
-export const useDoctorStore = create<DoctorState>((set) => ({
+export const useDoctorStore = create<DoctorState>((set, get) => ({
   doctors: [],
   isLoading: false,
   error: null,
+
   setDoctors: (doctors) => set({ doctors, error: null }),
-  addDoctor: (doctor) =>
-    set((state) => ({
-      doctors: [...state.doctors, doctor],
-      error: null,
-    })),
 
   fetchDoctors: async () => {
     set({ isLoading: true, error: null });
+
     try {
-      const res = await fetch("/api/doctorsApi/fetchdoctors", {
+      const res = await fetch("/api/doctorsApi/doctors/fetchdocs", {
         method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
+        headers: { Accept: "application/json" },
         credentials: "include",
       });
 
       if (!res.ok) {
-        if (res.status === 401) {
-          window.location.href = "/login";
-          return;
-        }
-        if (res.status === 404) {
-          set({
-            doctors: [],
-            isLoading: false,
-            error: "Doctor endpoint not found",
-          });
-          return;
-        }
-        throw new Error(`HTTP error! Status: ${res.status}`);
+        if (res.status === 401) window.location.href = "/login";
+        throw new Error(`Fetch failed with status ${res.status}`);
       }
 
-      const contentType = res.headers.get("content-type");
-      if (!contentType?.includes("application/json")) {
-        throw new Error("Received non-JSON response from server");
-      }
+      const raw = await res.json();
+      const doctors: Doctor[] = raw.map((doc: any) => ({
+        id: doc._id,
+        name: doc.name,
+        specialty: doc.specialty,
+        contact: doc.contact,
+        rate: doc.rate,
+        rating: doc.rating,
+        reviews: doc.reviews,
+        hospital: doc.hospital,
+        location: doc.location,
+        availability: doc.availability,
+      }));
 
-      // Simulated delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      set({ doctors, isLoading: false, error: null });
+    } catch (err: unknown) {
+      const error = err as Error;
+      set({ isLoading: false, error: error.message || "Failed to fetch doctors" });
+    }
+  },
 
-      const doctorList = {
-        
-        doctors: await res.json(),
-      };
+  deleteDoctor: async (id: string) => {
+    set({ isLoading: true, error: null });
 
-      set({ doctors: doctorList.doctors, isLoading: false, error: null });
-    } catch (error) {
-      set({
-        isLoading: false,
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
+    try {
+      const res = await fetch("/api/doctorsApi/doctors/deletedocs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ id }),
       });
+
+      if (!res.ok) {
+        if (res.status === 401) window.location.href = "/login";
+        throw new Error(`Delete failed with status ${res.status}`);
+      }
+
+      const current = get().doctors;
+      set({
+        doctors: current.filter((doc) => doc.id !== id),
+        isLoading: false,
+        error: null,
+      });
+    } catch (err: unknown) {
+      const error = err as Error;
+      set({ isLoading: false, error: error.message || "Failed to delete doctor" });
     }
   },
 }));
