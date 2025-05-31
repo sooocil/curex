@@ -1,44 +1,16 @@
+"use client";
+
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useDocApplicationStore } from "@/stores/doctorStores/docApplicationStore"
 
-const recentApplications = [
-  {
-    id: "app-1",
-    name: "Dr. Sarah Johnson",
-    specialty: "Cardiologist",
-    hospital: "City General Hospital",
-    date: "2023-04-08",
-    status: "pending",
-  },
-  {
-    id: "app-2",
-    name: "Dr. Michael Chen",
-    specialty: "Dermatologist",
-    hospital: "Westside Medical Center",
-    date: "2023-04-07",
-    status: "pending",
-  },
-  {
-    id: "app-3",
-    name: "Dr. Emily Rodriguez",
-    specialty: "Pediatrician",
-    hospital: "Children's Hospital",
-    date: "2023-04-06",
-    status: "pending",
-  },
-  {
-    id: "app-4",
-    name: "Dr. James Wilson",
-    specialty: "Neurologist",
-    hospital: "University Medical Center",
-    date: "2023-04-05",
-    status: "pending",
-  },
-]
+
 
 export function RecentDoctorApplications() {
+  const recentApplications = useDocApplicationStore((state) => state.applications)
+
   return (
     <Card>
       <CardHeader>

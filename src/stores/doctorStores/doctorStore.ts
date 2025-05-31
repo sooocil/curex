@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { create } from "zustand";
 
 export type Doctor = {
@@ -33,11 +34,12 @@ export const useDoctorStore = create<DoctorState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const res = await fetch("/api/doctorsApi/doctors/fetchdocs", {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        credentials: "include",
-      });
+
+        const res = await fetch("/api/doctorsApi/doctors/fetchdocs", {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "include",
+        });
 
       if (!res.ok) {
         if (res.status === 401) window.location.href = "/login";
@@ -75,7 +77,7 @@ export const useDoctorStore = create<DoctorState>((set, get) => ({
         credentials: "include",
         body: JSON.stringify({ id }),
       });
-
+ 
       if (!res.ok) {
         if (res.status === 401) window.location.href = "/login";
         throw new Error(`Delete failed with status ${res.status}`);
