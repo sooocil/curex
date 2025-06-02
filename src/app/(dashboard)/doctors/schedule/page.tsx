@@ -13,14 +13,14 @@ export default async function DoctorSchedulePage() {
   const cookieStore = cookies()
   const token = (await cookieStore).get("token")?.value
 
-  if (!token) {
-    redirect("/auth/login")
-  }
+  // if (!token) {
+  //   redirect("/doctor/login")
+  // }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string)
+    const decoded = jwt.verify(token!, process.env.JWT_SECRET as string)
   } catch (err) {
-    redirect("/auth/login")
+    // redirect("/doctor/login")
   }
 
   return (

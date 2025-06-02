@@ -74,7 +74,7 @@ export function DoctorHeader() {
       const res = await axios.post("http://localhost:3000/api/doctors/logout")
       if (res.status === 200) {
         localStorage.removeItem("doctorId")
-        window.location.href = "/auth/login"
+        window.location.href = "/doctor/login"
       }
       console.log("Logout response:", res.data)
       toast.success("Logout successful!")

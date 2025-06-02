@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 });
     }
 
-    const token = sign({ email, role: "admin" }, JWT_SECRET, { expiresIn: "24h" });
+    const token = sign({ email, role: "admin" }, JWT_SECRET, { expiresIn: "2d" });
     const cookieStore = cookies();
 
     // 🔥 Set cookies the middleware expects

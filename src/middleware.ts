@@ -33,7 +33,7 @@ export function middleware(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
     const user = req.cookies.get("user")?.value;
     const role = req.cookies.get("role")?.value;
-    
+
     if (token && user && role === "admin") {
       return NextResponse.redirect(new URL("/admin", req.url));
     }
@@ -43,12 +43,14 @@ export function middleware(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
     const user = req.cookies.get("user")?.value;
     const role = req.cookies.get("role")?.value;
-    
+
     if (token && user) {
       if (role === "admin") {
         return NextResponse.redirect(new URL("/admin", req.url));
       } else {
-        return NextResponse.redirect(new URL(`/user/${user}/dashboard`, req.url));
+        return NextResponse.redirect(
+          new URL(`/user/${user}/dashboard`, req.url)
+        );
       }
     }
   }

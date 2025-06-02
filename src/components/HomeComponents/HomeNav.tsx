@@ -128,7 +128,7 @@ const HomeNav = () => {
                   variant="outline"
                   onClick={() => {
                     setIsOpen(false)
-                    window.location.href = "/auth/login"
+                    window.location.href = "/doctor/login"
                   }}
                 >
                   Login

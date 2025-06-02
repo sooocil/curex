@@ -1,33 +1,39 @@
-import type { Metadata } from "next"
-import { cookies } from "next/headers"
-import jwt from "jsonwebtoken"
-import { redirect } from "next/navigation"
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import { redirect } from "next/navigation";
 
-import { DoctorOverview } from "@/components/doctors/doctor-overview"
-import { TodayAppointments } from "@/components/doctors/today-appointments"
-import { PatientStats } from "@/components/doctors/patient-stats"
-import { RecentPatients } from "@/components/doctors/recent-patients"
-import { ScheduleOverview } from "@/components/doctors/schedule-overview"
+import { DoctorOverview } from "@/components/doctors/doctor-overview";
+import { TodayAppointments } from "@/components/doctors/today-appointments";
+import { PatientStats } from "@/components/doctors/patient-stats";
+import { RecentPatients } from "@/components/doctors/recent-patients";
+import { ScheduleOverview } from "@/components/doctors/schedule-overview";
+
 
 export const metadata: Metadata = {
   title: "Doctor Dashboard | Curex",
   description: "Curex doctor dashboard",
-}
+};
 
 export default async function DoctorDashboardPage() {
-  const cookieStore = cookies()
-  const token = (await cookieStore).get("token")?.value
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("token")?.value;
 
   if (!token) {
-    redirect("/auth/login")
+    redirect("/doctor/login");
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string)
-    // You can use decoded info (doctor id, email, etc.) if needed here
-  } catch (err) {
-    // Invalid token or verification failed
-    redirect("/auth/login")
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+  } catch (err: any) {
+    if (err.name === "TokenExpiredError") {
+      // Redirect or force logout
+      redirect("/doctor/login");
+      return;
+    }
+
+    // For other JWT errors
+    console.error("Token verification error", err);
   }
 
   return (
@@ -47,5 +53,5 @@ export default async function DoctorDashboardPage() {
         <RecentPatients />
       </div>
     </div>
-  )
+  );
 }
