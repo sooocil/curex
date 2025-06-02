@@ -1,11 +1,19 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -20,15 +28,19 @@ const formSchema = z.object({
   phone: z.string().min(10, {
     message: "Please enter a valid phone number.",
   }),
-})
+});
 
 interface BasicInfoStepProps {
-  formData: any
-  updateFormData: (data: any) => void
-  onNext: () => void
+  formData: any;
+  updateFormData: (data: any) => void;
+  onNext: () => void;
 }
 
-export function BasicInfoStep({ formData, updateFormData, onNext }: BasicInfoStepProps) {
+export function BasicInfoStep({
+  formData,
+  updateFormData,
+  onNext,
+}: BasicInfoStepProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,18 +49,20 @@ export function BasicInfoStep({ formData, updateFormData, onNext }: BasicInfoSte
       password: formData.password || "",
       phone: formData.phone || "",
     },
-  })
+  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateFormData(values)
-    onNext()
+    updateFormData(values);
+    onNext();
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold">Basic Information</h2>
-        <p className="text-sm text-gray-500">Please provide your personal details</p>
+        <p className="text-sm text-gray-500">
+          Please provide your personal details
+        </p>
       </div>
 
       <Form {...form}>
@@ -74,7 +88,11 @@ export function BasicInfoStep({ formData, updateFormData, onNext }: BasicInfoSte
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="sarah.johnson@example.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="sarah.johnson@example.com"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,7 +108,9 @@ export function BasicInfoStep({ formData, updateFormData, onNext }: BasicInfoSte
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormDescription>At least 8 characters</FormDescription>
-                  <FormDescription className="text-sm text-red-500">Note password somewhere</FormDescription>
+                  <FormDescription className="text-sm text-red-500">
+                    Note password somewhere
+                  </FormDescription>
 
                   <FormMessage />
                 </FormItem>
@@ -110,14 +130,22 @@ export function BasicInfoStep({ formData, updateFormData, onNext }: BasicInfoSte
               )}
             />
           </div>
-
           <div className="flex justify-end">
-            <Button type="submit" className="bg-curex hover:bg-curex-dark text-white">
+            <Button
+              type="submit"
+              className="bg-curex hover:bg-curex-dark text-white"
+            >
               Continue
             </Button>
           </div>
+          <a
+            className="text-sm text-blue-600 hover:underline justify-center flex mt-4"
+            href="/"
+          >
+            Return to Homepage
+          </a>
         </form>
       </Form>
     </div>
-  )
+  );
 }

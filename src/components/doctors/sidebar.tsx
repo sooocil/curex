@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Calendar,
@@ -13,7 +13,8 @@ import {
   LogOut,
   Clock,
   FileText,
-} from "lucide-react"
+} from "lucide-react";
+import axios from "axios";
 
 const sidebarLinks = [
   {
@@ -31,35 +32,33 @@ const sidebarLinks = [
     href: "/doctors/patients",
     icon: Users,
   },
-  {
-    name: "Schedule",
-    href: "/doctors/schedule",
-    icon: Clock,
-  },
+
   {
     name: "Consultations",
     href: "/doctors/consultations",
     icon: MessageSquare,
   },
-  {
-    name: "Medical Records",
-    href: "/doctors/records",
-    icon: FileText,
-  },
-  {
-    name: "Reports",
-    href: "/doctors/reports",
-    icon: ClipboardList,
-  },
-  {
-    name: "Settings",
-    href: "/doctors/settings",
-    icon: Settings,
-  },
-]
+];
+
+
 
 export function DoctorSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+
+  const handleLogout = () => {
+    // Implement logout logic herecon
+    const res = axios.post("/api/doctorsApi/logout")
+    return res.then((response) => {
+      if (response.status === 200) {
+        // Redirect to home page after successful logout
+        window.location.href = "/Home";
+      } else {
+        console.error("Logout failed:", response.data); 
+      }
+    }).catch((error) => { 
+      console.log("Logging out...");
+    });
+  };
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col">
@@ -76,7 +75,10 @@ export function DoctorSidebar() {
         <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <nav className="mt-5 flex-1 px-2 space-y-1">
             {sidebarLinks.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`)
+              const isActive =
+                pathname === link.href ||
+                (pathname.startsWith(`${link.href}/`) &&
+                  link.href !== "/doctors");
               return (
                 <Link
                   key={link.name}
@@ -85,27 +87,31 @@ export function DoctorSidebar() {
                     "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
                     isActive
                       ? "bg-curex bg-opacity-10 text-curex"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
                 >
                   <link.icon
                     className={cn(
                       "mr-3 flex-shrink-0 h-5 w-5",
-                      isActive ? "text-curex" : "text-gray-400 group-hover:text-gray-500",
+                      isActive
+                        ? "text-curex"
+                        : "text-gray-400 group-hover:text-gray-500"
                     )}
                     aria-hidden="true"
                   />
                   {link.name}
                 </Link>
-              )
+              );
             })}
           </nav>
         </div>
         <div className="flex-shrink-0 flex border-t p-4">
-          <button className="flex-shrink-0 w-full group block">
+          <button onClick={handleLogout} className="flex-shrink-0 w-full group block">
             <div className="flex items-center">
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Dr. Sarah Wilson</p>
+                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                  Dr. Sarah Wilson
+                </p>
                 <div className="flex items-center text-xs font-medium text-gray-500 group-hover:text-gray-700">
                   <LogOut className="mr-1 h-4 w-4" />
                   Sign out
@@ -116,5 +122,5 @@ export function DoctorSidebar() {
         </div>
       </div>
     </aside>
-  )
+  );
 }

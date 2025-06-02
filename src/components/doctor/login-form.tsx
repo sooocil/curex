@@ -71,6 +71,9 @@ export function DoctorLoginForm() {
         {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
         {loading ? "Logging in..." : "Login"}
       </Button>
+      <a className="
+text-sm text-blue-600 hover:underline justify-center flex mt-4
+      " href="/">Return to Homepage</a>
     </form>
   );
 }
