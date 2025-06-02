@@ -1,38 +1,36 @@
 import mongoose from "mongoose";
 
+const appointmentSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "User ID is required"],
+    },
+    doctor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Doctor",
+      required: [true, "Doctor ID is required"],
+    },
+    date: {
+      type: Date,
+      required: [true, "Date is required"],
+    },
+    reason: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Reason cannot exceed 500 characters"],
+      default: "No reason provided",
+    },
+    status: {
+      type: String,
+      enum: ["pending", "confirmed", "completed", "cancelled"],
+      default: "pending",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-
-const appointmentSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  doctorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Doctor",
-    required: true, 
-  },
-  hospitalId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Hospital",
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  reason: {
-    type: String,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "confirmed", "completed", "cancelled"],
-    default: "pending",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-module.exports = mongoose.model("Appointment", appointmentSchema);
+export default mongoose.models.Appointment || mongoose.model("Appointment", appointmentSchema);

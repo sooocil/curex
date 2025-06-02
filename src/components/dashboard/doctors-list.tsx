@@ -9,7 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { useDoctorStore } from "@/stores/doctorStores/doctorStore";
 import toast from "react-hot-toast";
-import Viewdoctormodal from "../Modal/userdashboard/viewdoctormodal";
+import Viewdoctormodal from "@/components/Modal/userdashboard/viewdoctormodal";
+import AppointmentModal from "@/components/Modal/userdashboard/bookappointment";
 
 interface Doctor {
   id: string;
@@ -29,7 +30,8 @@ export const DoctorsList = () => {
   const isLoading = useDoctorStore((state) => state.isLoading);
   const error = useDoctorStore((state) => state.error);
 
-  const [showModal, setShowModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [bookAppointmentModal, setBookAppointmentModal] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
 
   useEffect(() => {
@@ -38,12 +40,18 @@ export const DoctorsList = () => {
 
   const viewDocProfile = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
-    setShowModal(true);
+    setShowProfileModal(true);
   };
 
-  const closeModal = () => {
-    setShowModal(false);
+  const closeAllModals = () => {
+    setShowProfileModal(false);
+    setBookAppointmentModal(false);
     setSelectedDoctor(null);
+  };
+
+  const bookApp = (doctor: Doctor) => {
+    setSelectedDoctor(doctor);
+    setBookAppointmentModal(true);
   };
 
   useEffect(() => {
@@ -168,7 +176,10 @@ export const DoctorsList = () => {
                 >
                   View Profile
                 </Button>
-                <Button className="flex-1 rounded-none bg-curex hover:bg-curex-dark text-white">
+                <Button
+                  onClick={() => bookApp(doctor)}
+                  className="flex-1 rounded-none bg-curex hover:bg-curex-dark text-white"
+                >
                   Book Appointment
                 </Button>
               </div>
@@ -178,8 +189,23 @@ export const DoctorsList = () => {
       </div>
 
       {/* Modal outside loop */}
-      {showModal && (
-        <Viewdoctormodal doctor={selectedDoctor} onClose={closeModal} />
+      {showProfileModal && selectedDoctor && (
+        <Viewdoctormodal
+          doctor={selectedDoctor}
+          onClose={closeAllModals}
+          onBookAppointment={(doctor) => {
+            closeAllModals();
+            setSelectedDoctor(doctor);
+            setBookAppointmentModal(true);
+          }}
+        />
+      )}
+
+      {bookAppointmentModal && (
+        <AppointmentModal
+          doctorName={selectedDoctor?.name ?? ""}
+          onClose={closeAllModals}
+        />
       )}
     </>
   );

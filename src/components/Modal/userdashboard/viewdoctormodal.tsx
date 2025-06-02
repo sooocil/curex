@@ -1,25 +1,27 @@
-import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useRef } from "react";
+import { X } from "lucide-react";
 
 interface ViewDoctorModalProps {
   doctor: any;
   onClose: () => void;
+  onBookAppointment: (doctor: any) => void; // Add this
 }
 
-
-
-function ViewDoctorModal({ doctor, onClose }: ViewDoctorModalProps) {
+function ViewDoctorModal({ doctor, onClose, onBookAppointment }: ViewDoctorModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
   if (!doctor) return null;
@@ -40,12 +42,14 @@ function ViewDoctorModal({ doctor, onClose }: ViewDoctorModalProps) {
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <img
-            src={doctor.image || '/doctorAssets/profileplaceholder.jpg'}
+            src={doctor.image || "/doctorAssets/profileplaceholder.jpg"}
             className=" w-20 h-20 rounded-full  border border-gray-200 shadow-lg"
           />
           <div>
             <h2 className="text-2xl font-bold text-gray-800">{doctor.name}</h2>
-            <p className="text-sm text-gray-500">{doctor.specialty} at {doctor.hospital}</p>
+            <p className="text-sm text-gray-500">
+              {doctor.specialty} at {doctor.hospital}
+            </p>
             <p className="text-sm text-gray-500">{doctor.location}</p>
           </div>
         </div>
@@ -54,38 +58,50 @@ function ViewDoctorModal({ doctor, onClose }: ViewDoctorModalProps) {
         <div className="space-y-4 text-gray-700 text-sm">
           <div>
             <h3 className="font-semibold text-curex">About</h3>
-            <p>{doctor.bio || "Dr. " + doctor.name + " is a highly experienced specialist committed to patient well-being."}</p>
+            <p>
+              {doctor.bio ||
+                "Dr. " +
+                  doctor.name +
+                  " is a highly experienced specialist committed to patient well-being."}
+            </p>
           </div>
 
           <div>
             <h3 className="font-semibold text-curex">Education & Experience</h3>
             <ul className="list-disc ml-5 space-y-1">
-              {doctor.education?.map((edu: string, i: number) => <li key={i}>{edu}</li>) || (
-                <li>MBBS, MD from recognized institutions</li>
-              )}
-              <li>{doctor.experience || 'Over 10 years of clinical practice'}</li>
+              {doctor.education?.map((edu: string, i: number) => (
+                <li key={i}>{edu}</li>
+              )) || <li>MBBS, MD from recognized institutions</li>}
+              <li>
+                {doctor.experience || "Over 10 years of clinical practice"}
+              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold text-curex">Languages Spoken</h3>
-            <p>{doctor.languages?.join(', ') || 'English, Hindi, Nepali'}</p>
+            <p>{doctor.languages?.join(", ") || "English, Hindi, Nepali"}</p>
           </div>
 
           <div>
             <h3 className="font-semibold text-curex">Consultation</h3>
             <p>
-              <span className="font-medium">Availability:</span> {doctor.availability || 'Mon–Fri, 9 AM – 5 PM'}
+              <span className="font-medium">Availability:</span>{" "}
+              {doctor.availability || "Mon–Fri, 9 AM – 5 PM"}
             </p>
             <p>
-              <span className="font-medium">Consultation Type:</span> {doctor.consultationType || 'Online & Offline'}
+              <span className="font-medium">Consultation Type:</span>{" "}
+              {doctor.consultationType || "Online & Offline"}
             </p>
           </div>
 
           <div>
             <h3 className="font-semibold text-curex">Ratings</h3>
             <p>
-              ⭐ {doctor.rating || 4.8} / 5.0 <span className="text-gray-500">({doctor.reviews || 25} reviews)</span>
+              ⭐ {doctor.rating || 4.8} / 5.0{" "}
+              <span className="text-gray-500">
+                ({doctor.reviews || 25} reviews)
+              </span>
             </p>
           </div>
         </div>
@@ -100,7 +116,10 @@ function ViewDoctorModal({ doctor, onClose }: ViewDoctorModalProps) {
           </button>
           <button
             className="px-5 py-2 rounded-lg bg-curex text-white hover:bg-curex-dark transition"
-            onClick={() => alert('Login flow for appointment booking to be added')}
+            onClick={() => {
+              onClose(); // Close current modal
+              onBookAppointment(doctor); // Trigger appointment modal
+            }}
           >
             Book Appointment
           </button>
