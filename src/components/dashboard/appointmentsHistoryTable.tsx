@@ -43,7 +43,12 @@ interface Appointment {
   doctorRating?: number;
 }
 
-export function AppointmentHistoryTable({ userId }: { userId: string }) {
+interface AppointmentHistoryTableProps {
+  userId: string;
+}
+
+export function AppointmentHistoryTable({ userId }: AppointmentHistoryTableProps) {
+  console.log("Rendering AppointmentHistoryTable with userId:", userId);
   const router = useRouter();
   const { history, upcoming, loading, fetchAppointments } = useAppointmentStore();
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);

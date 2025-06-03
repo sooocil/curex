@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import { create } from "zustand";
 
@@ -31,12 +30,11 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
     set({ loading: true });
 
     try {
-      const response = await axios.post("/api/users/appointments/fetchapp", {
-        userId,
-      });
+      const response = await axios.post("/api/users/appointments/fetchapp", { userId });
+      console.log("API response status:", response.status);
+      console.log("Raw API response:", JSON.stringify(response.data, null, 2));
 
       const data = response.data;
-      console.log("Raw API response:", data);
 
       if (Array.isArray(data)) {
         const appointments: Appointment[] = data.map((item: any) => {
@@ -56,22 +54,15 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
         });
 
         const now = new Date();
-        const upcoming = appointments.filter(
-          (app) => new Date(app.date) >= now
-        );
-        const history = appointments.filter(
-          (app) => new Date(app.date) < now
-        );
+        const upcoming = appointments.filter((app) => new Date(app.date) >= now);
+        const history = appointments.filter((app) => new Date(app.date) < now);
 
-        console.log("Upcoming appointments:", upcoming);
-        console.log("History appointments:", history);
+        console.log("Upcoming appointments:", JSON.stringify(upcoming, null, 2));
+        console.log("History appointments:", JSON.stringify(history, null, 2));
 
-        set({
-          upcoming,
-          history,
-        });
+        set({ upcoming, history });
       } else {
-        console.warn("API response is not an array:", data);
+        console.warn("API response is not an array:", JSON.stringify(data, null, 2));
         // Mock data for testing
         const mockAppointments: Appointment[] = [
           {
@@ -97,6 +88,7 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
             doctorRating: 4.8,
           },
         ];
+
         const now = new Date();
         set({
           upcoming: mockAppointments.filter((app) => new Date(app.date) >= now),

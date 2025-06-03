@@ -14,12 +14,19 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function UpcomingAppointments() {
+//interface for props
+interface UpcomingAppointmentsProps {
+  uId: string;
+}
+
+export function UpcomingAppointments({uId}: UpcomingAppointmentsProps) {
   const { upcoming, loading, fetchAppointments } = useAppointmentStore();
   const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchAppointments();
+    // TODO: Replace 'userId' with the actual user id from context/auth/store
+    const userId = uId;
+    fetchAppointments(userId);
   }, [fetchAppointments]);
 
   useEffect(() => {
@@ -69,10 +76,7 @@ export function UpcomingAppointments() {
                     <div className="flex items-center space-x-3">
                       <Avatar>
                         <AvatarFallback className="bg-curex/10 text-curex">
-                          {appointment.doctor
-                            .split(" ")
-                            .map((n: string) => n[0])
-                            .join("")}
+                          {(appointment.doctor ?? "Dr").split(" ").map((n: string) => n[0]).join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div>

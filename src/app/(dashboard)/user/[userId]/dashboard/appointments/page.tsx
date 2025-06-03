@@ -6,8 +6,9 @@ import { useParams } from "next/navigation"
 
 export default function AppointmentPage( {} ) {
   //useparams hook to get userId from the URL
-  const { userId } = useParams<{ userId: string }>()
-  
+  const params = useParams<{ userId: string }>();
+  const userId = params.userId;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

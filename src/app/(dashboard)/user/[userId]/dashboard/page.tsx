@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { cookies } from "next/headers"; // To read cookies in server component
+import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";
 
@@ -13,7 +13,14 @@ export const metadata: Metadata = {
   description: "Curex patient dashboard",
 };
 
-export default async function DashboardPage() {
+// ✅ Accept `params` directly from Next.js
+export default async function DashboardPage({
+  params,
+}: {
+  params: { userId: string };
+}) {
+  const userId = params.userId;
+
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
 
@@ -22,12 +29,8 @@ export default async function DashboardPage() {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-
-    // You can use decoded info (user id, email, etc.) if needed here
-
+    jwt.verify(token, process.env.JWT_SECRET as string);
   } catch (err) {
-    // Invalid token or verification failed
     redirect("/Login");
   }
 
@@ -37,7 +40,7 @@ export default async function DashboardPage() {
       <UserOverview />
       <div className="grid gap-6 md:grid-cols-2">
         <RecentTests />
-        <UpcomingAppointments />
+        <UpcomingAppointments uId={userId} />
       </div>
       <HealthTips />
     </div>
