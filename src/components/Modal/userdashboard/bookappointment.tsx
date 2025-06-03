@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,9 +15,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import * as z from "zod";
+import axios from "axios";
+import { useParams } from "next/navigation";
 
 interface AppointmentModalProps {
   doctorName: string;
+  doctorId: string;
   onClose: () => void;
 }
 
@@ -48,46 +52,70 @@ const appointmentSchema = z.object({
     .refine((date) => !dayjs(date).isBefore(dayjs(), "day"), {
       message: "Date cannot be in the past",
     }),
-  selectedTime: z.string().min(1, { message: "Time must be selected" }),
+  selectedTime: z
+    .string()
+    .min(1, { message: "Time must be selected" })
+    .regex(/^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/, {
+      message: "Invalid time format. Use hh:mm AM/PM",
+    }),
+  reason: z
+    .string()
+    .max(500, { message: "Reason cannot exceed 500 characters" })
+    .optional(),
 });
 
 export default function AppointmentModal({
   doctorName,
+  doctorId,
   onClose,
 }: AppointmentModalProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
-  );
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [reason, setReason] = useState<string>("");
   const [errors, setErrors] = useState<{
     selectedDate?: string;
     selectedTime?: string;
+    reason?: string;
   }>({});
+
+  const { userId } = useParams();
 
   const validate = () => {
     const now = dayjs();
-    const errors: { selectedDate?: string; selectedTime?: string } = {};
+    const errors: { selectedDate?: string; selectedTime?: string; reason?: string } = {};
 
+    // Validate date
     if (!selectedDate) {
       errors.selectedDate = "Please select a valid date";
     } else if (dayjs(selectedDate).isBefore(now, "day")) {
       errors.selectedDate = "Date cannot be in the past";
     }
 
+    // Validate time
     if (!selectedTime) {
       errors.selectedTime = "Please select a time slot";
     } else {
-      const selectedDateTime = dayjs(
-        `${dayjs(selectedDate).format("YYYY-MM-DD")} ${selectedTime}`,
-        "YYYY-MM-DD hh:mm A"
-      );
-
-      if (
-        dayjs(selectedDate).isSame(now, "day") &&
-        selectedDateTime.isBefore(now)
-      ) {
-        errors.selectedTime = "Selected time has already passed";
+      // Validate format
+      if (!/^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/.test(selectedTime)) {
+        errors.selectedTime = "Invalid time format. Use hh:mm AM/PM";
+      } else {
+        // Prevent past time slots for today
+        const selectedDateTime = dayjs(
+          `${dayjs(selectedDate).format("YYYY-MM-DD")} ${selectedTime}`,
+          "YYYY-MM-DD hh:mm A"
+        );
+        if (
+          dayjs(selectedDate).isSame(now, "day") &&
+          selectedDateTime.isBefore(now)
+        ) {
+          errors.selectedTime = "Selected time has already passed";
+        }
       }
+    }
+
+    // Validate reason
+    if (reason && reason.length > 500) {
+      errors.reason = "Reason cannot exceed 500 characters";
     }
 
     setErrors(errors);
@@ -97,35 +125,40 @@ export default function AppointmentModal({
   const handleConfirm = async () => {
     if (!validate()) return;
 
+    const payload = {
+      userId,
+      doctorId,
+      date: dayjs(selectedDate).format("YYYY-MM-DD"), // e.g., "2025-06-03"
+      time: selectedTime, 
+      reason: reason || "No reason provided",
+    };
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log("Sending payload:", payload);
+      await axios.post("/api/users/appointments/bookapp", payload);
       alert(
         `Appointment booked with Dr. ${doctorName} on ${dayjs(
           selectedDate
         ).format("MMM D, YYYY")} at ${selectedTime}`
       );
       onClose();
-    } catch (error) {
-      alert("Failed to book appointment. Please try again.");
+    } catch (error: any) {
+      console.error("Error booking appointment:", error.response?.data || error.message);
+      alert(`Failed to book appointment: ${error.response?.data?.error || error.message}`);
     }
   };
-  
 
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-3xl w-full">
         <DialogHeader>
-          <DialogTitle className="text-lg md:text-xl">
-            Book Appointment
-          </DialogTitle>
+          <DialogTitle className="text-lg md:text-xl">Book Appointment</DialogTitle>
           <DialogDescription>
             Schedule your appointment with <strong>{doctorName}</strong>
           </DialogDescription>
         </DialogHeader>
 
-        {/* Main Content Wrapper */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
-          {/* Calendar Section */}
           <div className="w-full md:w-1/2 border border-gray-300 rounded-md p-4 shadow-sm bg-white">
             <Calendar
               mode="single"
@@ -139,23 +172,20 @@ export default function AppointmentModal({
             )}
           </div>
 
-          {/* Time Picker Section */}
           <div className="w-full md:w-1/2 p-2">
             <label className="block text-sm font-medium text-muted-foreground mb-2">
               Select Time
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {TIME_SLOTS.map((time) => {
-                const isToday =
-                  selectedDate && dayjs(selectedDate).isSame(dayjs(), "day");
+                const isToday = selectedDate && dayjs(selectedDate).isSame(dayjs(), "day");
                 const slotDateTime = selectedDate
                   ? dayjs(
-                      `${dayjs(selectedDate).format("YYYY-MM-DD")} ${time}`,
-                      "YYYY-MM-DD hh:mm A"
+                      `${dayjs(selectedDate).format("YYYY-MM-DD")} `,
+                      "YYYY-MM-DD"
                     )
                   : null;
-                const isPast =
-                  isToday && slotDateTime && slotDateTime.isBefore(dayjs());
+                const isPast = isToday && slotDateTime && slotDateTime.isBefore(dayjs());
 
                 return (
                   <button
@@ -165,10 +195,10 @@ export default function AppointmentModal({
                     className={cn(
                       "text-sm font-medium py-2 px-3 rounded-md border transition-colors whitespace-nowrap",
                       isPast
-                        ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                        ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                         : selectedTime === time
-                          ? "bg-curex text-white border-curex"
-                          : "bg-white text-curex border border-gray-300 hover:text-black"
+                        ? "bg-curex text-white border-curex"
+                        : "bg-white text-curex border-gray-300 hover:text-black"
                     )}
                     onClick={() => !isPast && setSelectedTime(time)}
                   >
@@ -181,6 +211,22 @@ export default function AppointmentModal({
               <p className="text-xs text-red-600 mt-2">{errors.selectedTime}</p>
             )}
           </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-muted-foreground mb-2">
+            Reason for Appointment (Optional)
+          </label>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            maxLength={500}
+            placeholder="Enter reason for appointment"
+            className="w-full p-2 border rounded-md resize-y"
+          />
+          {errors.reason && (
+            <p className="text-xs text-red-600 mt-1">{errors.reason}</p>
+          )}
         </div>
 
         <DialogFooter className="mt-6">

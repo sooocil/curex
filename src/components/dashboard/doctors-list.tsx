@@ -204,6 +204,7 @@ export const DoctorsList = () => {
       {bookAppointmentModal && (
         <AppointmentModal
           doctorName={selectedDoctor?.name ?? ""}
+          doctorId={selectedDoctor?.id ?? ""}
           onClose={closeAllModals}
         />
       )}

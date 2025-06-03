@@ -1,3 +1,4 @@
+
 import { connectDB } from "@/dbConfig/dbConfig";
 import { NextResponse } from "next/server";
 import Appointment from "@/models/appointments";
@@ -7,14 +8,14 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { userId, doctorId, date, reason } = await request.json();
+    const { userId, doctorId, date, time, reason } = await request.json();
 
-    console.log("Booking appointment with IDs:", { userId, doctorId, date, reason });
+    console.log("Received payload:", { userId, doctorId, date, time, reason });
 
     // Validate required fields
-    if (!userId || !doctorId || !date) {
+    if (!userId || !doctorId || !date || !time) {
       return NextResponse.json(
-        { error: "Missing required fields: userId, doctorId, and date are required" },
+        { error: "Missing required fields: userId, doctorId, date, and time are required" },
         { status: 400 }
       );
     }
@@ -27,17 +28,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid doctorId format" }, { status: 400 });
     }
 
-    // Validate date
+    // Validate date format
     const parsedDate = new Date(date);
     if (isNaN(parsedDate.getTime())) {
-      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid date format. Use YYYY-MM-DD" }, { status: 400 });
     }
+
+    // Validate time format
+    if (!/^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/.test(time)) {
+      return NextResponse.json(
+        { error: "Invalid time format. Use hh:mm AM/PM (e.g., 09:45 AM)" },
+        { status: 400 }
+      );
+    }
+
+
+    // Validate that appointment is not in the past
+    const now = new Date();
+    const selectedDateTimeStr = `${date} ${time}`;
+    const selectedDateTime = new Date(selectedDateTimeStr);
+    if (isNaN(selectedDateTime.getTime()) || selectedDateTime < now) {
+      return NextResponse.json(
+        { error: "Cannot book appointment in the past" },
+        { status: 400 }
+      );
+    }
+
 
     // Create appointment
     const appointment = new Appointment({
       user: new mongoose.Types.ObjectId(userId),
       doctor: new mongoose.Types.ObjectId(doctorId),
       date: parsedDate,
+      time: time, // Assuming time is always in "hh:mm AM/PM" format
       reason: reason || "No reason provided",
     });
 

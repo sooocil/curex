@@ -16,6 +16,14 @@ const appointmentSchema = new mongoose.Schema(
       type: Date,
       required: [true, "Date is required"],
     },
+    time: {
+      type: String,
+      required: [true, "Time is required"],
+      trim: true,
+      match: /^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/,
+      message: "Time must be in the format hh:mm AM/PM",
+    },
+
     reason: {
       type: String,
       trim: true,
@@ -33,4 +41,6 @@ const appointmentSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.models.Appointment || mongoose.model("Appointment", appointmentSchema);
+export default mongoose.models["Appointment"]
+  ? mongoose.model("Appointment")
+  : mongoose.model("Appointment", appointmentSchema);
