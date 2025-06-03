@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import * as z from "zod";
 import axios from "axios";
 import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface AppointmentModalProps {
   doctorName: string;
@@ -136,11 +137,24 @@ export default function AppointmentModal({
     try {
       console.log("Sending payload:", payload);
       await axios.post("/api/users/appointments/bookapp", payload);
-      alert(
-        `Appointment booked with Dr. ${doctorName} on ${dayjs(
-          selectedDate
-        ).format("MMM D, YYYY")} at ${selectedTime}`
-      );
+      
+
+      setTimeout(() => {
+
+        toast.success("Appointment booked successfully!", {
+          style: { background: "#14b8a6", color: "#fff", fontSize: "0.9rem", justifyContent: "flex-start" },
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          ),
+        });
+
+
+
+      }, 1000);
+
+
       onClose();
     } catch (error: any) {
       console.error("Error booking appointment:", error.response?.data || error.message);
@@ -243,6 +257,8 @@ export default function AppointmentModal({
           </div>
         </DialogFooter>
       </DialogContent>
+      
     </Dialog>
+
   );
 }
