@@ -22,11 +22,18 @@ const appointmentSchema = new mongoose.Schema(
       trim: true,
       match: [/^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/, "Time must be in the format hh:mm AM/PM"],
     },
+
     reason: {
       type: String,
       trim: true,
       maxlength: [500, "Reason cannot exceed 500 characters"],
       default: "No reason provided",
+    },
+    mode: {
+      type: String,
+      enum: ["in-person", "online"],
+      required: [true, "Mode of appointment is required"],
+      default: "Online",
     },
     status: {
       type: String,

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useMemo, useCallback, JSX } from "react";
@@ -47,32 +46,44 @@ interface AppointmentHistoryTableProps {
   userId: string;
 }
 
-export function AppointmentHistoryTable({ userId }: AppointmentHistoryTableProps) {
-  console.log("Rendering AppointmentHistoryTable with userId:", userId);
+export function AppointmentHistoryTable({
+  userId,
+}: AppointmentHistoryTableProps) {
   const router = useRouter();
-  const { history, upcoming, loading, fetchAppointments } = useAppointmentStore();
+  const { history, upcoming, loading, fetchAppointments } =
+    useAppointmentStore();
+
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    console.log("AppointmentHistoryTable mounted with userId:", userId);
-    if (userId) {
-      fetchAppointments(userId);
-    }
+    if (!userId) return;
+
+    setShowSkeleton(true);
+    setHasFetched(false);
+
+    fetchAppointments(userId).then(() => {
+      setHasFetched(true);
+
+      // Keep skeleton for at least 1.5 seconds
+      setTimeout(() => {
+        setShowSkeleton(false);
+      }, 200);
+    });
   }, [fetchAppointments, userId]);
 
   const allAppointments = useMemo(() => {
     const map = new Map<string, Appointment>();
     [...history, ...upcoming].forEach((apt) => map.set(apt.id, apt));
-    const appointments = Array.from(map.values()).sort(
+    return Array.from(map.values()).sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-    console.log("All appointments:", appointments);
-    return appointments;
   }, [history, upcoming]);
 
   const openViewDetails = useCallback((apt: Appointment) => {
-    console.log("Opening details for appointment:", apt);
     setSelectedAppointment(apt);
     setViewDetailsOpen(true);
   }, []);
@@ -87,24 +98,45 @@ export function AppointmentHistoryTable({ userId }: AppointmentHistoryTableProps
   }, []);
 
   const statusBadges: { [key: string]: JSX.Element } = {
-    pending: <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">Pending</Badge>,
-    approved: <Badge className="bg-blue-100 text-blue-800 border-blue-300">Approved</Badge>,
-    completed: <Badge className="bg-green-100 text-green-800 border-green-300">Completed</Badge>,
-    cancelled: <Badge className="bg-red-100 text-red-800 border-red-300">Cancelled</Badge>,
-    rejected: <Badge className="bg-red-100 text-red-800 border-red-300">Rejected</Badge>,
+    pending: (
+      <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+        Pending
+      </Badge>
+    ),
+    approved: (
+      <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+        Approved
+      </Badge>
+    ),
+    completed: (
+      <Badge className="bg-green-100 text-green-800 border-green-300">
+        Completed
+      </Badge>
+    ),
+    cancelled: (
+      <Badge className="bg-red-100 text-red-800 border-red-300">
+        Cancelled
+      </Badge>
+    ),
+    rejected: (
+      <Badge className="bg-red-100 text-red-800 border-red-300">Rejected</Badge>
+    ),
   };
 
   const getStatusBadge = (status = "") => {
     const key = status.toLowerCase();
-    return statusBadges[key] || <Badge className="bg-gray-100 text-gray-800 border-gray-300">Unknown</Badge>;
+    return (
+      statusBadges[key] || (
+        <Badge className="bg-gray-100 text-gray-800 border-gray-300">
+          Unknown
+        </Badge>
+      )
+    );
   };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid date format: ${dateString}`);
-      return "Date unavailable";
-    }
+    if (isNaN(date.getTime())) return "Date unavailable";
     return date.toLocaleString("en-US", {
       year: "numeric",
       month: "long",
@@ -115,12 +147,25 @@ export function AppointmentHistoryTable({ userId }: AppointmentHistoryTableProps
     });
   };
 
-  if (loading) {
+  if (loading || showSkeleton) {
+    // Show skeleton while loading or during 1.5s delay
     return (
       <div className="p-6 bg-white rounded-xl shadow-lg space-y-4">
-        <Skeleton className="h-6 w-1/3 rounded-md" />
+        
+        <div className="grid grid-cols-[1fr_1fr_2fr_2fr_1fr_50px] gap-4 items-center">
+          <Skeleton className="h-5 w-full rounded-md" />
+          <Skeleton className="h-5 w-full rounded-md" />
+          <Skeleton className="h-5 w-full rounded-md" />
+          <Skeleton className="h-5 w-full rounded-md" />
+          <Skeleton className="h-5 w-full rounded-md" />
+          <Skeleton className="h-5 w-full rounded-md" />
+
+        </div>
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="grid grid-cols-[2fr_2fr_2fr_1fr_1fr_50px] gap-4 items-center">
+          <div
+            key={i}
+            className="grid grid-cols-[1fr_1fr_2fr_2fr_1fr_50px] gap-4 items-center"
+          >
             {[...Array(6)].map((_, j) => (
               <Skeleton key={j} className="h-5 w-full rounded-md" />
             ))}
@@ -130,7 +175,8 @@ export function AppointmentHistoryTable({ userId }: AppointmentHistoryTableProps
     );
   }
 
-  if (!allAppointments.length) {
+  if (hasFetched && allAppointments.length === 0) {
+    // No appointments after loading & skeleton delay
     return (
       <div className="flex flex-col gap-6 items-center p-8 bg-white rounded-xl shadow-lg text-center text-gray-700">
         <p className="text-lg font-medium">No appointments scheduled</p>
@@ -146,34 +192,64 @@ export function AppointmentHistoryTable({ userId }: AppointmentHistoryTableProps
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="p-4 bg-white rounded-xl shadow-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="text-gray-700 font-semibold">Patient</TableHead>
-              <TableHead className="text-gray-700 font-semibold">Doctor</TableHead>
-              <TableHead className="text-gray-700 font-semibold">Date & Time</TableHead>
-              <TableHead className="text-gray-700 font-semibold">Mode</TableHead>
-              <TableHead className="text-gray-700 font-semibold">Status</TableHead>
-              <TableHead className="text-right text-gray-700 font-semibold">Actions</TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Patient
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Doctor
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Date & Time
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Mode of Consultation
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Status
+              </TableHead>
+              <TableHead className="text-right text-gray-700 font-semibold">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {allAppointments.map((apt) => (
-              <TableRow key={apt.id} className="hover:bg-gray-50 transition-colors">
-                <TableCell className="text-gray-800">{apt.patientName || "Unknown Patient"}</TableCell>
-                <TableCell className="text-gray-800">{apt.doctorName || "Unknown Doctor"}</TableCell>
-                <TableCell className="text-gray-800">{formatDateTime(apt.date)}</TableCell>
-                <TableCell className="text-gray-800 capitalize">{apt.mode || "Not specified"}</TableCell>
+              <TableRow
+                key={apt.id}
+                className="hover:bg-gray-50 transition-colors"
+              >
+                <TableCell className="text-gray-800">
+                  {apt.patientName || "Unknown Patient"}
+                </TableCell>
+                <TableCell className="text-gray-800">
+                  {apt.doctorName || "Unknown Doctor"}
+                </TableCell>
+                <TableCell className="text-gray-800">
+                  {formatDateTime(apt.date)}
+                </TableCell>
+                <TableCell className="text-gray-800 capitalize">
+                  {apt.mode || "Not specified"}
+                </TableCell>
                 <TableCell>{getStatusBadge(apt.status)}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="p-1 hover:bg-gray-200">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1 hover:bg-gray-200"
+                      >
                         <MoreHorizontal className="h-5 w-5 text-gray-600" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-md">
+                    <DropdownMenuContent
+                      align="end"
+                      className="bg-white shadow-lg rounded-md"
+                    >
                       <DropdownMenuItem
                         onClick={() => openViewDetails(apt)}
                         className="text-gray-700 hover:bg-gray-100"
@@ -205,7 +281,10 @@ export function AppointmentHistoryTable({ userId }: AppointmentHistoryTableProps
             <DialogTitle className="text-2xl font-semibold text-gray-800">
               Appointment Details
             </DialogTitle>
-            <DialogClose className="text-gray-500 hover:text-gray-700" aria-label="Close" />
+            <DialogClose
+              className="text-gray-500 hover:text-gray-700"
+              aria-label="Close"
+            />
           </DialogHeader>
           {selectedAppointment ? (
             <div className="space-y-6 p-6">

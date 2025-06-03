@@ -20,13 +20,10 @@ import { toast } from "react-hot-toast";
 export function UserSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+
   const [user, setUser] = useState<{ _id: string; name: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (authChecked) return;
-
     const getCookie = (name: string): string | null => {
       if (typeof document === "undefined") return null;
       const cookies = document.cookie.split(";");
@@ -41,54 +38,35 @@ export function UserSidebar() {
     };
 
     const checkUserAuth = async () => {
-      setAuthChecked(true);
-
       try {
         const token = getCookie("token");
         const userCookieRaw = getCookie("user");
 
-        if (!token || !userCookieRaw) {
-          router.push("/Login");
-          return;
-        }
+        if (!token || !userCookieRaw) return;
 
         let decoded = decodeURIComponent(userCookieRaw);
-
-        if (decoded.startsWith("%7B")) {
-          decoded = decodeURIComponent(decoded);
-        }
+        if (decoded.startsWith("%7B")) decoded = decodeURIComponent(decoded);
 
         const parsedUser = JSON.parse(decoded);
 
-        if (!parsedUser._id) {
-          throw new Error("Invalid user cookie - missing _id");
+        if (parsedUser._id) {
+          setUser({
+            _id: parsedUser._id,
+            name: parsedUser.name || parsedUser.email || "User",
+          });
         }
-
-        setUser({
-          _id: parsedUser._id,
-          name: parsedUser.name || parsedUser.email || "User",
-        });
       } catch (error) {
-        console.error("Auth error:", error);
-        document.cookie =
-          "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-        document.cookie =
-          "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-        router.push("/Login");
-      } finally {
-        setLoading(false);
+        console.error("Auth parse error:", error);
       }
     };
 
     checkUserAuth();
-  }, [router, authChecked]);
+  }, []);
 
   const handleLogout = useCallback(async () => {
     try {
-      setLoading(true);
       await axios.post("/api/users/logout");
-      document.cookie =
-        "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       setUser(null);
       toast.success("Logged out successfully");
@@ -96,50 +74,22 @@ export function UserSidebar() {
     } catch (error) {
       console.error("Logout failed:", error);
       toast.error("Logout failed. Please try again.");
-    } finally {
-      setLoading(false);
     }
   }, [router]);
 
-  const sidebarLinks = user?._id
-    ? [
-        {
-          name: "Dashboard",
-          href: `/user/${user._id}/dashboard`,
-          icon: LayoutDashboard,
-        },
-        {
-          name: "Test History",
-          href: `/user/${user._id}/dashboard/tests`,
-          icon: ClipboardList,
-        },
-        {
-          name: "Find Doctors",
-          href: `/user/${user._id}/dashboard/doctors`,
-          icon: Users,
-        },
-        {
-          name: "Appointments",
-          href: `/user/${user._id}/dashboard/appointments`,
-          icon: Calendar,
-        },
-        {
-          name: "Profile",
-          href: `/user/${user._id}/dashboard/profile`,
-          icon: User,
-        },
-        {
-          name: "Settings",
-          href: `/user/${user._id}/dashboard/settings`,
-          icon: Settings,
-        },
-      ]
-    : [];
+  const links = [
+    { name: "Dashboard", slug: "dashboard", icon: LayoutDashboard },
+    { name: "Test History", slug: "dashboard/tests", icon: ClipboardList },
+    { name: "Find Doctors", slug: "dashboard/doctors", icon: Users },
+    { name: "Appointments", slug: "dashboard/appointments", icon: Calendar },
+    { name: "Profile", slug: "dashboard/profile", icon: User },
+    { name: "Settings", slug: "dashboard/settings", icon: Settings },
+  ];
 
-  if (loading || !user) return null;
+  const currentPath = pathname?.split("/").slice(3).join("/") || ""; // slice(3) skips ['', 'user', 'userId', ...]
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col">
+    <aside className="hidden md:flex md:w-64  ">
       <div className="flex flex-col flex-1 min-h-0 bg-white border-r">
         <div className="flex items-center h-16 px-4 border-b">
           <div className="flex items-center space-x-2">
@@ -151,15 +101,16 @@ export function UserSidebar() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+        <div className="flex-1 flex flex-col  pb-4 overflow-y-auto">
           <nav className="mt-5 flex-1 px-2 space-y-1">
-            {sidebarLinks.map((link) => {
-              const isActive =
-                pathname === link.href || pathname.startsWith(`${link.href}/`);
+            {links.map(({ name, slug, icon: Icon }) => {
+              const fullHref = `/user/${user?._id || "..."}/${slug}`;
+              const isActive = pathname === fullHref;
+
               return (
                 <Link
-                  key={link.name}
-                  href={link.href}
+                  key={name}
+                  href={fullHref}
                   className={cn(
                     "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
                     isActive
@@ -167,16 +118,15 @@ export function UserSidebar() {
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
                 >
-                  <link.icon
+                  <Icon
                     className={cn(
                       "mr-3 h-5 w-5",
                       isActive
                         ? "text-curex"
                         : "text-gray-400 group-hover:text-gray-500"
                     )}
-                    aria-hidden="true"
                   />
-                  {link.name}
+                  {name}
                 </Link>
               );
             })}
@@ -185,14 +135,15 @@ export function UserSidebar() {
 
         <div className="border-t p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-700">{user.name}</p>
+            <p className="text-sm font-medium text-gray-700">
+              {user?.name || "Guest"}
+            </p>
             <Button
               onClick={handleLogout}
-              disabled={loading}
               className="flex items-center text-xs font-medium text-black shadow-none bg-white hover:text-white"
             >
               <LogOut className="mr-1 h-4 w-4" />
-              {loading ? "Signing out..." : "Sign out"}
+              Sign out
             </Button>
           </div>
         </div>
