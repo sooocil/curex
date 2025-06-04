@@ -104,7 +104,6 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
           upcoming: mockAppointments.filter((app) => new Date(app.date) >= now),
           history: mockAppointments.filter((app) => new Date(app.date) < now),
         });
-        console.log("Using mock data due to invalid API response");
       }
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -138,7 +137,6 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
         upcoming: mockAppointments.filter((app) => new Date(app.date) >= now),
         history: mockAppointments.filter((app) => new Date(app.date) < now),
       });
-      console.log("Using mock data due to error");
     } finally {
       set({ loading: false });
     }

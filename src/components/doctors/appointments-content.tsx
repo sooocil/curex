@@ -59,8 +59,7 @@ const APPOINTMENT_STATUSES = {
 }
 
 const CONSULTATION_MODES = {
-  "Video Call": { icon: Video, color: "text-blue-600" },
-  "Phone Call": { icon: Phone, color: "text-green-600" },
+  "Online": { icon: Video, color: "text-blue-600" },
   "In-person": { icon: User, color: "text-purple-600" },
 }
 

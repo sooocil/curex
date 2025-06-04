@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -73,6 +72,8 @@ export default function AppointmentModal({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [reason, setReason] = useState<string>("");
+  const [mode, setMode] = useState<string>("Online");
+
   const [errors, setErrors] = useState<{
     selectedDate?: string;
     selectedTime?: string;
@@ -83,7 +84,11 @@ export default function AppointmentModal({
 
   const validate = () => {
     const now = dayjs();
-    const errors: { selectedDate?: string; selectedTime?: string; reason?: string } = {};
+    const errors: {
+      selectedDate?: string;
+      selectedTime?: string;
+      reason?: string;
+    } = {};
 
     // Validate date
     if (!selectedDate) {
@@ -130,35 +135,48 @@ export default function AppointmentModal({
       userId,
       doctorId,
       date: dayjs(selectedDate).format("YYYY-MM-DD"), // e.g., "2025-06-03"
-      time: selectedTime, 
+      time: selectedTime,
       reason: reason || "No reason provided",
+      mode : mode,
     };
 
     try {
       console.log("Sending payload:", payload);
       await axios.post("/api/users/appointments/bookapp", payload);
-      
 
       setTimeout(() => {
-
         toast.success("Appointment booked successfully!", {
-          style: { background: "#14b8a6", color: "#fff", fontSize: "0.9rem", justifyContent: "flex-start" },
+          style: {
+            background: "#14b8a6",
+            color: "#fff",
+            fontSize: "0.9rem",
+            justifyContent: "flex-start",
+          },
           icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           ),
         });
-
-
-
       }, 1000);
-
 
       onClose();
     } catch (error: any) {
-      console.error("Error booking appointment:", error.response?.data || error.message);
-      alert(`Failed to book appointment: ${error.response?.data?.error || error.message}`);
+ 
+      toast(
+        `Failed to book appointment: ${error.response?.data?.error || error.message}`
+      );
     }
   };
 
@@ -166,7 +184,9 @@ export default function AppointmentModal({
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-3xl w-full">
         <DialogHeader>
-          <DialogTitle className="text-lg md:text-xl">Book Appointment</DialogTitle>
+          <DialogTitle className="text-lg md:text-xl">
+            Book Appointment
+          </DialogTitle>
           <DialogDescription>
             Schedule your appointment with <strong>{doctorName}</strong>
           </DialogDescription>
@@ -192,14 +212,16 @@ export default function AppointmentModal({
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {TIME_SLOTS.map((time) => {
-                const isToday = selectedDate && dayjs(selectedDate).isSame(dayjs(), "day");
+                const isToday =
+                  selectedDate && dayjs(selectedDate).isSame(dayjs(), "day");
                 const slotDateTime = selectedDate
                   ? dayjs(
                       `${dayjs(selectedDate).format("YYYY-MM-DD")} `,
                       "YYYY-MM-DD"
                     )
                   : null;
-                const isPast = isToday && slotDateTime && slotDateTime.isBefore(dayjs());
+                const isPast =
+                  isToday && slotDateTime && slotDateTime.isBefore(dayjs());
 
                 return (
                   <button
@@ -211,8 +233,8 @@ export default function AppointmentModal({
                       isPast
                         ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                         : selectedTime === time
-                        ? "bg-curex text-white border-curex"
-                        : "bg-white text-curex border-gray-300 hover:text-black"
+                          ? "bg-curex text-white border-curex"
+                          : "bg-white text-curex border-gray-300 hover:text-black"
                     )}
                     onClick={() => !isPast && setSelectedTime(time)}
                   >
@@ -225,6 +247,19 @@ export default function AppointmentModal({
               <p className="text-xs text-red-600 mt-2">{errors.selectedTime}</p>
             )}
           </div>
+        </div>
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-muted-foreground mb-2">
+            Appointment Mode
+          </label>
+          <select
+            value={mode}
+            onChange={(e) => setMode(e.target.value)}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="Online">Online</option>
+            <option value="In-person">In-person</option>
+          </select>
         </div>
 
         <div className="mt-4">
@@ -257,8 +292,6 @@ export default function AppointmentModal({
           </div>
         </DialogFooter>
       </DialogContent>
-      
     </Dialog>
-
   );
 }

@@ -41,9 +41,14 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
       }
 
       const data = await res.json();
+      console.log("Fetched appointments:", data);
       set({ appointments: data, loading: false, error: null });
     } catch (err: any) {
-      set({ error: err.message || "Unknown error", loading: false, appointments: null });
+      set({
+        error: err.message || "Unknown error",
+        loading: false,
+        appointments: null,
+      });
     }
   },
 

@@ -20,7 +20,10 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       required: [true, "Time is required"],
       trim: true,
-      match: [/^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/, "Time must be in the format hh:mm AM/PM"],
+      match: [
+        /^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/,
+        "Time must be in the format hh:mm AM/PM",
+      ],
     },
 
     reason: {
@@ -31,10 +34,10 @@ const appointmentSchema = new mongoose.Schema(
     },
     mode: {
       type: String,
-      enum: ["in-person", "online"],
-      required: [true, "Mode of appointment is required"],
+      enum: ["online", "in-person"],
       default: "Online",
     },
+
     status: {
       type: String,
       enum: ["pending", "confirmed", "completed", "cancelled"],
@@ -45,6 +48,7 @@ const appointmentSchema = new mongoose.Schema(
 );
 
 const Appointment =
-  mongoose.models["Appointment"] || mongoose.model("Appointment", appointmentSchema);
+  mongoose.models["Appointment"] ||
+  mongoose.model("Appointment", appointmentSchema);
 
 export default Appointment;

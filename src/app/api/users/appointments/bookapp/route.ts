@@ -1,3 +1,5 @@
+// The schema enum expects lowercase values like "online" not "Online".
+// Fix: Force lowercase before saving to DB.
 
 import { connectDB } from "@/dbConfig/dbConfig";
 import { NextResponse } from "next/server";
@@ -8,19 +10,17 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { userId, doctorId, date, time, reason, mode, status} = await request.json();
+    const { userId, doctorId, date, time, reason, mode } = await request.json();
 
-    console.log("Received payload:", { userId, doctorId, date, time, reason });
+    console.log("Received payload:", { userId, doctorId, date, time, reason, mode });
 
-    // Validate required fields
-    if (!userId || !doctorId || !date || !time ) {
+    if (!userId || !doctorId || !date || !time) {
       return NextResponse.json(
         { error: "Missing required fields: userId, doctorId, date, and time are required" },
         { status: 400 }
       );
     }
 
-    // Validate ObjectIds
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ error: "Invalid userId format" }, { status: 400 });
     }
@@ -28,13 +28,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid doctorId format" }, { status: 400 });
     }
 
-    // Validate date format
-    const parsedDate = new Date(date);
-    if (isNaN(parsedDate.getTime())) {
-      return NextResponse.json({ error: "Invalid date format. Use YYYY-MM-DD" }, { status: 400 });
-    }
-
-    // Validate time format
     if (!/^([0-1]?[0-9]):([0-5][0-9]) (AM|PM)$/.test(time)) {
       return NextResponse.json(
         { error: "Invalid time format. Use hh:mm AM/PM (e.g., 09:45 AM)" },
@@ -42,41 +35,48 @@ export async function POST(request: Request) {
       );
     }
 
-
-    // Validate that appointment is not in the past
-    const now = new Date();
-    const selectedDateTimeStr = `${date} ${time}`;
-    const selectedDateTime = new Date(selectedDateTimeStr);
-    if (isNaN(selectedDateTime.getTime()) || selectedDateTime < now) {
+    const selectedDateTime = new Date(`${date} ${time}`);
+    if (isNaN(selectedDateTime.getTime()) || selectedDateTime < new Date()) {
       return NextResponse.json(
         { error: "Cannot book appointment in the past" },
         { status: 400 }
       );
     }
 
+    const allowedModes = ["online", "in-person"];
+    const finalMode = allowedModes.includes(mode?.toLowerCase()) ? mode.toLowerCase() : "online";
 
-    // Create appointment
-    const appointment = new Appointment({
-      user: new mongoose.Types.ObjectId(userId),
-      doctor: new mongoose.Types.ObjectId(doctorId),
-      date: parsedDate,
-      time: time, // Assuming time is always in "hh:mm AM/PM" format
-      mode: mode || "Chat", // Default to "Chat" if not provided
-      status: status || "pending", // Default to "pending" if not provided
-
-      reason: reason || "No reason provided",
+    const existing = await Appointment.findOne({
+      doctor: doctorId,
+      date: new Date(date),
+      time,
     });
 
-    await appointment.save();
+    if (existing) {
+      return NextResponse.json(
+        { error: "This time slot is already booked" },
+        { status: 409 }
+      );
+    }
+
+    const appointment = await Appointment.create({
+      user: new mongoose.Types.ObjectId(userId),
+      doctor: new mongoose.Types.ObjectId(doctorId),
+      date: new Date(date),
+      time,
+      reason: reason || "No reason provided",
+      mode: finalMode,
+      status: "pending",
+    });
 
     return NextResponse.json(
       { message: "Appointment booked successfully", appointment },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.error("Error booking appointment:", error.message);
+  } catch (error) {
+    console.error("Error creating appointment:", error);
     return NextResponse.json(
-      { error: "Failed to book appointment", details: error.message },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

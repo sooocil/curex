@@ -13,24 +13,29 @@ export const metadata: Metadata = {
   description: "Curex patient dashboard",
 };
 
-// ✅ Accept `params` directly from Next.js
-export default async function DashboardPage({
-  params,
-}: {
-  params: { userId: string };
-}) {
-  const userId = params.userId;
-
+export default async function DashboardPage({ params }: { params: { userId: string } }) {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
 
+  // 🔐 No token → redirect
   if (!token) {
     redirect("/Login");
   }
 
+  let decoded: any;
   try {
-    jwt.verify(token, process.env.JWT_SECRET as string);
+    // ✅ Verify token
+    decoded = jwt.verify(token, process.env.JWT_SECRET as string);
   } catch (err) {
+    // ❌ Invalid token → redirect
+    redirect("/Login");
+  }
+
+  // ✅ Only now we access params
+  const userId = params.userId;
+
+  // Optional: Ensure token's userId matches param
+  if (decoded.id !== userId) {
     redirect("/Login");
   }
 
