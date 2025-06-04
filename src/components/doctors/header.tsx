@@ -122,12 +122,7 @@ export function DoctorHeader() {
             <Bell className="h-5 w-5" />
             <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
           </Button>
-          <div className="ml-3 relative">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Doctor" />
-              <AvatarFallback>SW</AvatarFallback>
-            </Avatar>
-          </div>
+          
         </div>
       </div>
 
