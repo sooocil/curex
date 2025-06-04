@@ -1,106 +1,73 @@
-import { Calendar } from "@/components/ui/calendar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Clock, Video, Phone } from "lucide-react"
+"use client";
 
-const appointments = [
-  {
-    id: 1,
-    patient: "John Smith",
-    time: "09:00 AM",
-    type: "Video Call",
-    status: "upcoming",
-    avatar: "/placeholder.svg?height=40&width=40",
-    reason: "Follow-up consultation",
-  },
-  {
-    id: 2,
-    patient: "Emily Johnson",
-    time: "10:30 AM",
-    type: "In-person",
-    status: "in-progress",
-    avatar: "/placeholder.svg?height=40&width=40",
-    reason: "Regular checkup",
-  },
-  {
-    id: 3,
-    patient: "Michael Brown",
-    time: "02:00 PM",
-    type: "Phone Call",
-    status: "upcoming",
-    avatar: "/placeholder.svg?height=40&width=40",
-    reason: "Prescription review",
-  },
-  {
-    id: 4,
-    patient: "Sarah Davis",
-    time: "03:30 PM",
-    type: "Video Call",
-    status: "upcoming",
-    avatar: "/placeholder.svg?height=40&width=40",
-    reason: "Symptom discussion",
-  },
-]
+import { useEffect, useState } from "react";
+import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export function TodayAppointments() {
+interface TodayAppointmentsProps {
+  doctorId: string;
+}
+
+export function TodayAppointments({ doctorId }: TodayAppointmentsProps) {
+  const { appointments, loading, fetchAppointmentsByDoctorId } = useAppointmentStore();
+  const [showSkeleton, setShowSkeleton] = useState(true);
+
+  useEffect(() => {
+    if (!doctorId) return;
+
+    fetchAppointmentsByDoctorId(doctorId).then(() => {
+      setShowSkeleton(false);
+    });
+  }, [doctorId, fetchAppointmentsByDoctorId]);
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleString();
+  };
+
+  if (loading || showSkeleton) {
+    return (
+      <div className="p-4 bg-white rounded-xl shadow space-y-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="grid grid-cols-2 gap-4 items-center">
+            <Skeleton className="h-5 w-full rounded-md" />
+            <Skeleton className="h-5 w-full rounded-md" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+  console.log("Appointments:", appointments);
+  if (!appointments || appointments.length === 0) {
+    return (
+      <div className="p-6 bg-white rounded-xl shadow text-center text-gray-700">
+        No appointments found.
+      </div>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          Today's Appointments
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {appointments.map((appointment) => (
-            <div key={appointment.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage src={appointment.avatar || "/placeholder.svg"} alt={appointment.patient} />
-                  <AvatarFallback>
-                    {appointment.patient
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">{appointment.patient}</p>
-                  <p className="text-sm text-gray-500">{appointment.reason}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-500">{appointment.time}</span>
-                    <Badge variant={appointment.status === "in-progress" ? "default" : "secondary"}>
-                      {appointment.status === "in-progress" ? "In Progress" : "Upcoming"}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {appointment.type === "Video Call" && (
-                  <Button size="sm" className="bg-curex hover:bg-curex/90">
-                    <Video className="h-4 w-4 mr-1" />
-                    Join
-                  </Button>
-                )}
-                {appointment.type === "Phone Call" && (
-                  <Button size="sm" variant="outline">
-                    <Phone className="h-4 w-4 mr-1" />
-                    Call
-                  </Button>
-                )}
-                {appointment.type === "In-person" && (
-                  <Button size="sm" variant="outline">
-                    View Details
-                  </Button>
-                )}
-              </div>
-            </div>
+    <div className="p-4 bg-white rounded-xl shadow">
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Recent's Appointments</h2>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Patient</TableHead>
+            <TableHead>Date & Time</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {appointments.map((apt) => (
+            <TableRow key={apt._id}>
+              <TableCell>{apt.user.username || "Unknown"}</TableCell>
+              <TableCell>{formatDateTime(apt.date)}</TableCell>
+            </TableRow>
           ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
+        </TableBody>
+      </Table>
+    </div>
+  );
 }

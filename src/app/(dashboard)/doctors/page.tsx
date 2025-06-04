@@ -14,7 +14,6 @@ export const metadata: Metadata = {
   title: "Doctor Dashboard | Curex",
   description: "Curex doctor dashboard",
 };
-
 export default async function DoctorDashboardPage() {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
@@ -23,17 +22,14 @@ export default async function DoctorDashboardPage() {
     redirect("/doctor/login");
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-  } catch (err: any) {
-    if (err.name === "TokenExpiredError") {
-      // Redirect or force logout
-      redirect("/doctor/login");
-      return;
-    }
+  let doctorId: string = "";
 
-    // For other JWT errors
-    console.error("Token verification error", err);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    doctorId = decoded.id;
+  } catch (err: any) {
+    console.error("JWT error:", err);
+    redirect("/doctor/login");
   }
 
   return (
@@ -42,7 +38,7 @@ export default async function DoctorDashboardPage() {
       <DoctorOverview />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <TodayAppointments />
+          <TodayAppointments doctorId={doctorId} />
         </div>
         <div>
           <ScheduleOverview />
