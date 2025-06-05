@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 interface Appointment {
+  status: "pending" | "approved" | "busy" | "cancelled";
   _id: string;
   user: { username: string; email: string };
   doctor: { name: string; specialty: string; rate: number };
@@ -57,7 +58,9 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
       if (!state.appointments) return state;
 
       const updatedAppointments = state.appointments.map((app) =>
-        app._id === appointmentId ? { ...app, status: "approved" } : app
+        app._id === appointmentId 
+          ? { ...app, status: "approved" as const } 
+          : app
       );
 
       return { appointments: updatedAppointments };
@@ -69,7 +72,7 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
       if (!state.appointments) return state;
 
       const updatedAppointments = state.appointments.map((app) =>
-        app._id === appointmentId ? { ...app, status: "busy" } : app
+        app._id === appointmentId ? { ...app, status: "busy" as const } : app
       );
 
       return { appointments: updatedAppointments };

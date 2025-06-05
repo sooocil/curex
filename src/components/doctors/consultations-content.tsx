@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Video, Phone, MessageSquare, Clock, FileText } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Video, Phone, MessageSquare, Clock, FileText } from "lucide-react";
 
 const activeConsultations = [
   {
     id: 1,
     patient: "John Smith",
     type: "Video Call",
-    duration: "15:30",
+    duration: "30m",
     status: "In Progress",
     startTime: "2:00 PM",
     avatar: "/placeholder.svg?height=40&width=40",
   },
-]
+];
 
 const recentConsultations = [
   {
@@ -39,9 +39,28 @@ const recentConsultations = [
     notes: "Prescription updated",
     avatar: "/placeholder.svg?height=40&width=40",
   },
-]
+];
 
 export function ConsultationsContent() {
+  async function joinCall(consultationId: string) {
+    const res = await fetch(
+      `/api/consultations/${consultationId}?action=join`,
+      {
+        method: "POST",
+      }
+    );
+    const data = await res.json();
+    return data;
+  }
+
+  async function endCall(consultationId: string) {
+    const res = await fetch(`/api/consultations/${consultationId}?action=end`, {
+      method: "POST",
+    });
+    const data = await res.json();
+    return data;
+  }
+
   return (
     <div className="space-y-6">
       {activeConsultations.length > 0 && (
@@ -57,7 +76,10 @@ export function ConsultationsContent() {
               >
                 <div className="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarImage src={consultation.avatar || "/placeholder.svg"} alt={consultation.patient} />
+                    <AvatarImage
+                      src={consultation.avatar || "/placeholder.svg"}
+                      alt={consultation.patient}
+                    />
                     <AvatarFallback>
                       {consultation.patient
                         .split(" ")
@@ -84,11 +106,25 @@ export function ConsultationsContent() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Badge className="bg-green-100 text-green-800">{consultation.status}</Badge>
-                  <Button size="sm" className="bg-curex hover:bg-curex/90">
-                    Rejoin
-                  </Button>
+                  <Badge className="bg-green-100 text-green-800">
+                    {consultation.status}
+                  </Badge>
                   <Button size="sm" variant="outline">
+                    Chat
+                  </Button>
+
+                  <Button
+                    onClick={() => joinCall(String(consultation.id))}
+                    size="sm"
+                    className="bg-curex hover:bg-curex/90"
+                  >
+                    Join
+                  </Button>
+                  <Button
+                    onClick={() => endCall(String(consultation.id))}
+                    size="sm"
+                    variant="outline"
+                  >
                     End Call
                   </Button>
                 </div>
@@ -104,10 +140,16 @@ export function ConsultationsContent() {
         </CardHeader>
         <CardContent className="space-y-4">
           {recentConsultations.map((consultation) => (
-            <div key={consultation.id} className="flex items-center justify-between p-4 border rounded-lg">
+            <div
+              key={consultation.id}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
               <div className="flex items-center space-x-4">
                 <Avatar>
-                  <AvatarImage src={consultation.avatar || "/placeholder.svg"} alt={consultation.patient} />
+                  <AvatarImage
+                    src={consultation.avatar || "/placeholder.svg"}
+                    alt={consultation.patient}
+                  />
                   <AvatarFallback>
                     {consultation.patient
                       .split(" ")
@@ -131,7 +173,11 @@ export function ConsultationsContent() {
                       {consultation.duration}
                     </div>
                   </div>
-                  {consultation.notes && <p className="text-sm text-gray-600 mt-1">{consultation.notes}</p>}
+                  {consultation.notes && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {consultation.notes}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -139,7 +185,9 @@ export function ConsultationsContent() {
                   <p className="text-sm text-gray-500">Ended at</p>
                   <p className="text-sm font-medium">{consultation.endTime}</p>
                 </div>
-                <Badge className="bg-blue-100 text-blue-800">{consultation.status}</Badge>
+                <Badge className="bg-blue-100 text-blue-800">
+                  {consultation.status}
+                </Badge>
                 <Button size="sm" variant="outline">
                   <FileText className="h-4 w-4 mr-2" />
                   Notes
@@ -204,15 +252,27 @@ export function ConsultationsContent() {
             <CardTitle className="text-sm">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+            >
               <Video className="h-4 w-4 mr-2" />
               Start Video Call
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+            >
               <MessageSquare className="h-4 w-4 mr-2" />
               Send Message
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+            >
               <FileText className="h-4 w-4 mr-2" />
               Add Notes
             </Button>
@@ -220,5 +280,5 @@ export function ConsultationsContent() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

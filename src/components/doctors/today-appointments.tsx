@@ -3,14 +3,22 @@
 import { useEffect, useState } from "react";
 import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface TodayAppointmentsProps {
   doctorId: string;
 }
 
 export function TodayAppointments({ doctorId }: TodayAppointmentsProps) {
-  const { appointments, loading, fetchAppointmentsByDoctorId } = useAppointmentStore();
+  const { appointments, loading, fetchAppointmentsByDoctorId } =
+    useAppointmentStore();
   const [showSkeleton, setShowSkeleton] = useState(true);
 
   useEffect(() => {
@@ -57,6 +65,7 @@ export function TodayAppointments({ doctorId }: TodayAppointmentsProps) {
           <TableRow>
             <TableHead>Patient</TableHead>
             <TableHead>Date & Time</TableHead>
+            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -64,6 +73,7 @@ export function TodayAppointments({ doctorId }: TodayAppointmentsProps) {
             <TableRow key={apt._id}>
               <TableCell>{apt.user.username || "Unknown"}</TableCell>
               <TableCell>{formatDateTime(apt.date)}</TableCell>
+              <TableCell>{apt.status}</TableCell>
             </TableRow>
           ))}
         </TableBody>
