@@ -20,7 +20,6 @@ import {
   Minimize2,
 } from "lucide-react";
 import { ChatPopup } from "./chat-popup";
-import toast, { Toaster } from "react-hot-toast";
 
 interface VideoCallWindowProps {
   isOpen: boolean;
@@ -46,29 +45,58 @@ export function VideoCallWindow({
   const [connectionStatus, setConnectionStatus] = useState<
     "connecting" | "connected" | "poor" | "disconnected"
   >("connected");
+  const [pipPosition, setPipPosition] = useState({ x: 20, y: 400 }); // initial position from top-left
+
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const callWindowRef = useRef<HTMLDivElement>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
-    // Simulate getting user media
-    if (isVideoOn && videoRef.current) {
+    // Initialize media when component mounts and video is on
+    if (isVideoOn && !localStream) {
       navigator.mediaDevices
         .getUserMedia({ video: true, audio: true })
         .then((stream) => {
+          setLocalStream(stream);
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
           }
         })
         .catch((err) => console.log("Error accessing media devices:", err));
     }
-  }, [isVideoOn]);
+
+    // Cleanup when video is turned off
+    if (!isVideoOn && localStream) {
+      localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      setLocalStream(null);
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    }
+  }, [isVideoOn, localStream]);
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (localStream) {
+        localStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
+    };
+  }, [localStream]);
 
   const handleEndCall = () => {
     // Clean up media streams
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+      setLocalStream(null);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     onClose();
   };
@@ -92,8 +120,29 @@ export function VideoCallWindow({
     }
   };
 
+  const toggleVideo = () => {
+    if (isVideoOn && localStream) {
+      // Stop video track only, keep audio
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.stop();
+      }
+    }
+    setIsVideoOn(!isVideoOn);
+  };
+
+  const toggleMute = () => {
+    if (localStream) {
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = isMuted; // Toggle audio track enabled state
+      }
+    }
+    setIsMuted(!isMuted);
+  };
+
   return (
-    <AnimatePresence>
+    <AnimatePresence >
       {isOpen && (
         <>
           {/* Backdrop for fullscreen */}
@@ -102,7 +151,7 @@ export function VideoCallWindow({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black z-50"
+              className="fixed  inset-0 bg-black z-50"
             />
           )}
 
@@ -113,7 +162,7 @@ export function VideoCallWindow({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: "spring", duration: 0.3 }}
-            className={`fixed z-50 ${
+            className={`fixed select-none z-50 ${
               isFullscreen
                 ? "inset-0"
                 : "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px]"
@@ -189,7 +238,7 @@ export function VideoCallWindow({
                     className={`relative ${isChatOpen && !isFullscreen ? "col-span-2" : "col-span-1"} bg-gray-800`}
                   >
                     {/* Patient Video (Main) */}
-                    <div className="select-none w-full h-full bg-gray-700 flex items-center justify-center">
+                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
                       <div className="text-center">
                         <Avatar className="h-24 w-24 mx-auto mb-4">
                           <AvatarImage
@@ -211,7 +260,7 @@ export function VideoCallWindow({
                     </div>
 
                     {/* Doctor Video (Picture-in-Picture) */}
-                    <div className="absolute bottom-4 right-4 w-48 h-36 bg-gray-900 rounded-lg border-2 border-white/20 overflow-hidden">
+                    <div className="absolute bottom-4 left-4 w-72 h-56 bg-gray-900 rounded-lg border-2 border-white/20 overflow-hidden">
                       {isVideoOn ? (
                         <video
                           ref={videoRef}
@@ -271,7 +320,7 @@ export function VideoCallWindow({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setIsMuted(!isMuted)}
+                      onClick={toggleMute}
                       className={`h-12 w-12 rounded-full ${
                         isMuted
                           ? "bg-red-500 hover:bg-red-600"
@@ -288,15 +337,7 @@ export function VideoCallWindow({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        if (isVideoOn) {
-                          setIsVideoOn(false);
-                          toast.success("Video opened", { position: "bottom-left" });
-                        } else {
-                          setIsVideoOn(true);
-                          toast.error("Video closed",  { position: "bottom-left" });
-                        }
-                      }}
+                      onClick={toggleVideo}
                       className={`h-12 w-12 rounded-full ${
                         !isVideoOn
                           ? "bg-red-500 hover:bg-red-600"
@@ -323,15 +364,13 @@ export function VideoCallWindow({
                       <MessageSquare className="h-5 w-5" />
                     </Button>
 
-                    {/* Monitor Button  */}
-
-                    {/* <Button
+                    <Button
                       variant="ghost"
                       size="sm"
                       className="h-12 w-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white"
                     >
                       <Monitor className="h-5 w-5" />
-                    </Button> */}
+                    </Button>
 
                     <Button
                       variant="ghost"
@@ -353,26 +392,19 @@ export function VideoCallWindow({
                 </div>
               </CardContent>
             </Card>
-            <Toaster
-              position="bottom-left"
-              toastOptions={{
-                
-                duration: 1000,
-              }}
-              // Limit to 3 toasts at a time
-              
-            />
           </motion.div>
 
           {/* Standalone Chat Popup for fullscreen mode */}
           {isFullscreen && (
-            <ChatPopup
-              isOpen={isChatOpen}
-              onClose={() => setIsChatOpen(false)}
-              patientName={patientName}
-              patientAvatar={patientAvatar}
-              consultationId={consultationId}
-            />
+            <div className="fixed bottom-0 left-0 z-50">
+              <ChatPopup
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+                patientName={patientName}
+                patientAvatar={patientAvatar}
+                consultationId={consultationId}
+              />
+            </div>
           )}
         </>
       )}
