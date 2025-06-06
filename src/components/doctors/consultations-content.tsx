@@ -1,26 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Video, Phone, MessageSquare, Clock, FileText } from "lucide-react"
 import { ChatPopup } from "./chat-popup"
-import { VideoCallWindow } from "./video-call-window"
-
-
-const activeConsultations = [
-  {
-    id: 1,
-    patient: "John Smith",
-    type: "Video Call",
-    duration: "30m",
-    status: "In Progress",
-    startTime: "2:00 PM",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-]
+import { WebRTCVideoCall } from "./webrtc-video-call"
+import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore"
 
 const recentConsultations = [
   {
@@ -45,17 +33,44 @@ const recentConsultations = [
   },
 ]
 
-export function ConsultationsContent() {
-  const [chatOpen, setChatOpen] = useState<{ isOpen: boolean; consultation: any | null }>({
+export function ConsultationsContent({ doctorId }: { doctorId: string }) {
+  const { fetchAppointmentsByDoctorId, appointments } = useAppointmentStore()
+
+  const [chatOpen, setChatOpen] = useState({
     isOpen: false,
-    consultation: null,
+    consultation: null as any,
   })
-  const [videoCallOpen, setVideoCallOpen] = useState<{ isOpen: boolean; consultation: any | null }>({
+  const [videoCallOpen, setVideoCallOpen] = useState({
     isOpen: false,
-    consultation: null,
+    consultation: null as any,
   })
+
+  useEffect(() => {
+    if (doctorId) fetchAppointmentsByDoctorId(doctorId)
+  }, [doctorId, fetchAppointmentsByDoctorId])
+
+  const activeConsultations = Array.from(
+    new Map(
+      (appointments || [])
+        .filter((app) => app.user?.email)
+        .map((app) => [
+          app.user.email,
+          {
+            id: app._id,
+            patient: `${app.user.username || "John"}`,
+            type: app.user.mode || "Video Call",
+            duration: "30m",
+            status: "In Progress",
+            startTime: app.user.time || "2:00 PM",
+            avatar: app.user.username || "/placeholder.svg?height=40&width=40",
+          },
+        ]),
+    ).values(),
+  )
+
   return (
     <div className="space-y-6">
+      {/* Active Consultations */}
       {activeConsultations.length > 0 && (
         <Card>
           <CardHeader>
@@ -79,8 +94,8 @@ export function ConsultationsContent() {
                   </Avatar>
                   <div>
                     <h3 className="font-semibold">{consultation.patient}</h3>
-                    <div className="flex items-center space-x-4 mt-1">
-                      <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
+                      <div className="flex items-center">
                         {consultation.type === "Video Call" ? (
                           <Video className="h-4 w-4 mr-1" />
                         ) : (
@@ -88,7 +103,7 @@ export function ConsultationsContent() {
                         )}
                         {consultation.type}
                       </div>
-                      <div className="flex items-center text-sm text-gray-600">
+                      <div className="flex items-center">
                         <Clock className="h-4 w-4 mr-1" />
                         {consultation.duration}
                       </div>
@@ -114,6 +129,7 @@ export function ConsultationsContent() {
         </Card>
       )}
 
+      {/* Recent Consultations */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Recent Consultations</CardTitle>
@@ -133,8 +149,8 @@ export function ConsultationsContent() {
                 </Avatar>
                 <div>
                   <h3 className="font-semibold">{consultation.patient}</h3>
-                  <div className="flex items-center space-x-4 mt-1">
-                    <div className="flex items-center text-sm text-gray-600">
+                  <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
+                    <div className="flex items-center">
                       {consultation.type === "Video Call" ? (
                         <Video className="h-4 w-4 mr-1" />
                       ) : (
@@ -142,7 +158,7 @@ export function ConsultationsContent() {
                       )}
                       {consultation.type}
                     </div>
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
                       {consultation.duration}
                     </div>
@@ -166,29 +182,28 @@ export function ConsultationsContent() {
         </CardContent>
       </Card>
 
+      {/* Stats & Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Today's Stats</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Total Consultations</span>
-                <span className="font-medium">8</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Video Calls</span>
-                <span className="font-medium">5</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Phone Calls</span>
-                <span className="font-medium">3</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Total Duration</span>
-                <span className="font-medium">3h 45m</span>
-              </div>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Total Consultations</span>
+              <span className="font-medium">8</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Video Calls</span>
+              <span className="font-medium">5</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Phone Calls</span>
+              <span className="font-medium">3</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Total Duration</span>
+              <span className="font-medium">3h 45m</span>
             </div>
           </CardContent>
         </Card>
@@ -197,20 +212,18 @@ export function ConsultationsContent() {
           <CardHeader>
             <CardTitle className="text-sm">This Week</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Consultations</span>
-                <span className="font-medium">42</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Avg Duration</span>
-                <span className="font-medium">22m</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Patient Satisfaction</span>
-                <span className="font-medium text-curex">4.8/5</span>
-              </div>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Consultations</span>
+              <span className="font-medium">42</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Avg Duration</span>
+              <span className="font-medium">22m</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Patient Satisfaction</span>
+              <span className="font-medium text-curex">4.8/5</span>
             </div>
           </CardContent>
         </Card>
@@ -235,6 +248,7 @@ export function ConsultationsContent() {
           </CardContent>
         </Card>
       </div>
+
       {/* Chat Popup */}
       {chatOpen.isOpen && chatOpen.consultation && (
         <ChatPopup
@@ -246,16 +260,16 @@ export function ConsultationsContent() {
         />
       )}
 
-      {/* Video Call Window */}
+      {/* WebRTC Video Call Window */}
       {videoCallOpen.isOpen && videoCallOpen.consultation && (
-        <VideoCallWindow
-        
+        <WebRTCVideoCall
           isOpen={videoCallOpen.isOpen}
           onClose={() => setVideoCallOpen({ isOpen: false, consultation: null })}
           patientName={videoCallOpen.consultation.patient}
           patientAvatar={videoCallOpen.consultation.avatar}
           consultationId={videoCallOpen.consultation.id.toString()}
           callDuration={videoCallOpen.consultation.duration}
+          doctorId={doctorId}
         />
       )}
     </div>

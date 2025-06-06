@@ -66,7 +66,8 @@ export function UserSidebar() {
   const handleLogout = useCallback(async () => {
     try {
       await axios.post("/api/users/logout");
-      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+      document.cookie =
+        "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       setUser(null);
       toast.success("Logged out successfully");
@@ -82,6 +83,7 @@ export function UserSidebar() {
     { name: "Test History", slug: "dashboard/tests", icon: ClipboardList },
     { name: "Find Doctors", slug: "dashboard/doctors", icon: Users },
     { name: "Appointments", slug: "dashboard/appointments", icon: Calendar },
+    { name: "Consultation", slug: "dashboard/consultation", icon: Calendar },
     { name: "Profile", slug: "dashboard/profile", icon: User },
     { name: "Settings", slug: "dashboard/settings", icon: Settings },
   ];

@@ -4,8 +4,8 @@ const appointmentSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "User ID is required"],
+      ref: "user", // must match the model name, exactly
+      required: true,
     },
     doctor: {
       type: mongoose.Schema.Types.ObjectId,

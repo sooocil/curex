@@ -21,19 +21,21 @@ export function PatientsContent({ doctorId }: { doctorId: string }) {
   // Unique patients from appointments
   const patients = Array.from(
     new Map(
-      (appointments || []).map((app) => [
-        app.user.email,
-        {
-          id: app._id,
-          name: app.user.username,
-          email: app.user.email,
-          phone: "N/A", // Fill from actual data
-          condition: "Follow-up", // You can pass reason if stored in app
-          lastVisit: "Not Visited Yet", 
-          status: app.status,
-          avatar: "/placeholder.svg",
-        },
-      ])
+      (appointments || [])
+        .filter((app) => app.user && app.user.email)
+        .map((app) => [
+          app.user.email,
+          {
+            id: app._id,
+            name: app.user.username,
+            email: app.user.email,
+            phone: "N/A", // Fill from actual data
+            condition: "Follow-up", // You can pass reason if stored in app
+            lastVisit: "Not Visited Yet", 
+            status: app.status,
+            avatar: "/placeholder.svg",
+          },
+        ])
     ).values()
   );
 

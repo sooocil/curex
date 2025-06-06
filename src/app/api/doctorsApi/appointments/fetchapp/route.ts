@@ -5,7 +5,7 @@ import Appointment from "@/models/appointments";
 import User from "@/models/userModel";
 import Doctor from "@/models/doctor/doctorModel";
 
-mongoose.model("users", User.schema);
+mongoose.model("user", User.schema);
 mongoose.model("doctors", Doctor.schema);
 
 export async function POST(req: NextRequest) {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     const appointments = await Appointment.find({ doctor: doctorId })
-      .populate({ path: "user", model: "users", select: "username email" })
+      .populate({ path: "user", model: "user", select: "username email status mode" })
       .populate({ path: "doctor", model: "doctors", select: "name specialty rate" })
       .lean()
       .exec();

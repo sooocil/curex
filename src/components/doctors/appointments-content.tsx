@@ -1,14 +1,15 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo } from "react"
-import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Separator } from "@/components/ui/separator"
+import { useState, useEffect, useMemo } from "react";
+import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Calendar,
@@ -24,7 +25,8 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-} from "lucide-react"
+  Trash,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -32,120 +34,210 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "react-hot-toast"
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "react-hot-toast";
+import { redirect } from "next/dist/server/api-utils";
 
 interface Appointment {
-  _id: string
-  user: { username: string; email: string }
-  doctor: { name: string; specialty: string; rate: number }
-  date: string
-  mode?: string
-  status?: string
-  reason?: string
+  _id: string;
+  user: { username: string; email: string };
+  doctor: { name: string; specialty: string; rate: number };
+  date: string;
+  mode?: string;
+  status?: string;
+  reason?: string;
 }
 
 interface AppointmentsContentProps {
-  doctorId?: string
+  doctorId?: string;
 }
 
 const APPOINTMENT_STATUSES = {
-  pending: { label: "Pending", color: "bg-amber-100 text-amber-800 border-amber-200", icon: AlertCircle },
-  confirmed: { label: "Confirmed", color: "bg-emerald-100 text-emerald-800 border-emerald-200", icon: CheckCircle },
-  completed: { label: "Completed", color: "bg-blue-100 text-blue-800 border-blue-200", icon: CheckCircle },
-  cancelled: { label: "Cancelled", color: "bg-red-100 text-red-800 border-red-200", icon: XCircle },
-}
+  pending: {
+    label: "Pending",
+    color: "bg-amber-100 text-amber-800 border-amber-200",
+    icon: AlertCircle,
+  },
+  confirmed: {
+    label: "Confirmed",
+    color: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    icon: CheckCircle,
+  },
+  completed: {
+    label: "Completed",
+    color: "bg-blue-100 text-blue-800 border-blue-200",
+    icon: CheckCircle,
+  },
+  cancelled: {
+    label: "Cancelled",
+    color: "bg-red-100 text-red-800 border-red-200",
+    icon: XCircle,
+  },
+};
 
 const CONSULTATION_MODES = {
-  "Online": { icon: Video, color: "text-blue-600" },
+  Online: { icon: Video, color: "text-blue-600" },
   "In-person": { icon: User, color: "text-purple-600" },
-}
+};
 
 export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
-  const { appointments, loading, error, fetchAppointmentsByDoctorId, approveAppointment, markBusyAppointment } =
-    useAppointmentStore()
+
+  const {
+    appointments,
+    loading,
+    error,
+    fetchAppointmentsByDoctorId,
+    approveAppointment,
+    markBusyAppointment,
+  } = useAppointmentStore();
 
   useEffect(() => {
     if (doctorId) {
-      fetchAppointmentsByDoctorId(doctorId)
+      fetchAppointmentsByDoctorId(doctorId);
     }
-  }, [doctorId, fetchAppointmentsByDoctorId])
+  }, [doctorId, fetchAppointmentsByDoctorId]);
 
   const { upcomingAppointments, stats } = useMemo(() => {
-    const now = new Date()
-    const upcoming = appointments?.filter((appt: Appointment) => new Date(appt.date) >= now) || []
+    const now = new Date();
+    const upcoming =
+      appointments?.filter((appt: Appointment) => new Date(appt.date) >= now) ||
+      [];
 
     const stats = {
-      total: appointments?.length || 0,
-      pending: appointments?.filter((appt: Appointment) => appt.status === "pending").length || 0,
-      confirmed: appointments?.filter((appt: Appointment) => appt.status === "confirmed").length || 0,
-      completed: appointments?.filter((appt: Appointment) => appt.status === "completed").length || 0,
-    }
+      total: (appointments?.length ?? 0) ,
+        pending:
+        appointments?.filter((appt: Appointment) => appt.status === "pending")
+          .length || 0,
+      confirmed:
+        appointments?.filter((appt: Appointment) => appt.status === "confirmed")
+          .length || 0,
+      completed:
+        appointments?.filter((appt: Appointment) => appt.status === "completed")
+          .length || 0,
+    };
 
-    return { upcomingAppointments: upcoming, stats }
-  }, [appointments])
+    return { upcomingAppointments: upcoming, stats };
+  }, [appointments]);
 
   const filterAppointments = (appts: Appointment[]) => {
     return appts?.filter((appt) => {
       const matchesSearch =
-        appt.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (appt.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+        (appt.user?.username
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ??
+          false) ||
+        (appt.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ??
+          false);
 
-      const matchesStatus = statusFilter === "all" || appt.status === statusFilter
+      const matchesStatus =
+        statusFilter === "all" || appt.status === statusFilter;
 
-      return matchesSearch && matchesStatus
-    })
-  }
+      return matchesSearch && matchesStatus;
+    });
+  };
 
   const formatDateTime = (iso: string) => {
-    const date = new Date(iso)
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
+    const date = new Date(iso);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const isToday = date.toDateString() === today.toDateString()
-    const isTomorrow = date.toDateString() === tomorrow.toDateString()
+    const isToday = date.toDateString() === today.toDateString();
+    const isTomorrow = date.toDateString() === tomorrow.toDateString();
 
-    const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    const time = date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-    if (isToday) return `Today, ${time}`
-    if (isTomorrow) return `Tomorrow, ${time}`
+    if (isToday) return `Today, ${time}`;
+    if (isTomorrow) return `Tomorrow, ${time}`;
 
     return `${date.toLocaleDateString([], {
       month: "short",
       day: "numeric",
       year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
-    })}, ${time}`
-  }
+    })}, ${time}`;
+  };
 
-  const handleAction = async (action: "approve" | "busy", appointmentId: string) => {
+  const handleAction = async (
+    action: "approve" | "busy",
+    appointmentId: string
+  ) => {
     try {
       if (action === "approve") {
-        await approveAppointment(appointmentId)
-        toast.success("Appointment approved successfully!")
-      } else {
-        await markBusyAppointment(appointmentId)
-        toast.success("Patient notified of unavailability")
+        await approveAppointment(appointmentId);
+        APPOINTMENT_STATUSES.confirmed;
+        toast.success("Appointment approved successfully!");
+      } else if (action === "busy") {
+        // await markBusyAppointment(appointmentId)
+        toast.success("Patient notified of unavailability");
       }
     } catch (error) {
-      toast.error(`Failed to ${action} appointment`)
+      toast.error(`Failed to ${action} appointment`);
     }
-  }
+  };
+
+  const deleteAppointment = async (appointmentId: string) => {
+    try {
+      const response = await fetch("/api/doctorsApi/appointments/deleteapp", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ appointmentId }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete appointment");
+      }
+      setTimeout(()=>{
+
+        toast.success( "Appointment deleted successfully");
+      },1000)
+      router.push("/doctors/appointments");
+
+      // Optionally, you can refetch appointments or update state here
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while deleting the appointment"
+      );
+    }
+  };
 
   const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
     const status =
-      APPOINTMENT_STATUSES[appointment.status as keyof typeof APPOINTMENT_STATUSES] || APPOINTMENT_STATUSES.pending
+      APPOINTMENT_STATUSES[
+        appointment.status as keyof typeof APPOINTMENT_STATUSES
+      ] || APPOINTMENT_STATUSES.pending;
     const mode =
-      CONSULTATION_MODES[appointment.mode as keyof typeof CONSULTATION_MODES] || CONSULTATION_MODES["In-person"]
-    const StatusIcon = status.icon
-    const ModeIcon = mode.icon
+      CONSULTATION_MODES[appointment.mode as keyof typeof CONSULTATION_MODES] ||
+      CONSULTATION_MODES["In-person"];
+    const StatusIcon = status.icon;
+    const ModeIcon = mode.icon;
 
     return (
       <Card className="group hover:shadow-md transition-all duration-200 border-gray-200">
@@ -153,9 +245,12 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
           <div className="flex items-start justify-between">
             <div className="flex items-start space-x-4 flex-1">
               <Avatar className="h-12 w-12 ring-2 ring-gray-100">
-                <AvatarImage src="/placeholder.svg" alt={appointment.user.username} />
+                <AvatarImage
+                  src="/placeholder.svg"
+                  alt={appointment.user?.username}
+                />
                 <AvatarFallback className="bg-curex/10 text-curex font-semibold">
-                  {appointment.user.username
+                  {appointment.user?.username
                     .split(" ")
                     .map((n) => n[0])
                     .join("")
@@ -166,9 +261,15 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2 mb-1">
                   <h3 className="font-semibold text-gray-900 truncate">
-                    {appointment.user.username.charAt(0).toUpperCase() + appointment.user.username.slice(1)}
+                    {appointment.user?.username
+                      ? appointment.user.username.charAt(0).toUpperCase() +
+                        appointment.user.username.slice(1)
+                      : "Unknown"}
                   </h3>
-                  <Badge variant="outline" className={`${status.color} border text-xs font-medium`}>
+                  <Badge
+                    variant="outline"
+                    className={`${status.color} border text-xs font-medium`}
+                  >
                     <StatusIcon className="w-3 h-3 mr-1" />
                     {status.label}
                   </Badge>
@@ -194,7 +295,11 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
             <div className="flex items-center space-x-2 ml-4">
               {appointment.status === "confirmed" && (
                 <div className="flex space-x-2">
-                  <Button size="sm" variant="outline" className="hover:bg-curex/10 hover:text-curex">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="hover:bg-curex/10 hover:text-curex"
+                  >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Chat
                   </Button>
@@ -209,7 +314,11 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:bg-gray-100">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0 hover:bg-gray-100"
+                  >
                     <MoreHorizontal className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -217,8 +326,8 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem
                     onClick={() => {
-                      setSelectedAppointment(appointment)
-                      setIsModalOpen(true)
+                      setSelectedAppointment(appointment);
+                      setIsModalOpen(true);
                     }}
                   >
                     View Details
@@ -233,9 +342,19 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Approve
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleAction("busy", appointment._id)} className="text-red-600">
+                      <DropdownMenuItem
+                        onClick={() => handleAction("busy", appointment._id)}
+                        className="text-red-600"
+                      >
                         <XCircle className="w-4 h-4 mr-2" />
                         Mark as Busy
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => deleteAppointment( appointment._id)}
+                        className="text-red-600"
+                      >
+                        <Trash  className="w-4 h-4 mr-2" />
+                        Delete
                       </DropdownMenuItem>
                     </>
                   )}
@@ -245,8 +364,8 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
           </div>
         </CardContent>
       </Card>
-    )
-  }
+    );
+  };
 
   const LoadingSkeleton = () => (
     <div className="space-y-4">
@@ -265,7 +384,7 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
         </Card>
       ))}
     </div>
-  )
+  );
 
   const EmptyState = ({ message }: { message: string }) => (
     <Card className="border-dashed border-2 border-gray-200">
@@ -274,7 +393,7 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
         <p className="text-gray-500 text-center">{message}</p>
       </CardContent>
     </Card>
-  )
+  );
 
   if (error) {
     return (
@@ -287,7 +406,7 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
           <p className="text-red-600 text-sm mt-1">{error}</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -300,7 +419,9 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
               <Users className="w-5 h-5 text-curex" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -310,8 +431,9 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
             <div className="flex items-center space-x-2">
               <AlertCircle className="w-5 h-5 text-amber-500" />
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.pending}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -322,7 +444,9 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
               <CheckCircle className="w-5 h-5 text-emerald-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Confirmed</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.confirmed}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.confirmed}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -333,7 +457,9 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
               <CheckCircle className="w-5 h-5 text-blue-500" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completed}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.completed}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -377,7 +503,9 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
       <div className="space-y-4">
         <div className="flex items-center space-x-2 mb-4">
           <CalendarDays className="w-5 h-5 text-curex" />
-          <h2 className="text-lg font-semibold text-gray-900">Upcoming Appointments ({upcomingAppointments.length})</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Upcoming Appointments ({upcomingAppointments.length})
+          </h2>
         </div>
 
         {loading ? (
@@ -387,7 +515,10 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
         ) : (
           <div className="space-y-4">
             {filterAppointments(upcomingAppointments).map((appointment) => (
-              <AppointmentCard key={appointment._id} appointment={appointment} />
+              <AppointmentCard
+                key={appointment._id}
+                appointment={appointment}
+              />
             ))}
           </div>
         )}
@@ -398,55 +529,84 @@ export function AppointmentsContent({ doctorId }: AppointmentsContentProps) {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Appointment Details</DialogTitle>
-            <DialogDescription>Complete information about this appointment</DialogDescription>
+            <DialogDescription>
+              Complete information about this appointment
+            </DialogDescription>
           </DialogHeader>
           {selectedAppointment && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Patient</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Patient
+                  </label>
                   <p className="text-sm text-gray-900">
-                    {selectedAppointment.user.username.charAt(0).toUpperCase() +
-                      selectedAppointment.user.username.slice(1)}
+                    {selectedAppointment.user?.username
+                      .charAt(0)
+                      .toUpperCase() +
+                      selectedAppointment.user?.username.slice(1)}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Email</label>
-                  <p className="text-sm text-gray-900">{selectedAppointment.user.email}</p>
+                  <label className="text-sm font-medium text-gray-600">
+                    Email
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {selectedAppointment.user?.email}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Date & Time</label>
-                  <p className="text-sm text-gray-900">{formatDateTime(selectedAppointment.date)}</p>
+                  <label className="text-sm font-medium text-gray-600">
+                    Date & Time
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {formatDateTime(selectedAppointment.date)}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Mode</label>
-                  <p className="text-sm text-gray-900">{selectedAppointment.mode || "In-person"}</p>
+                  <label className="text-sm font-medium text-gray-600">
+                    Mode
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {selectedAppointment.mode || "In-person"}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Status
+                  </label>
                   <Badge
                     className={
-                      APPOINTMENT_STATUSES[selectedAppointment.status as keyof typeof APPOINTMENT_STATUSES]?.color ||
-                      "bg-gray-100 text-gray-800"
+                      APPOINTMENT_STATUSES[
+                        selectedAppointment.status as keyof typeof APPOINTMENT_STATUSES
+                      ]?.color || "bg-gray-100 text-gray-800"
                     }
                   >
                     {selectedAppointment.status || "Unknown"}
                   </Badge>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Doctor Rate</label>
-                  <p className="text-sm text-gray-900">${selectedAppointment.doctor.rate}</p>
+                  <label className="text-sm font-medium text-gray-600">
+                    Doctor Rate
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    ${selectedAppointment.doctor.rate}
+                  </p>
                 </div>
               </div>
               <Separator />
               <div>
-                <label className="text-sm font-medium text-gray-600">Reason for Visit</label>
-                <p className="text-sm text-gray-900 mt-1">{selectedAppointment.reason || "General consultation"}</p>
+                <label className="text-sm font-medium text-gray-600">
+                  Reason for Visit
+                </label>
+                <p className="text-sm text-gray-900 mt-1">
+                  {selectedAppointment.reason || "General consultation"}
+                </p>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

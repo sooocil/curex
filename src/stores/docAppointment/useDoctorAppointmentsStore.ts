@@ -3,7 +3,7 @@ import { create } from "zustand";
 interface Appointment {
   status: "pending" | "approved" | "busy" | "cancelled";
   _id: string;
-  user: { username: string; email: string };
+  user: { username: string; email: string ; mode: string; status: string; time: string };
   doctor: { name: string; specialty: string; rate: number };
   date: string;
   // Add more as needed
@@ -62,6 +62,7 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
           ? { ...app, status: "approved" as const } 
           : app
       );
+      console.log("Updated appointments after approval:", updatedAppointments);
 
       return { appointments: updatedAppointments };
     });
