@@ -71,7 +71,7 @@ export function UserSidebar() {
       document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       setUser(null);
       toast.success("Logged out successfully");
-      router.push("/Login");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
       toast.error("Logout failed. Please try again.");
