@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 interface Appointment {
+  reason: any;
   status: "pending" | "approved" | "busy" | "cancelled";
   _id: string;
   user: { username: string; email: string ; mode: string; status: string; time: string };
@@ -53,19 +54,38 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
     }
   },
 
-  approveAppointment: (appointmentId) => {
-    set((state) => {
-      if (!state.appointments) return state;
+  approveAppointment: async (appointmentId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch("/api/doctorsApi/appointments/approveapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appointmentId }),
+      });
 
-      const updatedAppointments = state.appointments.map((app) =>
-        app._id === appointmentId 
-          ? { ...app, status: "approved" as const } 
-          : app
-      );
-      console.log("Updated appointments after approval:", updatedAppointments);
+      const data = await res.json();
 
-      return { appointments: updatedAppointments };
-    });
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to approve appointment");
+      }
+
+      set((state) => {
+        if (!state.appointments) return state;
+
+        const updatedAppointments = state.appointments.map((app) =>
+          app._id === appointmentId
+            ? { ...app, status: "approved" as const }
+            : app
+        );
+        return { appointments: updatedAppointments, loading: false, error: null };
+      });
+    } catch (err: any) {
+      set((state) => ({
+        ...state,
+        error: err.message || "Unknown error",
+        loading: false,
+      }));
+    }
   },
 
   markBusyAppointment: (appointmentId) => {

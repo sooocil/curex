@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useAppointmentStore } from "@/stores/doctorStores/appointmentStore";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -14,40 +13,80 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
-//interface for props
+interface Appointment {
+  id: string;
+  doctor: string;
+  specialty: string;
+  date: string; // ISO format
+  time: string;
+}
+
 interface UpcomingAppointmentsProps {
   uId: string;
 }
 
-export function UpcomingAppointments({uId}: UpcomingAppointmentsProps) {
-  const { upcoming, loading, fetchAppointments } = useAppointmentStore();
-  const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
+export function UpcomingAppointments({ uId }: UpcomingAppointmentsProps) {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Replace 'userId' with the actual user id from context/auth/store
-    const userId = uId;
-    fetchAppointments(userId);
-  }, [fetchAppointments]);
+    const fetchAppointments = async () => {
+      // fallback to dummy data in development
+      if (process.env.NODE_ENV === "development") {
+        setAppointments([
+          {
+            id: "1",
+            doctor: "Dr. Alice Smith",
+            specialty: "Cardiology",
+            date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0],
+            time: "10:00 AM",
+          },
+          {
+            id: "2",
+            doctor: "Dr. Bob Johnson",
+            specialty: "Dermatology",
+            date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0],
+            time: "2:30 PM",
+          },
+          {
+            id: "3",
+            doctor: "Dr. Carol Lee",
+            specialty: "Pediatrics",
+            date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0],
+            time: "9:00 AM",
+          },
+        ]);
+      }
 
-  useEffect(() => {
+      setLoading(false);
+    };
+
+    fetchAppointments();
+  }, [uId]);
+
+  const filteredAppointments = useMemo(() => {
     const now = new Date();
     const in30Days = new Date();
     in30Days.setDate(now.getDate() + 30);
 
-    const filtered = upcoming
-      .filter((appointment: any) => {
+    return appointments
+      .filter((appointment) => {
         const date = new Date(appointment.date);
         return date >= now && date <= in30Days;
       })
-      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    setFilteredAppointments(filtered);
-  }, [upcoming]);
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [appointments]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upcoming Appointments</CardTitle>
+        <CardTitle>Appointments Schedule</CardTitle>
         <CardDescription>Your scheduled doctor appointments</CardDescription>
       </CardHeader>
 
@@ -71,18 +110,25 @@ export function UpcomingAppointments({uId}: UpcomingAppointmentsProps) {
           <>
             <div className="space-y-4">
               {filteredAppointments.length > 0 ? (
-                filteredAppointments.map((appointment: any) => (
-                  <div key={appointment.id} className="flex items-center justify-between">
+                filteredAppointments.map((appointment) => (
+                  <div
+                    key={appointment.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center space-x-3">
                       <Avatar>
                         <AvatarFallback className="bg-curex/10 text-curex">
-                          {(appointment.doctor ?? "Dr").split(" ").map((n: string) => n[0]).join("")}
+                          {appointment.doctor
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{appointment.doctor}</p>
                         <p className="text-sm text-muted-foreground">
-                          {appointment.specialty} • {appointment.date} • {appointment.time}
+                          {appointment.specialty} • {appointment.date} •{" "}
+                          {appointment.time}
                         </p>
                       </div>
                     </div>
@@ -102,7 +148,9 @@ export function UpcomingAppointments({uId}: UpcomingAppointmentsProps) {
 
             <div className="mt-36 text-center">
               <Button asChild variant="link" className="text-curex">
-                <Link href="/dashboard/appointments">View all appointments</Link>
+                <Link href={`/user/${uId}/dashboard/appointments`}>
+                  View all appointments
+                </Link>
               </Button>
             </div>
           </>

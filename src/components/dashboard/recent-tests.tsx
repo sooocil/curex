@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
-import { useTestStore } from "@/stores/testStore"
+import { useEffect, useMemo, useState } from "react"
 import {
   Card,
   CardContent,
@@ -14,32 +13,64 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 
+interface Test {
+  id: string
+  name: string
+  date: string
+  result: "Normal" | "Low" | "High"
+}
+
 export function RecentTests() {
-  const { tests, isLoading, fetchTests } = useTestStore()
-  const [recentTests, setRecentTests] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [tests, setTests] = useState<Test[]>([])
 
+  // Simulate loading and set dummy test data
   useEffect(() => {
-    fetchTests()
-  }, [fetchTests])
+    const timer = setTimeout(() => {
+      const now = new Date()
+      const dummyTests: Test[] = [
+        {
+          id: "1",
+          name: "Blood Glucose",
+          date: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          result: "Normal",
+        },
+        {
+          id: "2",
+          name: "Cholesterol",
+          date: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          result: "High",
+        },
+        {
+          id: "3",
+          name: "Hemoglobin",
+          date: new Date(now.getTime() - 25 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          result: "Low",
+        },
+      ]
+      setTests(dummyTests)
+      setIsLoading(false)
+    }, 1000)
 
-  useEffect(() => {
-    const today = new Date()
-    const past30Days = new Date(today.setDate(today.getDate() - 30))
+    return () => clearTimeout(timer)
+  }, [])
 
-    const filtered = tests
-      .filter((test) => new Date(test.date) >= past30Days)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const recentTests = useMemo(() => {
+    const now = new Date()
+    const last30Days = new Date()
+    last30Days.setDate(now.getDate() - 30)
 
-    setRecentTests(filtered)
+    return tests.filter((test) => {
+      const testDate = new Date(test.date)
+      return testDate >= last30Days && testDate <= now
+    })
   }, [tests])
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Recent Tests</CardTitle>
-        <CardDescription>
-          Your tests from the past 30 days
-        </CardDescription>
+        <CardDescription>Your tests from the past 30 days</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -98,9 +129,9 @@ export function RecentTests() {
               )}
             </div>
 
-            <div className=" mt-36  text-center">
+            <div className="mt-36 text-center">
               <Button asChild variant="link" className="text-curex">
-                <Link href="/user/$%7BuserId%7D/dashboard/tests">View all tests</Link>
+                <Link href="/user/123/dashboard/tests">View all tests</Link>
               </Button>
             </div>
           </>

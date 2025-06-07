@@ -18,6 +18,33 @@ type TestState = {
   fetchTests: () => Promise<void>;
 };
 
+const dummyTests: Test[] = [
+  {
+    id: "1",
+    name: "Blood Test",
+    date: "2024-06-01",
+    status: "Completed",
+    result: "Normal",
+    doctor: "Dr. Smith",
+  },
+  {
+    id: "2",
+    name: "X-Ray",
+    date: "2024-06-03",
+    status: "Pending",
+    result: "",
+    doctor: "Dr. Lee",
+  },
+  {
+    id: "3",
+    name: "MRI Scan",
+    date: "2024-05-28",
+    status: "Completed",
+    result: "No issues detected",
+    doctor: "Dr. Patel",
+  },
+];
+
 export const useTestStore = create<TestState>((set) => ({
   tests: [],
   isLoading: false,
@@ -31,36 +58,10 @@ export const useTestStore = create<TestState>((set) => ({
   fetchTests: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch("/api/tests", {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          window.location.href = "/login";
-          return;
-        }
-        if (res.status === 404) {
-          // Handle missing endpoint gracefully
-          set({ tests: [], isLoading: false, error: "Test endpoint not found" });
-          return;
-        }
-        throw new Error(`HTTP error! Status: ${res.status}`);
-      }
-
-      const contentType = res.headers.get("content-type");
-      if (!contentType?.includes("application/json")) {
-        throw new Error("Received non-JSON response from server");
-      }
-
-      const data = await res.json();
-      set({ tests: data.tests || [], isLoading: false, error: null });
+      // Simulate API delay and append dummy data
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      set({ tests: dummyTests, isLoading: false, error: null });
     } catch (error: any) {
-      console.error("Failed to fetch tests:", error.message);
       set({ isLoading: false, error: error.message });
     }
   },

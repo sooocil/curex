@@ -71,7 +71,7 @@ export function TodayAppointments({ doctorId }: TodayAppointmentsProps) {
         <TableBody>
           {appointments.map((apt) => (
             <TableRow key={apt._id}>
-              <TableCell>{apt.user.username || "Unknown"}</TableCell>
+              <TableCell>{apt.user?.username || "Unknown"}</TableCell>
               <TableCell>{formatDateTime(apt.date)}</TableCell>
               <TableCell>{apt.status}</TableCell>
             </TableRow>

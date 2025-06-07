@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,13 +31,19 @@ export function PatientsContent({ doctorId }: { doctorId: string }) {
             email: app.user.email,
             phone: "N/A", // Fill from actual data
             condition: "Follow-up", // You can pass reason if stored in app
-            lastVisit: "Not Visited Yet", 
+            lastVisit: "Not Visited Yet",
             status: app.status,
             avatar: "/placeholder.svg",
           },
         ])
     ).values()
   );
+  useEffect(() => {
+    //print patient status
+    patients.forEach((patient) => {
+      console.log(`Patient: ${patient.name}, Status: ${patient.status}`);
+    });
+  } , [patients]); 
 
   const filteredPatients = patients.filter(
     (patient) =>
@@ -45,12 +51,11 @@ export function PatientsContent({ doctorId }: { doctorId: string }) {
       patient.condition.toLowerCase().includes(searchTerm.toLowerCase())
   );
   function capitalizeName(name: string) {
-  return name
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
 
   return (
     <div className="space-y-6">
@@ -111,7 +116,9 @@ export function PatientsContent({ doctorId }: { doctorId: string }) {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold text-lg">{capitalizeName(patient.name)}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {capitalizeName(patient.name)}
+                      </h3>
                       <p className="text-sm text-gray-600">
                         Condition: {patient.condition}
                       </p>

@@ -17,26 +17,33 @@ const Page = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const hasToken = document.cookie.includes("token");
-        const hasUser = document.cookie.includes("user");
+  const checkAuthStatus = async () => {
+    try {
+      const hasToken = document.cookie.includes("token");
+      const hasUser = document.cookie.includes("user");
 
-        if (hasToken && hasUser) {
-          setIsAuthenticated(true);
-          const userData = localStorage.getItem("userData");
-          const userId = userData ? JSON.parse(userData).id : "dashboard";
-          router.replace(`/user/${userId}/dashboard`);
-        }
-      } catch (error) {
-        console.error("Authentication check failed:", error);
-      } finally {
-        setLoading(false);
+      if (hasToken && hasUser) {
+        const userData = localStorage.getItem("userData");
+
+        if (!userData) throw new Error("User data missing in localStorage");
+
+        const parsedUser = JSON.parse(userData);
+        if (!parsedUser?.id) throw new Error("Invalid user ID");
+
+        setIsAuthenticated(true);
+        router.replace(`/user/${parsedUser.id}/dashboard`);
       }
-    };
+    } catch (error) {
+      console.error("Authentication check failed:", error);
+      // Optional: Clear bad data from cookies/localStorage
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    checkAuthStatus();
-  }, [router]);
+  checkAuthStatus();
+}, [router]);
+
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberEmail");

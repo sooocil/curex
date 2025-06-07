@@ -1,31 +1,38 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Send, X, Paperclip, Smile } from "lucide-react"
+import { useState, useRef, useEffect, use } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Send, X, Paperclip, Smile } from "lucide-react";
+import { socket } from "@/lib/socket";
 
 interface Message {
-  id: string
-  sender: "doctor" | "patient"
-  content: string
-  timestamp: Date
-  type: "text" | "file"
+  id: string;
+  sender: "doctor" | "patient";
+  content: string;
+  timestamp: Date;
+  type: "text" | "file";
 }
 
 interface ChatPopupProps {
-  isOpen: boolean
-  onClose: () => void
-  patientName: string
-  patientAvatar?: string
-  consultationId: string
+  isOpen: boolean;
+  onClose: () => void;
+  patientName: string;
+  patientAvatar?: string;
+  consultationId: string;
 }
 
-export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consultationId }: ChatPopupProps) {
+export function ChatPopup({
+  isOpen,
+  onClose,
+  patientName,
+  patientAvatar,
+  consultationId,
+}: ChatPopupProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -37,46 +44,78 @@ export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consult
     {
       id: "2",
       sender: "doctor",
-      content: "I understand your concern. Can you describe the pain in more detail?",
+      content:
+        "I understand your concern. Can you describe the pain in more detail?",
       timestamp: new Date(Date.now() - 240000),
       type: "text",
     },
     {
       id: "3",
       sender: "patient",
-      content: "It's a sharp pain that comes and goes, mostly when I breathe deeply.",
+      content:
+        "It's a sharp pain that comes and goes, mostly when I breathe deeply.",
       timestamp: new Date(Date.now() - 180000),
       type: "text",
     },
-  ])
-  const [newMessage, setNewMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const chatRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  ]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [transport, setTransport] = useState("N/A");
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (socket.connected) {
+      onConnect();
+    }
+
+    function onConnect() {
+      setIsConnected(true);
+      setTransport(socket.io.engine.transport.name);
+
+      socket.io.engine.on("upgrade", (transport: any) => {
+        setTransport(transport.name);
+      });
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+      setTransport("N/A");
+    }
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
+  }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
-        onClose()
+        onClose();
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen, onClose])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -86,29 +125,21 @@ export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consult
         content: newMessage.trim(),
         timestamp: new Date(),
         type: "text",
-      }
-      setMessages((prev) => [...prev, message])
-      setNewMessage("")
+      };
 
-      // Simulate patient typing response
-      setIsTyping(true)
-      setTimeout(() => {
-        setIsTyping(false)
-        const patientResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: "patient",
-          content: "Thank you for the information, Doctor.",
-          timestamp: new Date(),
-          type: "text",
-        }
-        setMessages((prev) => [...prev, patientResponse])
-      }, 2000)
+      // Emit to server
+      socket.emit("message:send", {
+        consultationId,
+        message,
+      });
+
+      setMessages((prev) => [...prev, message]);
+      setNewMessage("");
     }
-  }
-
+  };
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  }
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
 
   return (
     <AnimatePresence>
@@ -133,10 +164,16 @@ export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consult
             className="fixed bottom-4 right-4 w-96 h-[500px] z-50"
           >
             <Card className=" h-full flex flex-col shadow-2xl border-0 bg-white">
+              <p>Status: {isConnected ? "connected" : "disconnected"}</p>
+              <p>Transport: {transport}</p>
+
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 bg-curex text-white rounded-t-lg">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={patientAvatar || "/placeholder.svg"} alt={patientName} />
+                    <AvatarImage
+                      src={patientAvatar || "/placeholder.svg"}
+                      alt={patientName}
+                    />
                     <AvatarFallback className="bg-white text-curex text-sm">
                       {patientName
                         .split(" ")
@@ -145,8 +182,12 @@ export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consult
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-sm font-medium">{patientName}</CardTitle>
-                    <p className="text-xs text-curex-light opacity-90">Online</p>
+                    <CardTitle className="text-sm font-medium">
+                      {patientName}
+                    </CardTitle>
+                    <p className="text-xs text-curex-light opacity-90">
+                      Online
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -169,17 +210,23 @@ export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consult
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex ${message.sender === "doctor" ? "justify-end" : "justify-start"}`}
                       >
-                        <div className={`max-w-[80%] ${message.sender === "doctor" ? "order-2" : "order-1"}`}>
+                        <div
+                          className={`max-w-[80%] ${message.sender === "doctor" ? "order-2" : "order-1"}`}
+                        >
                           <div
                             className={`rounded-lg px-3 py-2 text-sm ${
-                              message.sender === "doctor" ? "bg-curex text-white" : "bg-gray-100 text-gray-900"
+                              message.sender === "doctor"
+                                ? "bg-curex text-white"
+                                : "bg-gray-100 text-gray-900"
                             }`}
                           >
                             {message.content}
                           </div>
                           <p
                             className={`text-xs text-gray-500 mt-1 ${
-                              message.sender === "doctor" ? "text-right" : "text-left"
+                              message.sender === "doctor"
+                                ? "text-right"
+                                : "text-left"
                             }`}
                           >
                             {formatTime(message.timestamp)}
@@ -225,7 +272,9 @@ export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consult
                       placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleSendMessage()
+                      }
                       className="flex-1 border-0 bg-white focus-visible:ring-1 focus-visible:ring-curex"
                     />
                     <Button
@@ -244,5 +293,5 @@ export function ChatPopup({ isOpen, onClose, patientName, patientAvatar, consult
         </>
       )}
     </AnimatePresence>
-  )
+  );
 }

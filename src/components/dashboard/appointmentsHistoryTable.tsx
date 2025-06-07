@@ -99,22 +99,22 @@ export function AppointmentHistoryTable({
 
   const statusBadges: { [key: string]: JSX.Element } = {
     pending: (
-      <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+      <Badge className="hover:bg-yellow-50 bg-yellow-100 text-yellow-800 border-yellow-300">
         Pending
       </Badge>
     ),
     approved: (
-      <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+      <Badge className="hover:bg-green-50 bg-blue-100 text-blue-800 border-blue-300">
         Approved
       </Badge>
     ),
     completed: (
-      <Badge className="bg-green-100 text-green-800 border-green-300">
+      <Badge className="hover:bg-zinc-50 bg-green-100 text-green-800 border-green-300">
         Completed
       </Badge>
     ),
     cancelled: (
-      <Badge className="bg-red-100 text-red-800 border-red-300">
+      <Badge className="hover:bg-red-50 bg-red-100 text-red-800 border-red-300">
         Cancelled
       </Badge>
     ),
@@ -234,7 +234,7 @@ export function AppointmentHistoryTable({
                 <TableCell className="text-gray-800 capitalize">
                   {apt.mode || "Not specified"}
                 </TableCell>
-                <TableCell>{getStatusBadge(apt.status)}</TableCell>
+                <TableCell>{getStatusBadge(apt.status)} </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

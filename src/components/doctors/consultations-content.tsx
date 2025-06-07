@@ -46,6 +46,7 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
   })
 
   useEffect(() => {
+
     if (doctorId) fetchAppointmentsByDoctorId(doctorId)
   }, [doctorId, fetchAppointmentsByDoctorId])
 

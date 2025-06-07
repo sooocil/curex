@@ -1,83 +1,56 @@
-const { createServer } = require("http")
-const { parse } = require("url")
-const next = require("next")
-const WebSocket = require("ws")
+import { createServer } from "node:http";
+import next from "next";
+import { Server } from "socket.io";
 
-const dev = process.env.NODE_ENV !== "production"
-const app = next({ dev })
-const handle = app.getRequestHandler()
+const dev = process.env.NODE_ENV !== "production";
+const hostname = "localhost";
+const port = 3000;
 
-// Room store
-const rooms = new Map()
+// Next.js setup
+const app = next({ dev, hostname, port });
+const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
-  const server = createServer((req, res) => {
-    const parsedUrl = parse(req.url, true)
-    handle(req, res, parsedUrl)
-  })
+  const httpServer = createServer(handler);
 
-  const wss = new WebSocket.Server({ server })
+  // Create a single instance of Socket.IO server
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*", // Allow all origins during dev; restrict in production
+    },
+  });
 
-  wss.on("connection", (ws, req) => {
-    const { query } = parse(req.url, true)
-    const { room, user, role } = query
+  io.on("connection", (socket) => {
+    console.log("A user connected:", socket.id);
 
-    console.log(`User ${user} (${role}) joined room ${room}`)
+    // Join a room (e.g., consultationId)
+    socket.on("room:join", (roomId) => {
+      socket.join(roomId);
+      console.log(`Socket ${socket.id} joined room ${roomId}`);
+    });
 
-    if (!rooms.has(room)) rooms.set(room, new Map())
-    const roomUsers = rooms.get(room)
-    roomUsers.set(user, { ws, role })
+    // Leave a room
+    socket.on("room:leave", (roomId) => {
+      socket.leave(roomId);
+    });
 
-    roomUsers.forEach((userData, userId) => {
-      if (userId !== user && userData.ws.readyState === WebSocket.OPEN) {
-        userData.ws.send(
-          JSON.stringify({
-            type: "user-joined",
-            payload: { userId: user, role },
-          })
-        )
-      }
+    // Handle incoming message and broadcast to room
+    socket.on("message:send", ({ consultationId, message }) => {
+      socket.to(consultationId).emit("message:receive", message);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
+
+  // Start HTTP server
+  httpServer
+    .once("error", (err) => {
+      console.error(err);
+      process.exit(1);
     })
-
-    ws.on("message", (message) => {
-      try {
-        const data = JSON.parse(message)
-        console.log(`Message from ${user}:`, data.type)
-
-        roomUsers.forEach((userData, userId) => {
-          if (userId !== user && userData.ws.readyState === WebSocket.OPEN) {
-            userData.ws.send(message)
-          }
-        })
-      } catch (error) {
-        console.error("Error parsing message:", error)
-      }
-    })
-
-    ws.on("close", () => {
-      console.log(`User ${user} left room ${room}`)
-      roomUsers.delete(user)
-
-      roomUsers.forEach((userData) => {
-        if (userData.ws.readyState === WebSocket.OPEN) {
-          userData.ws.send(
-            JSON.stringify({
-              type: "user-left",
-              payload: { userId: user },
-            })
-          )
-        }
-      })
-
-      if (roomUsers.size === 0) {
-        rooms.delete(room)
-      }
-    })
-  })
-
-  const PORT = process.env.PORT || 3001
-  server.listen(PORT, () => {
-    console.log(`> Ready on http://localhost:${PORT}`)
-    console.log(`> WebSocket Signaling Server running on port ${PORT}`)
-  })
-})
+    .listen(port, () => {
+      console.log(`> Ready on http://${hostname}:${port}`);
+    });
+});
