@@ -10,40 +10,31 @@ import { GoHomeFill } from "react-icons/go";
 
 const Page = () => {
   const [user, setUser] = useState({ email: "", password: "" });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-  const checkAuthStatus = async () => {
-    try {
-      const hasToken = document.cookie.includes("token");
-      const hasUser = document.cookie.includes("user");
+    const checkIfLoggedIn = () => {
+      try {
+        const token = localStorage.getItem("token") || getCookie("token");
+        const userData = localStorage.getItem("user") || decodeURIComponent(getCookie("user") || "");
 
-      if (hasToken && hasUser) {
-        const userData = localStorage.getItem("userData");
-
-        if (!userData) throw new Error("User data missing in localStorage");
-
-        const parsedUser = JSON.parse(userData);
-        if (!parsedUser?.id) throw new Error("Invalid user ID");
-
-        setIsAuthenticated(true);
-        router.replace(`/user/${parsedUser.id}/dashboard`);
+        if (token && userData) {
+          const parsedUser = JSON.parse(userData);
+          if (parsedUser?.id || parsedUser?._id) {
+            const userId = parsedUser.id || parsedUser._id;
+            router.replace(`/user/${userId}/dashboard`);
+          }
+        }
+      } catch (err) {
+        console.error("Silent auth check failed", err);
       }
-    } catch (error) {
-      console.error("Authentication check failed:", error);
-      // Optional: Clear bad data from cookies/localStorage
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  checkAuthStatus();
-}, [router]);
-
+    checkIfLoggedIn();
+  }, [router]);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberEmail");
@@ -55,17 +46,21 @@ const Page = () => {
     setButtonDisabled(!user.email || !user.password);
   }, [user.email, user.password]);
 
-  const setCookie = (name: string, value: string, days: number = 1) => {
-    const expires = new Date();
-    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+  const getCookie = (name: string) => {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? match[2] : null;
+  };
+
+  const setCookie = (name: string, value: string, days = 1) => {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
   };
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       setLoading(true);
+
       const response = await axios.post("/api/users/login", user, {
         withCredentials: true,
       });
@@ -73,13 +68,13 @@ const Page = () => {
       const { userId, token, user: userData } = response.data;
 
       if (token) {
+        localStorage.setItem("token", token);
         setCookie("token", token);
-        console.log("Token cookie set on client:", token);
       }
 
       if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData));
         setCookie("user", encodeURIComponent(JSON.stringify(userData)));
-        console.log("User cookie set on client:", userData);
       }
 
       if (rememberMe) {
@@ -91,6 +86,7 @@ const Page = () => {
       }
 
       toast.success("Login successful!");
+
       setTimeout(() => {
         startTransition(() => {
           router.push(`/user/${userId}/dashboard`);
@@ -105,20 +101,15 @@ const Page = () => {
     }
   };
 
-  // if (loading) {
-  //   return (
-  //     <div className="flex bg-transparent items-center justify-center min-h-screen">
-  //       <Spinner /> {/* Replace with your actual loader component */}
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="mainlogin flex flex-col items-center justify-center min-h-screen">
       <div className="AuthPopup RegisterPopup flex flex-col align-middle justify-between items-center absolute shadow-2xl bg-white rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 w-full max-w-sm">
-       
-          <GoHomeFill onClick={()=>{router.push("/Home")}} size={35} className=" text-teal-600 hover:cursor-pointer hover:scale-[1.1] active:scale-[1] ease-in-out transition-all duration-300 mb-4"/>
-        
+        <GoHomeFill
+          onClick={() => router.push("/Home")}
+          size={35}
+          className="text-teal-600 hover:cursor-pointer hover:scale-[1.1] active:scale-[1] ease-in-out transition-all duration-300 mb-4"
+        />
+
         <h1 className="font-sans font-extrabold text-2xl text-center">
           User Login
         </h1>
@@ -144,6 +135,7 @@ const Page = () => {
             required
             className="border-2 border-gray-300 p-2 w-full mt-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
+
           <label className="flex items-center mt-3 text-sm text-gray-600">
             <input
               type="checkbox"
@@ -173,13 +165,12 @@ const Page = () => {
           </span>
         </p>
       </div>
+
       <Toaster
         position="bottom-right"
         reverseOrder={false}
         toastOptions={{
-          className: "",
           duration: 5000,
-          removeDelay: 1000,
           style: {
             background: "#363636",
             color: "#fff",

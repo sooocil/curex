@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 3600,
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+
     });
 
     // Set user cookie (this was missing!)
@@ -89,6 +91,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 3600,
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     });
 
     console.log("Cookies set: token, user for user:", user._id);

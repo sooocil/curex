@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";
-import { toast } from "sonner";
 import { UserOverview } from "@/components/dashboard/user-overview";
 import { RecentTests } from "@/components/dashboard/recent-tests";
 import { UpcomingAppointments } from "@/components/dashboard/upcoming-appointments";
@@ -20,50 +18,36 @@ export default async function DashboardPage({
 }) {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
+  const userCookie = (await cookieStore).get("user")?.value;
 
-  // 🔐 No token → redirect to login
-  if (!token) {
+  // No token or user cookie → redirect to login
+  if (!token || !userCookie) {
     redirect("/Login");
   }
 
+  let userId: string | undefined;
   try {
-    // ⚠️ Decode first to check expiration manually
-    const decodedToken: any = jwt.decode(token);
-
-    // ⏳ Check if token is expired
-    if (!decodedToken || decodedToken.exp * 1000 < Date.now()) {
-      // toast.error("Session expired. Please log in again.");
-      console.warn("Token expired");
-      redirect("/Login");
-    }
-
-    // ✅ Now verify token integrity
-    const verifiedToken: any = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    );
-
-    // ✅ Token matches current userId?
-    const userId = params.userId;
-
-    if (verifiedToken.id !== userId) {
-      console.warn("User ID mismatch. Redirecting to their own dashboard.");
-      redirect(`(dashboard)/user/${verifiedToken.id}/dashboard`);
-    }
-
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <UserOverview />
-        <div className="grid gap-6 md:grid-cols-2">
-          <RecentTests />
-          <UpcomingAppointments uId={userId} />
-        </div>
-        <HealthTips />
-      </div>
-    );
+    const parsed = JSON.parse(decodeURIComponent(userCookie));
+    userId = parsed._id;
   } catch (err) {
-    console.error("Token verification failed:", err);
+    console.error("Failed to parse user cookie:", err);
     redirect("/Login");
   }
+
+  // User ID mismatch → redirect to correct dashboard
+  if (userId !== params.userId) {
+    redirect(`/user/${userId}/dashboard`);
+  }
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+      <UserOverview />
+      <div className="grid gap-6 md:grid-cols-2">
+        <RecentTests />
+        <UpcomingAppointments uId={params.userId} />
+      </div>
+      <HealthTips />
+    </div>
+  );
 }

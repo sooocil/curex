@@ -1,27 +1,67 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowLeft, Users, MapPin } from "lucide-react"
-import dynamic from "next/dynamic"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-  
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Users, MapPin } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { toast } from "sonner";
+import router from "next/router";
 
-const MapComponent = dynamic(() => import("./map-component"), { ssr: false })
+const MapComponent = dynamic(() => import("./map-component"), { ssr: false });
+useEffect(() => {
+  const cookies = document.cookie.split("; ").reduce(
+    (acc, cookie) => {
+      const [name, value] = cookie.split("=");
+      acc[name] = value;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
+  let userId: string | undefined;
+  if (cookies.user) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(cookies.user));
+      userId = parsed._id;
+    } catch (error) {
+      console.error("Failed to parse user cookie:", error);
+    }
+  }
+
+  if (!userId) {
+    console.error("No userId found in cookie");
+    toast.error("Please log in to submit assessment");
+    router.push("/Login");
+    return;
+  }
+});
 
 const analysisResults = {
   possibleConditions: [
-    { name: "Common Cold", probability: "High", description: "A viral infection of the upper respiratory tract." },
-    { name: "Seasonal Allergies", probability: "Medium", description: "An immune response to environmental triggers." },
-    { name: "Influenza", probability: "Low", description: "A viral infection that attacks your respiratory system." },
+    {
+      name: "Common Cold",
+      probability: "High",
+      description: "A viral infection of the upper respiratory tract.",
+    },
+    {
+      name: "Seasonal Allergies",
+      probability: "Medium",
+      description: "An immune response to environmental triggers.",
+    },
+    {
+      name: "Influenza",
+      probability: "Low",
+      description: "A viral infection that attacks your respiratory system.",
+    },
   ],
   recommendedActions: [
     "Rest and stay hydrated",
     "Take over-the-counter pain relievers",
     "Consult with a healthcare provider if symptoms worsen",
   ],
-}
+};
 
 const hospitals = [
   {
@@ -63,20 +103,20 @@ const hospitals = [
       { name: "Dr. Thomas Brown", specialty: "Family Medicine" },
     ],
   },
-]
+];
 
 export default function ResultsPage() {
-  const router = useRouter()
-  const [activeHospital, setActiveHospital] = useState<string | null>(null)
-  const [isClient, setIsClient] = useState(false)
+  const router = useRouter();
+  const [activeHospital, setActiveHospital] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   const handleHospitalClick = (hospitalId: string) => {
-    router.push(`/hospitals/${hospitalId}`)
-  }
+    router.push(`/hospitals/${hospitalId}`);
+  };
 
   return (
     <div className="min-h-screen max-h-20 overflow-hidden bg-gray-50">
@@ -93,35 +133,48 @@ export default function ResultsPage() {
           {/* Results section */}
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h1 className="text-2xl font-bold text-gray-800 mb-6">Your Symptom Analysis</h1>
+              <h1 className="text-2xl font-bold text-gray-800 mb-6">
+                Your Symptom Analysis
+              </h1>
 
               <div className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-700 mb-3">Possible Conditions</h2>
+                <h2 className="text-lg font-semibold text-gray-700 mb-3">
+                  Possible Conditions
+                </h2>
                 <div className="space-y-4">
-                  {analysisResults.possibleConditions.map((condition, index) => (
-                    <div key={index} className="border-l-4 border-[#00AD9B] pl-4 py-2">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">{condition.name}</h3>
-                        <span
-                          className={`text-sm px-2 py-1 rounded-full ${
-                            condition.probability === "High"
-                              ? "bg-red-100 text-red-800"
-                              : condition.probability === "Medium"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
-                          }`}
-                        >
-                          {condition.probability}
-                        </span>
+                  {analysisResults.possibleConditions.map(
+                    (condition, index) => (
+                      <div
+                        key={index}
+                        className="border-l-4 border-[#00AD9B] pl-4 py-2"
+                      >
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium">{condition.name}</h3>
+                          <span
+                            className={`text-sm px-2 py-1 rounded-full ${
+                              condition.probability === "High"
+                                ? "bg-red-100 text-red-800"
+                                : condition.probability === "Medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                            }`}
+                          >
+                            {condition.probability}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {condition.description}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">{condition.description}</p>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-700 mb-3">Recommended Actions</h2>
+                <h2 className="text-lg font-semibold text-gray-700 mb-3">
+                  Recommended Actions
+                </h2>
                 <ul className="list-disc list-inside space-y-2 text-gray-700">
                   {analysisResults.recommendedActions.map((action, index) => (
                     <li key={index}>{action}</li>
@@ -133,12 +186,12 @@ export default function ResultsPage() {
             <div className="bg-[#00AD9B] text-white rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Important Note</h2>
               <p className="mb-4">
-                This analysis is not a medical diagnosis. Always consult with a healthcare professional for proper
-                medical advice.
+                This analysis is not a medical diagnosis. Always consult with a
+                healthcare professional for proper medical advice.
               </p>
-              <Button  className="bg-white text-[#00AD9B] px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+              <Button className="bg-white text-[#00AD9B] px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
                 <Link href="/user/$%7BuserId%7D/dashboard/doctors">
-                Find a Doctor
+                  Find a Doctor
                 </Link>
               </Button>
             </div>
@@ -147,12 +200,13 @@ export default function ResultsPage() {
           {/* Map section */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-lg p-6 h-full">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Nearby Healthcare Facilities</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Nearby Healthcare Facilities
+              </h2>
 
               <div className="h-[500px] rounded-xl overflow-hidden">
                 {isClient ? (
                   <MapComponent
-                  
                     hospitals={hospitals}
                     activeHospital={activeHospital}
                     setActiveHospital={setActiveHospital}
@@ -172,7 +226,9 @@ export default function ResultsPage() {
                     className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => handleHospitalClick(hospital.id)}
                   >
-                    <h3 className="font-semibold text-[#00AD9B] mb-2">{hospital.name}</h3>
+                    <h3 className="font-semibold text-[#00AD9B] mb-2">
+                      {hospital.name}
+                    </h3>
                     <div className="flex items-center text-sm text-gray-600 mb-1">
                       <MapPin className="w-4 h-4 mr-1" />
                       <span className="truncate">{hospital.address}</span>
@@ -189,6 +245,5 @@ export default function ResultsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

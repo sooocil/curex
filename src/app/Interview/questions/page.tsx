@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,33 @@ export default function SymptomAssessment() {
     q9: "", // Contact with sick person (Yes/No)
     q10: "", // Other symptoms
   });
+
+  
+  useEffect(() => {
+    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+      const [name, value] = cookie.split("=");
+      acc[name] = value;
+      return acc;
+    }, {} as Record<string, string>);
+
+    let userId: string | undefined;
+    if (cookies.user) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(cookies.user));
+        userId = parsed._id;
+      } catch (error) {
+        console.error("Failed to parse user cookie:", error);
+      }
+    }
+
+    if (!userId) {
+      console.error("No userId found in cookie");
+      toast.error("Please log in to submit assessment");
+      router.push("/Login");
+      return;
+    }
+  })
+
 
   const pushToBackend = async (data: any) => {
     try {

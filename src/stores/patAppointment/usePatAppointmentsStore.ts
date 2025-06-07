@@ -16,7 +16,7 @@ interface AppointmentState {
 }
 
 export const usePatAppointmentStore = create<AppointmentState>((set) => ({
-  appointments: null,
+  appointments: null, 
   loading: false,
   error: null,
 
@@ -34,6 +34,7 @@ export const usePatAppointmentStore = create<AppointmentState>((set) => ({
 
       if (!res.ok) {
         const data = await res.json();
+        console.error("Error fetching appointments:", data);
         throw new Error(data.message || "Failed to fetch");
       }
 
