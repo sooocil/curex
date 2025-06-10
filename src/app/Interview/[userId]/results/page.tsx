@@ -10,33 +10,7 @@ import { toast } from "sonner";
 import router from "next/router";
 
 const MapComponent = dynamic(() => import("./map-component"), { ssr: false });
-useEffect(() => {
-  const cookies = document.cookie.split("; ").reduce(
-    (acc, cookie) => {
-      const [name, value] = cookie.split("=");
-      acc[name] = value;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
 
-  let userId: string | undefined;
-  if (cookies.user) {
-    try {
-      const parsed = JSON.parse(decodeURIComponent(cookies.user));
-      userId = parsed._id;
-    } catch (error) {
-      console.error("Failed to parse user cookie:", error);
-    }
-  }
-
-  if (!userId) {
-    console.error("No userId found in cookie");
-    toast.error("Please log in to submit assessment");
-    router.push("/Login");
-    return;
-  }
-});
 
 const analysisResults = {
   possibleConditions: [
@@ -106,9 +80,38 @@ const hospitals = [
 ];
 
 export default function ResultsPage() {
+
   const router = useRouter();
   const [activeHospital, setActiveHospital] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+  const cookies = document.cookie.split("; ").reduce(
+    (acc, cookie) => {
+      const [name, value] = cookie.split("=");
+      acc[name] = value;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
+  let userId: string | undefined;
+  if (cookies.user) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(cookies.user));
+      userId = parsed._id;
+    } catch (error) {
+      console.error("Failed to parse user cookie:", error);
+    }
+  }
+
+  if (!userId) {
+    console.error("No userId found in cookie");
+    toast.error("Please log in to submit assessment");
+    router.push("/Login");
+    return;
+  }
+});
 
   useEffect(() => {
     setIsClient(true);

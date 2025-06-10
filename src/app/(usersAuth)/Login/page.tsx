@@ -19,13 +19,25 @@ const Page = () => {
     const checkIfLoggedIn = () => {
       try {
         const token = localStorage.getItem("token") || getCookie("token");
-        const userData = localStorage.getItem("user") || decodeURIComponent(getCookie("user") || "");
+        const userData =
+          localStorage.getItem("user") ||
+          decodeURIComponent(getCookie("user") || "");
 
         if (token && userData) {
           const parsedUser = JSON.parse(userData);
+
+          // router.push(`/user/${userId}/dashboard`);
           if (parsedUser?.id || parsedUser?._id) {
             const userId = parsedUser.id || parsedUser._id;
-            router.replace(`/user/${userId}/dashboard`);
+            console.log(
+              "User is already logged in, redirecting to dashboard:",
+              userId
+            );
+            setTimeout(() => {
+              startTransition(() => {
+                // router.push(`/user/${userId}/dashboard`);
+              });
+            }, 1000);
           }
         }
       } catch (err) {

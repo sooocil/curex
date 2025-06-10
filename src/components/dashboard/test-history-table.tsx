@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import Link from "next/link"
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -8,45 +8,53 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye, Download, Share } from "lucide-react"
-import { useTestStore } from "@/stores/testStore"
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Eye, Download, Share } from "lucide-react";
+import { useTestStore } from "@/stores/testStore";
+import { useParams } from "next/navigation";
 
 export function TestHistoryTable() {
-  const tests = useTestStore((state) => state.tests)
+  const tests = useTestStore((state) => state.tests);
 
   const getResultBadge = (result: string) => {
     switch (result) {
       case "Normal":
-        return <Badge className="bg-green-500">Normal</Badge>
+        return <Badge className="bg-green-500">Normal</Badge>;
       case "Low":
-        return <Badge className="bg-yellow-500">Low</Badge>
+        return <Badge className="bg-yellow-500">Low</Badge>;
       case "High":
-        return <Badge className="bg-orange-500">High</Badge>
+        return <Badge className="bg-orange-500">High</Badge>;
       case "Abnormal":
-        return <Badge className="bg-red-500">Abnormal</Badge>
+        return <Badge className="bg-red-500">Abnormal</Badge>;
       default:
-        return <Badge>{result}</Badge>
+        return <Badge>{result}</Badge>;
     }
-  }
+  };
+  const { userId } = useParams<{ userId: string }>();
 
   if (tests.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center bg-white rounded-lg shadow p-8 text-center">
-        <p className="text-gray-500 mb-4 text-lg">No tests you have done till now.</p>
-        <Link href="/Interview/questions">
+        <p className="text-gray-500 mb-4 text-lg">
+          No tests you have done till now.
+        </p>
+        <div
+          onClick={() => {
+            window.location.href = `/Interview/${userId}/questions`;
+          }}
+        >
           <Button>Take Test</Button>
-        </Link>
+        </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -66,7 +74,9 @@ export function TestHistoryTable() {
             <TableRow key={test.id}>
               <TableCell className="font-medium">{test.name}</TableCell>
               <TableCell>{test.date}</TableCell>
-              <TableCell className="hidden md:table-cell">{test.doctor}</TableCell>
+              <TableCell className="hidden md:table-cell">
+                {test.doctor}
+              </TableCell>
               <TableCell>{getResultBadge(test.result)}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
@@ -99,5 +109,5 @@ export function TestHistoryTable() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

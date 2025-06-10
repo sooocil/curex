@@ -1,7 +1,7 @@
 // app/api/symptom-assessment/route.ts
+import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@/dbConfig/dbConfig";
 import Symptom from "@/models/symptom";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import { create } from "zustand";
 
@@ -61,9 +60,7 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
         const upcoming = appointments.filter(
           (app) => new Date(app.date) >= now
         );
-        const history = appointments.filter(
-          (app) => new Date(app.date) < now
-        );
+        const history = appointments.filter((app) => new Date(app.date) < now);
 
         console.log("Upcoming appointments:", upcoming);
         console.log("History appointments:", history);
@@ -73,69 +70,16 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
           history,
         });
       } else {
-        console.warn("API response is not an array:", data);
-        // Mock data for testing
-        const mockAppointments: Appointment[] = [
-          {
-            id: "1",
-            patientName: "John Doe",
-            doctorName: "Dr. Smith",
-            specialty: "Cardiology",
-            date: "2025-06-10T14:30:00Z",
-            mode: "video",
-            status: "approved",
-            reason: "Follow-up checkup",
-            doctorRating: 4.5,
-          },
-          {
-            id: "2",
-            patientName: "Jane Roe",
-            doctorName: "Dr. Brown",
-            specialty: "Neurology",
-            date: "2025-05-01T10:00:00Z",
-            mode: "in-person",
-            status: "completed",
-            reason: "Initial consultation",
-            doctorRating: 4.8,
-          },
-        ];
-        const now = new Date();
         set({
-          upcoming: mockAppointments.filter((app) => new Date(app.date) >= now),
-          history: mockAppointments.filter((app) => new Date(app.date) < now),
+          upcoming: [],
+          history: [],
         });
       }
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      // Mock data on error
-      const mockAppointments: Appointment[] = [
-        {
-          id: "1",
-          patientName: "John Doe",
-          doctorName: "Dr. Smith",
-          specialty: "Cardiology",
-          date: "2025-06-10T14:30:00Z",
-          mode: "video",
-          status: "approved",
-          reason: "Follow-up checkup",
-          doctorRating: 4.5,
-        },
-        {
-          id: "2",
-          patientName: "Jane Roe",
-          doctorName: "Dr. Brown",
-          specialty: "Neurology",
-          date: "2025-05-01T10:00:00Z",
-          mode: "in-person",
-          status: "completed",
-          reason: "Initial consultation",
-          doctorRating: 4.8,
-        },
-      ];
-      const now = new Date();
       set({
-        upcoming: mockAppointments.filter((app) => new Date(app.date) >= now),
-        history: mockAppointments.filter((app) => new Date(app.date) < now),
+        upcoming: [],
+        history: [],
       });
     } finally {
       set({ loading: false });

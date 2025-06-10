@@ -16,6 +16,8 @@ export default async function DashboardPage({
 }: {
   params: { userId: string };
 }) {
+  // This is a server component, so you can't use useEffect or client-side hooks here.
+  // Token checking and redirection must be done on the server before rendering.
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
   const userCookie = (await cookieStore).get("user")?.value;

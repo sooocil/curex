@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existingUser = await User.findOne({ email });
+    
     if (existingUser) {
       return NextResponse.json(
         { message: "User already exists." },

@@ -103,7 +103,7 @@ export default function SymptomAssessment() {
   const handleSubmit = () => {
     pushToBackend(answers);
     console.log("Form submitted with answers:", answers);
-    router.push("/Interview/results")
+    router.push("/Interview/[userId]/results")
   };
 
   const getStepTitle = () => {

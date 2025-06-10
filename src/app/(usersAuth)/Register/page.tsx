@@ -210,7 +210,7 @@ const page = () => {
               <input
                 type="text"
                 id="username"
-                placeholder="Username"
+                placeholder="Full name || Username"
                 value={user.username}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setUser({ ...user, username: e.target.value })

@@ -1,15 +1,55 @@
-import { NextRequest } from "next/server";
+import { useEffect, useState } from "react";
 import jwt from "jsonwebtoken";
 
-export const getDataFromToken = async (req: NextRequest) => {
-  try {
-    const token = req.cookies.get("token")?.value;
+type User = {
+  firstName: string;
+  role: "user" | "doctor";
+  email: string;
+};
+
+export const useAuthUser = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const updateUserFromToken = () => {
+    const token = localStorage.getItem("token");
     if (!token) {
-      return null;
+      setUser(null);
+      setLoading(false);
+      return;
     }
-    const decodedToken:any = jwt.verify(token, process.env.JWT_SECRET as string);
-    return decodedToken.id ;
-  } catch (error:any) {
-    throw new Error(error.message);
-  }
+
+    try {
+      const decoded = jwt.decode(token) as User | null;
+      if (decoded && typeof decoded === "object") {
+        setUser({
+          firstName: decoded.firstName,
+          role: decoded.role,
+          email: decoded.email,
+        });
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    updateUserFromToken();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "token") {
+        updateUserFromToken();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  return { user, loading };
 };

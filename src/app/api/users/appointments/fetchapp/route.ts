@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     if (!appointments || appointments.length === 0) {
       console.log("No appointments found for userId:", userId);
-      return NextResponse.json({ message: "No appointments found" }, { status: 404 });
+      return NextResponse.json({ message: "No appointments found" }, { status: 201 });
     }
 
     return NextResponse.json(appointments, { status: 200 });

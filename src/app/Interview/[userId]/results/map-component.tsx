@@ -1,45 +1,46 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
-import { motion } from "framer-motion"
-import { ExternalLink, Users, MapPin, Phone } from "lucide-react"
-import "leaflet/dist/leaflet.css"
-
-
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { motion } from "framer-motion";
+import { ExternalLink, Users, MapPin, Phone } from "lucide-react";
+import "leaflet/dist/leaflet.css";
+import DynamicMapComponent from "@/components/dashboard/DynamicMapComponent";
 
 const fixLeafletIcon = () => {
   if (typeof window !== "undefined" && window.L) {
-    delete (window.L.Icon.Default.prototype as any)._getIconUrl
+    delete (window.L.Icon.Default.prototype as any)._getIconUrl;
 
     window.L.Icon.Default.mergeOptions({
-      iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+      iconRetinaUrl:
+        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
       iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-      shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-    })
+      shadowUrl:
+        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+    });
   }
-}
+};
 
 interface Doctor {
-  name: string
-  specialty: string
+  name: string;
+  specialty: string;
 }
 
 interface Hospital {
-  id: string
-  name: string
-  position: [number, number]
-  address: string
-  phone: string
-  availableDoctors: number
-  doctors: Doctor[]
+  id: string;
+  name: string;
+  position: [number, number];
+  address: string;
+  phone: string;
+  availableDoctors: number;
+  doctors: Doctor[];
 }
 
 interface MapComponentProps {
-  hospitals: Hospital[]
-  activeHospital: string | null
-  setActiveHospital: (id: string | null) => void
-  handleHospitalClick: (id: string) => void
+  hospitals: Hospital[];
+  activeHospital: string | null;
+  setActiveHospital: (id: string | null) => void;
+  handleHospitalClick: (id: string) => void;
 }
 
 export default function MapComponent({
@@ -51,21 +52,23 @@ export default function MapComponent({
   useEffect(() => {
     import("leaflet").then((L) => {
       if (!window.L) {
-        window.L = L
+        window.L = L;
       }
-      fixLeafletIcon()
-    })
-  }, [])
+      fixLeafletIcon();
+    });
+  }, []);
 
   return (
     <>
-      <MapContainer center={[27.670684, 84.438595]} zoom={14} style={{ height: "100%", width: "100%" }}>
-      <TileLayer
-  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-/>
-
-
+      <MapContainer
+        center={[27.670684, 84.438595]}
+        zoom={14}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
 
         {hospitals.map((hospital) => (
           <Marker
@@ -83,7 +86,10 @@ export default function MapComponent({
                   activeHospital === hospital.id ? "w-64 h-auto" : ""
                 }`}
               >
-                <div className="p-2 cursor-pointer" onClick={() => handleHospitalClick(hospital.id)}>
+                <div
+                  className="p-2 cursor-pointer"
+                  onClick={() => handleHospitalClick(hospital.id)}
+                >
                   <h3 className="font-bold text-[#00AD9B] hover:underline flex items-center">
                     {hospital.name}
                     <ExternalLink className="w-3 h-3 ml-1" />
@@ -111,12 +117,19 @@ export default function MapComponent({
                         <span>{hospital.phone}</span>
                       </div>
 
-                      <div className="text-xs font-medium mb-1">Available Doctors:</div>
+                      <div className="text-xs font-medium mb-1">
+                        Available Doctors:
+                      </div>
                       <div className="max-h-24 overflow-y-auto pr-1">
                         {hospital.doctors.map((doctor, index) => (
-                          <div key={index} className="mb-1 pb-1 border-b border-gray-100 last:border-0">
+                          <div
+                            key={index}
+                            className="mb-1 pb-1 border-b border-gray-100 last:border-0"
+                          >
                             <div className="font-medium">{doctor.name}</div>
-                            <div className="text-gray-500">{doctor.specialty}</div>
+                            <div className="text-gray-500">
+                              {doctor.specialty}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -127,9 +140,13 @@ export default function MapComponent({
             </Popup>
           </Marker>
         ))}
+      <DynamicMapComponent
+        hospitals={hospitals}
+        activeHospital={activeHospital}
+        setActiveHospital={setActiveHospital}
+        handleHospitalClick={handleHospitalClick}
+      />
       </MapContainer>
     </>
-  )
+  );
 }
-
-

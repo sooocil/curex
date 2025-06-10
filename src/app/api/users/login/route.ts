@@ -4,6 +4,7 @@ import User from "@/models/userModel";
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 connectDB();
 
@@ -68,30 +69,23 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-
-    // Set token cookie
-    response.cookies.set({
-      name: "token",
-      value: token,
+    (await cookies()).set("token", token, {
       httpOnly: false,
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 3600,
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-
+      expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
     });
 
-    // Set user cookie (this was missing!)
-    response.cookies.set({
-      name: "user",
-      value: encodeURIComponent(JSON.stringify(userData)),
+    (await cookies()).set("user", encodeURIComponent(JSON.stringify(userData)), {
       httpOnly: false,
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 3600,
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
+
     });
 
     console.log("Cookies set: token, user for user:", user._id);
