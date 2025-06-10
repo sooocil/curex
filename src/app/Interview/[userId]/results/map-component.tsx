@@ -1,152 +1,148 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { motion } from "framer-motion";
-import { ExternalLink, Users, MapPin, Phone } from "lucide-react";
-import "leaflet/dist/leaflet.css";
-import DynamicMapComponent from "@/components/dashboard/DynamicMapComponent";
-
-const fixLeafletIcon = () => {
-  if (typeof window !== "undefined" && window.L) {
-    delete (window.L.Icon.Default.prototype as any)._getIconUrl;
-
-    window.L.Icon.Default.mergeOptions({
-      iconRetinaUrl:
-        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-      iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-      shadowUrl:
-        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-    });
-  }
-};
-
-interface Doctor {
-  name: string;
-  specialty: string;
-}
+import React, { useState, useCallback, useMemo } from "react"
+import { Map, Marker, Overlay } from "pigeon-maps"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { MapPin, Phone, Users, X } from "lucide-react"
 
 interface Hospital {
-  id: string;
-  name: string;
-  position: [number, number];
-  address: string;
-  phone: string;
-  availableDoctors: number;
-  doctors: Doctor[];
+  id: string
+  name: string
+  position: [number, number] // [lat, lng]
+  address: string
+  phone?: string
+  availableDoctors?: number
 }
 
-interface MapComponentProps {
-  hospitals: Hospital[];
-  activeHospital: string | null;
-  setActiveHospital: (id: string | null) => void;
-  handleHospitalClick: (id: string) => void;
+interface Props {
+  hospitals: Hospital[]
 }
 
-export default function MapComponent({
-  hospitals,
-  activeHospital,
-  setActiveHospital,
-  handleHospitalClick,
-}: MapComponentProps) {
-  useEffect(() => {
-    import("leaflet").then((L) => {
-      if (!window.L) {
-        window.L = L;
-      }
-      fixLeafletIcon();
-    });
-  }, []);
+const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
+  const [popupInfo, setPopupInfo] = useState<Hospital | null>(null)
+  const [center, setCenter] = useState<[number, number]>([40.7128, -74.006])
+  const [zoom, setZoom] = useState(12)
+
+  // Memoize hospital markers to prevent re-rendering
+  const hospitalMarkers = useMemo(() => {
+    return hospitals.map((hospital) => (
+      <Marker
+        key={hospital.id}
+        anchor={hospital.position}
+        onClick={() => setPopupInfo(hospital)}
+        width={32}
+        height={32}
+      >
+        <div className="relative">
+          <div className="w-8 h-8 bg-[#00AD9B] rounded-full border-2 border-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
+            <MapPin className="w-4 h-4 text-white" />
+          </div>
+          {hospital.availableDoctors && hospital.availableDoctors > 0 && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-xs text-white font-bold">{hospital.availableDoctors}</span>
+            </div>
+          )}
+        </div>
+      </Marker>
+    ))
+  }, [hospitals])
+
+  // Optimize popup close handler
+  const handleClosePopup = useCallback(() => {
+    setPopupInfo(null)
+  }, [])
+
+  // Optimize bounds change handler
+  const handleBoundsChanged = useCallback(({ center, zoom }: { center: [number, number]; zoom: number }) => {
+    setCenter(center)
+    setZoom(zoom)
+  }, [])
 
   return (
-    <>
-      <MapContainer
-        center={[27.670684, 84.438595]}
-        zoom={14}
-        style={{ height: "100%", width: "100%" }}
+    <div className="relative w-full h-full rounded-xl overflow-hidden">
+      <Map
+        height={500}
+        center={center}
+        zoom={zoom}
+        onBoundsChanged={handleBoundsChanged}
+        attribution={false}
+        metaWheelZoom={true}
+        mouseEvents={true}
+        touchEvents={true}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
+        {hospitalMarkers}
 
-        {hospitals.map((hospital) => (
-          <Marker
-            key={hospital.id}
-            position={hospital.position}
-            eventHandlers={{
-              mouseover: () => setActiveHospital(hospital.id),
-              mouseout: () => setActiveHospital(null),
-              click: () => setActiveHospital(hospital.id),
-            }}
-          >
-            <Popup>
-              <div
-                className={`w-10 h-5 transition-all duration-300 ease-in-out overflow-hidden ${
-                  activeHospital === hospital.id ? "w-64 h-auto" : ""
-                }`}
-              >
-                <div
-                  className="p-2 cursor-pointer"
-                  onClick={() => handleHospitalClick(hospital.id)}
-                >
-                  <h3 className="font-bold text-[#00AD9B] hover:underline flex items-center">
-                    {hospital.name}
-                    <ExternalLink className="w-3 h-3 ml-1" />
-                  </h3>
-
-                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                    <Users className="w-3 h-3 mr-1" />
-                    <span>{hospital.availableDoctors} doctors available</span>
-                  </div>
-
-                  {activeHospital === hospital.id && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="mt-2"
-                    >
-                      <div className="flex items-center text-xs text-gray-600 mb-1">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        <span>{hospital.address}</span>
-                      </div>
-                      <div className="flex items-center text-xs text-gray-600 mb-2">
-                        <Phone className="w-3 h-3 mr-1" />
-                        <span>{hospital.phone}</span>
-                      </div>
-
-                      <div className="text-xs font-medium mb-1">
-                        Available Doctors:
-                      </div>
-                      <div className="max-h-24 overflow-y-auto pr-1">
-                        {hospital.doctors.map((doctor, index) => (
-                          <div
-                            key={index}
-                            className="mb-1 pb-1 border-b border-gray-100 last:border-0"
-                          >
-                            <div className="font-medium">{doctor.name}</div>
-                            <div className="text-gray-500">
-                              {doctor.specialty}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
+        {/* Hospital count overlay */}
+        <Overlay anchor={[center[0] + 0.01, center[1] - 0.02]} offset={[0, 0]}>
+          <Card className="shadow-lg border-none bg-white/95 backdrop-blur-sm">
+            <CardContent className="p-3">
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-4 h-4 text-[#00AD9B]" />
+                <div>
+                  <p className="font-semibold text-sm text-gray-800">Nearby Hospitals</p>
+                  <p className="text-xs text-gray-600">{hospitals.length} facilities found</p>
                 </div>
               </div>
-            </Popup>
-          </Marker>
-        ))}
-      <DynamicMapComponent
-        hospitals={hospitals}
-        activeHospital={activeHospital}
-        setActiveHospital={setActiveHospital}
-        handleHospitalClick={handleHospitalClick}
-      />
-      </MapContainer>
-    </>
-  );
-}
+            </CardContent>
+          </Card>
+        </Overlay>
+
+        {/* Hospital popup */}
+        {popupInfo && (
+          <Overlay anchor={popupInfo.position} offset={[0, -40]}>
+            <Card className="shadow-xl border-none bg-white max-w-xs">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-semibold text-[#00AD9B] text-sm">{popupInfo.name}</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClosePopup}
+                    className="h-6 w-6 p-0 hover:bg-gray-100"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-start space-x-2">
+                    <MapPin className="w-3 h-3 text-gray-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-600">{popupInfo.address}</span>
+                  </div>
+
+                  {popupInfo.phone && (
+                    <div className="flex items-center space-x-2">
+                      <Phone className="w-3 h-3 text-gray-500 flex-shrink-0" />
+                      <span className="text-gray-600">{popupInfo.phone}</span>
+                    </div>
+                  )}
+
+                  {popupInfo.availableDoctors && (
+                    <div className="flex items-center space-x-2">
+                      <Users className="w-3 h-3 text-gray-500 flex-shrink-0" />
+                      <span className="text-gray-600">{popupInfo.availableDoctors} doctors available</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex space-x-2 mt-3">
+                  <Button size="sm" className="bg-[#00AD9B] hover:bg-[#009688] text-white text-xs px-3 py-1">
+                    View Details
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs px-3 py-1">
+                    Get Directions
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </Overlay>
+        )}
+      </Map>
+    </div>
+  )
+})
+
+HospitalMap.displayName = "HospitalMap"
+
+export default HospitalMap

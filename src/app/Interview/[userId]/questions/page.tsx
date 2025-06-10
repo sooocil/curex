@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -13,6 +13,8 @@ export default function SymptomAssessment() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const totalSteps = 10;
+  const params = useParams();
+  const currentUserId = params.userId;
 
   const [answers, setAnswers] = useState({
     q1: "", // Main symptom
@@ -27,13 +29,15 @@ export default function SymptomAssessment() {
     q10: "", // Other symptoms
   });
 
-  
   useEffect(() => {
-    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-      const [name, value] = cookie.split("=");
-      acc[name] = value;
-      return acc;
-    }, {} as Record<string, string>);
+    const cookies = document.cookie.split("; ").reduce(
+      (acc, cookie) => {
+        const [name, value] = cookie.split("=");
+        acc[name] = value;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
     let userId: string | undefined;
     if (cookies.user) {
@@ -51,34 +55,123 @@ export default function SymptomAssessment() {
       router.push("/Login");
       return;
     }
-  })
-
+  }, []);
 
   const pushToBackend = async (data: any) => {
     try {
-      //Get userId from local storage or token or session
-      const userId = localStorage.getItem("userId") || "defaultUserId";
+      console.log("=== Frontend: Starting submission ===");
+
+      // Get userId from cookies
+      const cookies = document.cookie.split("; ").reduce(
+        (acc, cookie) => {
+          const [name, value] = cookie.split("=");
+          acc[name] = value;
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      let userId: string | undefined;
+      if (cookies.user) {
+        try {
+          const parsed = JSON.parse(decodeURIComponent(cookies.user));
+          userId = parsed._id;
+          console.log("✅ UserId extracted from cookie:", userId);
+        } catch (error) {
+          console.error("❌ Failed to parse user cookie:", error);
+        }
+      }
+
+      if (!userId) {
+        console.error("❌ No userId found in cookie");
+        toast.error("Please log in to submit assessment");
+        router.push("/Login");
+        return;
+      }
+
+      // Transform the data
+      const transformedData = {
+        userId: userId,
+        mainSymptom: data.q1,
+        duration: data.q2,
+        hasFever: data.q3,
+        temperature: data.q4,
+        hasCough: data.q5,
+        coughType: data.q6,
+        painLevel: data.q7,
+        hasFatigue: data.q8,
+        contactWithSick: data.q9,
+        otherSymptoms: data.q10,
+      };
+
+      console.log("✅ Data transformed:", transformedData);
 
       const response = await axios.post(
-        "http://localhost:3000/api/symptom-assessment", 
+        "/api/interview/pushint/",
+        transformedData,
         {
-          ...data,
-          userId: userId, 
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
-      if (response.status === 200) {
-        console.log("Data pushed to backend successfully");
-        toast.success("Data pushed to backend successfully");
-      } else {
-        console.error("Failed to push data to backend");
-        toast.error("Failed to push data to backend");
-      }
+
+      console.log("✅ Response received:", response.status, response.data);
+      setTimeout(() => {
+        if (response.status === 201) {
+          console.log("✅ Assessment submitted successfully");
+          return response.data;
+        }
+        toast.success("Assessment submitted successfully");
+      }, 1000);
     } catch (error) {
-      console.error("Error pushing data to backend:", error);
-      toast.error("Error pushing data to backend");
+      console.error("❌ Error submitting assessment:", error);
+
+      if (axios.isAxiosError(error)) {
+        console.error("Response data:", error.response?.data);
+        console.error("Response status:", error.response?.status);
+
+        if (error.response?.status === 400) {
+          const errorData = error.response.data;
+          toast.error(
+            `Validation Error: ${errorData.message || "Invalid data format"}`
+          );
+        } else if (error.response?.status === 500) {
+          const errorData = error.response.data;
+          toast.error(
+            `Server Error: ${errorData.message || "Please try again later"}`
+          );
+        } else {
+          toast.error("Network error. Please check your connection.");
+        }
+      } else {
+        toast.error("Unexpected error occurred");
+      }
+
+      throw error;
     }
   };
 
+  // Also fix the handleSubmit function
+  const handleSubmit = async () => {
+    try {
+      console.log("=== Starting form submission ===");
+      console.log("Current answers:", answers);
+
+      await pushToBackend(answers);
+
+      // Get userId from useParams
+
+      console.log(
+        "✅ Submission successful, redirecting to:",
+        `/Interview/${currentUserId}/results`
+      );
+      router.push(`/Interview/${currentUserId}/results`);
+    } catch (error) {
+      console.error("❌ Submission failed:", error);
+      // Error is already handled in pushToBackend, just prevent redirect
+    }
+  };
   const updateAnswer = (question: string, value: string | number) => {
     setAnswers((prev) => ({
       ...prev,
@@ -98,12 +191,6 @@ export default function SymptomAssessment() {
       setStep(step - 1);
       window.scrollTo(0, 0);
     }
-  };
-
-  const handleSubmit = () => {
-    pushToBackend(answers);
-    console.log("Form submitted with answers:", answers);
-    router.push("/Interview/[userId]/results")
   };
 
   const getStepTitle = () => {
@@ -154,15 +241,17 @@ export default function SymptomAssessment() {
     }
   };
 
+  const userId = useParams().userId;
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push(`/user/${userId}/dashboard/tests`)}
           className="flex items-center text-gray-600 hover:text-[#00AD9B] mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to home
+          Back to Tests
         </button>
 
         <div className="mb-8">

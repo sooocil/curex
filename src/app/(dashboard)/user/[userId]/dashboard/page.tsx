@@ -35,7 +35,7 @@ export default async function DashboardPage({
     console.error("Failed to parse user cookie:", err);
     redirect("/Login");
   }
-
+ 
   // User ID mismatch → redirect to correct dashboard
   if (userId !== params.userId) {
     redirect(`/user/${userId}/dashboard`);
