@@ -1,7 +1,7 @@
-// app/api/symptom-assessment/route.ts
 import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@/dbConfig/dbConfig";
-import Symptom from "@/models/symptom";
+import SymptomAssessment from "@/models/symptomassessment/symptomAssessmentModel";
+import { determineResult } from "@/lib/algos/symptomAssessmentAlgo";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +14,14 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const saved = await Symptom.create({ userId, ...answers });
+    const { result, score } = determineResult(answers);
+
+    const saved = await SymptomAssessment.create({
+      userId,
+      ...answers,
+      result,
+      score,
+    });
 
     return NextResponse.json(
       { message: "Symptom saved successfully", data: saved },

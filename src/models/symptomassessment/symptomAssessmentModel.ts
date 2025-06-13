@@ -23,13 +23,7 @@ const symptomAssessmentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Comment out the pre-save hook temporarily to fix the immediate issue
-/* 
-symptomAssessmentSchema.pre("save", async function (next) {
-  // Username population logic - disabled for now
-  next();
-});
-*/
+
 
 export default mongoose.models.SymptomAssessment ||
   mongoose.model("SymptomAssessment", symptomAssessmentSchema);
