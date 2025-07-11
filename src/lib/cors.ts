@@ -27,6 +27,19 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  const corsHeaders = new Headers({
+    "Access-Control-Allow-Origin": "https://curex.soocil.tech",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  });
+
+  if (req.method === "OPTIONS" && pathname.startsWith("/api/")) {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
   if (pathname.startsWith("/admin")) {
     if (!token || !userId || role !== "admin") {
       return NextResponse.redirect(new URL("/adminLogin", req.url));
@@ -60,13 +73,10 @@ export function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith("/Interview")) {
-    // Only allow access if token, userId, and role === "user"
     if (!token || !userId) {
       return NextResponse.redirect(new URL("/Login", req.url));
     }
-    // Check role in user cookie
     if (role !== "user") {
-      // If not a user, redirect to their respective dashboard
       if (role === "admin") {
         return NextResponse.redirect(new URL("/admin", req.url));
       } else if (role === "doctor") {
@@ -77,7 +87,6 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // General Protected Routes
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
@@ -86,7 +95,14 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/Login", req.url));
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  if (pathname.startsWith("/api/")) {
+    corsHeaders.forEach((value, key) => {
+      response.headers.set(key, value);
+    });
+  }
+
+  return response;
 }
 
 export const config = {
@@ -100,5 +116,6 @@ export const config = {
     "/user/:path*",
     "/profile/:path*",
     "/Interview/:path*",
+    "/api/:path*",  
   ],
 };
