@@ -8,8 +8,19 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 
+type SettingKey =
+  | "emailNotifications"
+  | "smsNotifications"
+  | "appointmentReminders"
+  | "testResultAlerts"
+  | "marketingEmails"
+  | "twoFactorAuth"
+  | "dataSharing"
+
+type Settings = Record<SettingKey, boolean>
+
 export function ProfileSettings() {
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<Settings>({
     emailNotifications: true,
     smsNotifications: false,
     appointmentReminders: true,
@@ -19,7 +30,7 @@ export function ProfileSettings() {
     dataSharing: true,
   })
 
-  const handleToggle = (setting: string) => {
+  const handleToggle = (setting: SettingKey) => {
     setSettings((prev) => ({ ...prev, [setting]: !prev[setting] }))
   }
 

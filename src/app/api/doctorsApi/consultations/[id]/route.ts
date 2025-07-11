@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/dbConfig/dbConfig"
-import { ActiveConsultation } from "@/models/consultations/consultation"
+import { connectDB } from "@/dbConfig/dbConfig";
+import { ActiveConsultation } from "@/models/consultations/consultation";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+interface ConsultationProps {
+  params: Promise<{ id: string }>;
+}
+
+const ConsultationPage = async (
+  { params }: ConsultationProps,
+  request: Request
+) => {
   const url = new URL(request.url);
   const action = url.searchParams.get("action"); // action=join or action=end
 
@@ -12,11 +19,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   await connectDB();
 
-  const consultationId = params.id;
+  const consultationId = (await params).id;
 
   const consultation = await ActiveConsultation.findById(consultationId);
   if (!consultation) {
-    return NextResponse.json({ error: "Consultation not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Consultation not found" },
+      { status: 404 }
+    );
   }
 
   if (action === "join") {
@@ -32,4 +42,4 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 
   return NextResponse.json({ error: "Unknown error" }, { status: 500 });
-}
+};

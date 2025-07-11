@@ -11,34 +11,31 @@ export const metadata: Metadata = {
   description: "Curex patient dashboard",
 };
 
-export default async function DashboardPage({
-  params,
-}: {
-  params: { userId: string };
-}) {
-  // This is a server component, so you can't use useEffect or client-side hooks here.
-  // Token checking and redirection must be done on the server before rendering.
+interface DashboardPageProps {
+  params: Promise<{ userId: string }>;
+}
+
+const DashboardPage = async ({ params }: DashboardPageProps) => {
+  const { userId } = await params; 
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
   const userCookie = (await cookieStore).get("user")?.value;
 
-  // No token or user cookie → redirect to login
   if (!token || !userCookie) {
     redirect("/Login");
   }
 
-  let userId: string | undefined;
+  let parsedUserId: string | undefined;
   try {
     const parsed = JSON.parse(decodeURIComponent(userCookie));
-    userId = parsed._id;
+    parsedUserId = parsed._id;
   } catch (err) {
     console.error("Failed to parse user cookie:", err);
     redirect("/Login");
   }
- 
-  // User ID mismatch → redirect to correct dashboard
-  if (userId !== params.userId) {
-    redirect(`/user/${userId}/dashboard`);
+
+  if (parsedUserId !== userId) {
+    redirect(`/user/${parsedUserId}/dashboard`);
   }
 
   return (
@@ -47,9 +44,11 @@ export default async function DashboardPage({
       <UserOverview />
       <div className="grid gap-6 md:grid-cols-2">
         <RecentTests />
-        <UpcomingAppointments uId={params.userId} />
+        <UpcomingAppointments uId={userId} />
       </div>
       <HealthTips />
     </div>
   );
-}
+};
+
+export default DashboardPage;

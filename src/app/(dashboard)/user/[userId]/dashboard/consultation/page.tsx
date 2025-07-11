@@ -25,7 +25,7 @@ export default async function PatientConsultationsPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold tracking-tight">Consultations</h1>
-        <PatientConsultationsContent userId={userId} />
+        <PatientConsultationsContent />
       </div>
     );
   } catch (err) {
