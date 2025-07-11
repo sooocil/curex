@@ -70,7 +70,7 @@ export function UserHeader() {
 
   const handleLogout = async () => {
     try {
-      const res = await axios.post("http://localhost:3000/api/users/logout", )
+      const res = await axios.post("/api/users/logout", )
       if (res.status === 200) {
         localStorage.removeItem("userId");
         window.location.href = "/";

@@ -34,7 +34,7 @@ export function ProfileInfo() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/users/me");
+        const response = await axios.get("/api/users/me");
         console.log("Profile data fetched:", response.data);
         setProfileData((prev) => ({
           ...prev,
@@ -65,10 +65,10 @@ export function ProfileInfo() {
  const handleSave = async () => {
   try {
     // Save data to backend
-    await axios.put("http://localhost:3000/api/users/me", profileData);
+    await axios.put("/api/users/me", profileData);
     setIsEditing(false);
     // Optionally re-fetch updated profile data
-    const response = await axios.get("http://localhost:3000/api/users/me");
+    const response = await axios.get("/api/users/me");
     setProfileData((prev) => ({
       ...prev,
       name: response.data.username,
