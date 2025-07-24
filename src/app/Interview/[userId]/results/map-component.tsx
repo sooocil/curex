@@ -24,7 +24,6 @@ const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
   const [center, setCenter] = useState<[number, number]>([40.7128, -74.006])
   const [zoom, setZoom] = useState(12)
 
-  // Memoize hospital markers to prevent re-rendering
   const hospitalMarkers = useMemo(() => {
     return hospitals.map((hospital) => (
       <Marker

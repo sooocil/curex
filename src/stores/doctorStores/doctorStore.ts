@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { create } from "zustand";
 
 export type Doctor = {
+  _id: string;
   id: string;
   name: string;
   specialty: string;
