@@ -61,7 +61,6 @@ export default function SymptomAssessment() {
     try {
       console.log("=== Frontend: Starting submission ===");
 
-      // Get userId from cookies
       const cookies = document.cookie.split("; ").reduce(
         (acc, cookie) => {
           const [name, value] = cookie.split("=");

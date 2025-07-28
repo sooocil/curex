@@ -6,9 +6,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, AlertCircle, Loader2 } from "lucide-react";
-
+import { recommendDoctors } from "@/lib/algos/recommendDoctors";
 import { useDoctorStore } from "@/stores/doctorStores/doctorStore";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,7 +96,6 @@ export default function ResultsPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-
   const { doctors, isLoading, error, fetchDoctors } = useDoctorStore();
 
   const checkUserAuth = useCallback(() => {
@@ -129,6 +127,31 @@ export default function ResultsPage() {
     checkUserAuth();
     fetchDoctors();
   }, [checkUserAuth, fetchDoctors]);
+
+  // Determine result (highest probability condition)
+  const result = analysisResults.possibleConditions.sort(
+    (a, b) => {
+      const probOrder: Record<string, number> = { High: 3, Medium: 2, Low: 1 };
+      return probOrder[b.probability] - probOrder[a.probability];
+    }
+  )[0].name;
+
+  // Map doctors to DoctorType
+  const recommendedDoctors = recommendDoctors(
+    result,
+    doctors.map((doc) => ({
+      ...doc,
+      email: "",
+      password: "",
+      phone: doc.contact || "",
+      bio: "",
+      education: [],
+      certifications: [],
+      documents: {},
+      status: "approved" as const,
+      createdAt: new Date().toISOString(),
+    }))
+  );
 
   const handleBackClick = () => router.back();
   const handleHospitalClick = (id: string) => router.push(`/hospitals/${id}`);
@@ -251,7 +274,7 @@ export default function ResultsPage() {
                   Recommended Doctors
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {doctors.map((doc) => (
+                  {recommendedDoctors.map((doc) => (
                     <Card
                       key={doc._id || doc.id}
                       className="cursor-pointer border border-gray-200 hover:shadow-lg transition-shadow rounded-lg"
