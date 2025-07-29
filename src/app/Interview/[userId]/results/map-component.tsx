@@ -9,7 +9,7 @@ import { MapPin, Phone, Users, X } from "lucide-react"
 interface Hospital {
   id: string
   name: string
-  position: [number, number] // [lat, lng]
+  position: [number, number]
   address: string
   phone?: string
   availableDoctors?: number
@@ -21,8 +21,8 @@ interface Props {
 
 const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
   const [popupInfo, setPopupInfo] = useState<Hospital | null>(null)
-  const [center, setCenter] = useState<[number, number]>([40.7128, -74.006])
-  const [zoom, setZoom] = useState(12)
+  const [center, setCenter] = useState<[number, number]>([27.704010, 84.422564])
+  const [zoom, setZoom] = useState(13)
 
   const hospitalMarkers = useMemo(() => {
     return hospitals.map((hospital) => (
@@ -47,12 +47,10 @@ const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
     ))
   }, [hospitals])
 
-  // Optimize popup close handler
   const handleClosePopup = useCallback(() => {
     setPopupInfo(null)
   }, [])
 
-  // Optimize bounds change handler
   const handleBoundsChanged = useCallback(({ center, zoom }: { center: [number, number]; zoom: number }) => {
     setCenter(center)
     setZoom(zoom)
@@ -71,8 +69,6 @@ const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
         touchEvents={true}
       >
         {hospitalMarkers}
-
-        {/* Hospital count overlay */}
         <Overlay anchor={[center[0] + 0.01, center[1] - 0.02]} offset={[0, 0]}>
           <Card className="shadow-lg border-none bg-white/95 backdrop-blur-sm">
             <CardContent className="p-3">
@@ -86,8 +82,6 @@ const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
             </CardContent>
           </Card>
         </Overlay>
-
-        {/* Hospital popup */}
         {popupInfo && (
           <Overlay anchor={popupInfo.position} offset={[0, -40]}>
             <Card className="shadow-xl border-none bg-white max-w-xs">
@@ -103,20 +97,17 @@ const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
                     <X className="w-3 h-3" />
                   </Button>
                 </div>
-
                 <div className="space-y-2 text-xs">
                   <div className="flex items-start space-x-2">
                     <MapPin className="w-3 h-3 text-gray-500 mt-0.5 flex-shrink-0" />
                     <span className="text-gray-600">{popupInfo.address}</span>
                   </div>
-
                   {popupInfo.phone && (
                     <div className="flex items-center space-x-2">
                       <Phone className="w-3 h-3 text-gray-500 flex-shrink-0" />
                       <span className="text-gray-600">{popupInfo.phone}</span>
                     </div>
                   )}
-
                   {popupInfo.availableDoctors && (
                     <div className="flex items-center space-x-2">
                       <Users className="w-3 h-3 text-gray-500 flex-shrink-0" />
@@ -124,7 +115,6 @@ const HospitalMap: React.FC<Props> = React.memo(({ hospitals }) => {
                     </div>
                   )}
                 </div>
-
                 <div className="flex space-x-2 mt-3">
                   <Button size="sm" className="bg-[#00AD9B] hover:bg-[#009688] text-white text-xs px-3 py-1">
                     View Details

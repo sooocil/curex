@@ -1,69 +1,75 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDocApplicationStore } from "@/stores/doctorStores/docApplicationStore";
-import { useDoctorStore } from "@/stores/doctorStores/doctorStore";
-import { Users, ClipboardCheck, CheckCircle, Clock } from "lucide-react";
 import { useEffect } from "react";
+import { toast } from "sonner";
+import { EditableVital } from "@/components/EditableVital"; // adjust path if needed
+import { usePatientStatsStore } from "@/stores/patientStats/patientStatsStore";
 
-export function DashboardStats() {
-  const totalDocs = useDoctorStore((state) => state.doctors);
-  const pendingApps = useDocApplicationStore((state) => state.applications);
+interface UserOverviewStatsProps {
+  userId: string;
+
+}
+
+export function UserOverviewStats({ userId }: UserOverviewStatsProps) {
+  const { stats, fetchStats, updateStats } = usePatientStatsStore();
+
+  useEffect(() => {
+    if (userId) fetchStats(userId);
+  }, [userId, fetchStats]);
+
+  const handleUpdate = async (field: keyof typeof stats, rawValue: string) => {
+    let parsedValue: string | number = rawValue;
+
+    if (field === "heartRate" || field === "bloodGlucose") {
+      const parsed = parseInt(rawValue);
+      if (isNaN(parsed)) return toast.error(`Invalid number for ${field}`);
+      parsedValue = parsed;
+    }
+
+    if (field === "temperature") {
+      const parsed = parseFloat(rawValue);
+      if (isNaN(parsed)) return toast.error("Invalid temperature");
+      parsedValue = parsed;
+    }
+
+    if (field === "bloodPressure") {
+      const regex = /^\d{2,3}\/\d{2,3}$/;
+      if (!regex.test(rawValue)) {
+        return toast.error("Invalid blood pressure format (e.g., 120/80)");
+      }
+    }
+
+    await updateStats(userId, { [field]: parsedValue });
+    toast.success(`${field} updated successfully`);
+  };
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Doctors</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalDocs.length}</div>
-          <p className="text-xs text-muted-foreground">
-            +{totalDocs.length} from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Pending Applications
-          </CardTitle>
-          <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{pendingApps.length}</div>
-          <p className="text-xs text-muted-foreground">+3 from yesterday</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Approved This Week
-          </CardTitle>
-          <CheckCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalDocs.length}</div>
-          <p className="text-xs text-muted-foreground">
-            +{totalDocs.length + 3} from last week
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Avg. Review Time
-          </CardTitle>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">1.2 days</div>
-          <p className="text-xs text-muted-foreground">
-            -0.3 days from last month
-          </p>
-        </CardContent>
-      </Card>
+      <EditableVital
+        label="Heart Rate"
+        value={stats.heartRate.toString()}
+        unit="BPM"
+        onSave={(val) => handleUpdate("heartRate", val)}
+      />
+      
+      <EditableVital
+        label="Blood Pressure"
+        value={stats.bloodPressure}
+        placeholder="120/80"
+        onSave={(val) => handleUpdate("bloodPressure", val)}
+      />
+      <EditableVital
+        label="Temperature"
+        value={stats.temperature.toString()}
+        unit="°F"
+        onSave={(val) => handleUpdate("temperature", val)}
+      />
+      <EditableVital
+        label="Blood Glucose"
+        value={stats.bloodGlucose.toString()}
+        unit="mg/dL"
+        onSave={(val) => handleUpdate("bloodGlucose", val)}
+      />
     </div>
   );
 }
