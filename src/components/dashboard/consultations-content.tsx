@@ -24,6 +24,7 @@ import { useParams } from "next/navigation";
 export  function PatientConsultationsContent() {
   const params = useParams();
   const userID = params?.userId as string | undefined;
+  
 
   const { fetchAppointmentsByUserId, appointments, loading, error } = usePatAppointmentStore();
 

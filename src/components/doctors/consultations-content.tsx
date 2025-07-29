@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Video, Phone, MessageSquare, Clock, FileText } from "lucide-react"
-import { ChatPopup } from "./chat-popup"
-import { WebRTCVideoCall } from "./webrtc-video-call"
-import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore"
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Video, Phone, MessageSquare, Clock, FileText } from "lucide-react";
+import { ChatPopup } from "./chat-popup";
+import { WebRTCVideoCall } from "./webrtc-video-call";
+import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore";
 
 const recentConsultations = [
   {
@@ -31,24 +31,23 @@ const recentConsultations = [
     notes: "Prescription updated",
     avatar: "/placeholder.svg?height=40&width=40",
   },
-]
+];
 
 export function ConsultationsContent({ doctorId }: { doctorId: string }) {
-  const { fetchAppointmentsByDoctorId, appointments } = useAppointmentStore()
+  const { fetchAppointmentsByDoctorId, appointments } = useAppointmentStore();
 
   const [chatOpen, setChatOpen] = useState({
     isOpen: false,
     consultation: null as any,
-  })
+  });
   const [videoCallOpen, setVideoCallOpen] = useState({
     isOpen: false,
     consultation: null as any,
-  })
+  });
 
   useEffect(() => {
-
-    if (doctorId) fetchAppointmentsByDoctorId(doctorId)
-  }, [doctorId, fetchAppointmentsByDoctorId])
+    if (doctorId) fetchAppointmentsByDoctorId(doctorId);
+  }, [doctorId, fetchAppointmentsByDoctorId]);
 
   const activeConsultations = Array.from(
     new Map(
@@ -65,9 +64,9 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
             startTime: app.user.time || "2:00 PM",
             avatar: app.user.username || "/placeholder.svg?height=40&width=40",
           },
-        ]),
-    ).values(),
-  )
+        ])
+    ).values()
+  );
 
   return (
     <div className="space-y-6">
@@ -85,7 +84,10 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
               >
                 <div className="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarImage src={consultation.avatar || "/placeholder.svg"} alt={consultation.patient} />
+                    <AvatarImage
+                      src={consultation.avatar || "/placeholder.svg"}
+                      alt={consultation.patient}
+                    />
                     <AvatarFallback>
                       {consultation.patient
                         .split(" ")
@@ -112,15 +114,23 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Badge className="bg-green-100 text-green-800">{consultation.status}</Badge>
+                  <Badge className="bg-green-100 text-green-800">
+                    {consultation.status}
+                  </Badge>
                   <Button
-                    onClick={() => setVideoCallOpen({ isOpen: true, consultation })}
+                    onClick={() =>
+                      setVideoCallOpen({ isOpen: true, consultation })
+                    }
                     size="sm"
                     className="bg-curex hover:bg-curex/90"
                   >
                     Join
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => setChatOpen({ isOpen: true, consultation })}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setChatOpen({ isOpen: true, consultation })}
+                  >
                     Chat
                   </Button>
                 </div>
@@ -137,10 +147,16 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
         </CardHeader>
         <CardContent className="space-y-4">
           {recentConsultations.map((consultation) => (
-            <div key={consultation.id} className="flex items-center justify-between p-4 border rounded-lg">
+            <div
+              key={consultation.id}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
               <div className="flex items-center space-x-4">
                 <Avatar>
-                  <AvatarImage src={consultation.avatar || "/placeholder.svg"} alt={consultation.patient} />
+                  <AvatarImage
+                    src={consultation.avatar || "/placeholder.svg"}
+                    alt={consultation.patient}
+                  />
                   <AvatarFallback>
                     {consultation.patient
                       .split(" ")
@@ -164,7 +180,11 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
                       {consultation.duration}
                     </div>
                   </div>
-                  {consultation.notes && <p className="text-sm text-gray-600 mt-1">{consultation.notes}</p>}
+                  {consultation.notes && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {consultation.notes}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -172,7 +192,9 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
                   <p className="text-sm text-gray-500">Ended at</p>
                   <p className="text-sm font-medium">{consultation.endTime}</p>
                 </div>
-                <Badge className="bg-blue-100 text-blue-800">{consultation.status}</Badge>
+                <Badge className="bg-blue-100 text-blue-800">
+                  {consultation.status}
+                </Badge>
                 <Button size="sm" variant="outline">
                   <FileText className="h-4 w-4 mr-2" />
                   Notes
@@ -234,15 +256,27 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
             <CardTitle className="text-sm">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+            >
               <Video className="h-4 w-4 mr-2" />
               Start Video Call
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+            >
               <MessageSquare className="h-4 w-4 mr-2" />
               Send Message
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+            >
               <FileText className="h-4 w-4 mr-2" />
               Add Notes
             </Button>
@@ -255,8 +289,8 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
         <ChatPopup
           isOpen={chatOpen.isOpen}
           onClose={() => setChatOpen({ isOpen: false, consultation: null })}
-          patientName={chatOpen.consultation.patient}
-          patientAvatar={chatOpen.consultation.avatar}
+          doctorName={chatOpen.consultation.patient}
+          doctorAvatar={chatOpen.consultation.avatar}
           consultationId={chatOpen.consultation.id.toString()}
         />
       )}
@@ -265,7 +299,9 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
       {videoCallOpen.isOpen && videoCallOpen.consultation && (
         <WebRTCVideoCall
           isOpen={videoCallOpen.isOpen}
-          onClose={() => setVideoCallOpen({ isOpen: false, consultation: null })}
+          onClose={() =>
+            setVideoCallOpen({ isOpen: false, consultation: null })
+          }
           patientName={videoCallOpen.consultation.patient}
           patientAvatar={videoCallOpen.consultation.avatar}
           consultationId={videoCallOpen.consultation.id.toString()}
@@ -274,5 +310,5 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
         />
       )}
     </div>
-  )
+  );
 }

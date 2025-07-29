@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, X, Paperclip, Smile } from "lucide-react";
+import { useAuthUser } from "@/helpers/getDataFromToken"; // <-- your hook path
 
 interface Message {
   id: string;
@@ -19,7 +20,6 @@ interface Message {
 
 interface ChatPopupProps {
   consultationId: string;
-  userId: string;
   onClose: () => void;
   isOpen: boolean;
   doctorName: string;
@@ -33,32 +33,8 @@ export function ChatPopup({
   doctorAvatar,
   consultationId,
 }: ChatPopupProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      sender: "doctor",
-      content:
-        "Hello! I'm ready for our consultation. How are you feeling today?",
-      timestamp: new Date(Date.now() - 300000),
-      type: "text",
-    },
-    {
-      id: "2",
-      sender: "patient",
-      content:
-        "Hi Doctor, I'm experiencing some chest pain that I wanted to discuss.",
-      timestamp: new Date(Date.now() - 240000),
-      type: "text",
-    },
-    {
-      id: "3",
-      sender: "doctor",
-      content:
-        "I understand your concern. Can you describe the pain in more detail? When did it start?",
-      timestamp: new Date(Date.now() - 180000),
-      type: "text",
-    },
-  ]);
+  const { user, loading } = useAuthUser();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -89,43 +65,47 @@ export function ChatPopup({
   }, [isOpen, onClose]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const message: Message = {
-        id: Date.now().toString(),
-        sender: "patient",
-        content: newMessage.trim(),
-        timestamp: new Date(),
-        type: "text",
-      };
-      setMessages((prev) => [...prev, message]);
-      setNewMessage("");
+    if (!user || !newMessage.trim()) return;
 
-      // Simulate doctor typing response
-      setIsTyping(true);
-      setTimeout(() => {
-        setIsTyping(false);
+    const senderRole = user.role === "doctor" ? "doctor" : "patient";
+
+    const message: Message = {
+      id: Date.now().toString(),
+      sender: senderRole,
+      content: newMessage.trim(),
+      timestamp: new Date(),
+      type: "text",
+    };
+
+    setMessages((prev) => [...prev, message]);
+    setNewMessage("");
+
+    // Simulate response for demo, replace with real backend logic later
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      if (senderRole === "patient") {
         const doctorResponse: Message = {
           id: (Date.now() + 1).toString(),
           sender: "doctor",
-          content:
-            "Thank you for that information. Let me review your symptoms.",
+          content: "Thank you for the info. Let me review your case.",
           timestamp: new Date(),
           type: "text",
         };
         setMessages((prev) => [...prev, doctorResponse]);
-      }, 2000);
-    }
+      }
+    }, 2000);
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  if (loading) return null;
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -134,7 +114,6 @@ export function ChatPopup({
             onClick={onClose}
           />
 
-          {/* Chat Window */}
           <motion.div
             ref={chatRef}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -159,12 +138,8 @@ export function ChatPopup({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-sm font-medium">
-                      {doctorName}
-                    </CardTitle>
-                    <p className="text-xs text-curex-light opacity-90">
-                      Online
-                    </p>
+                    <CardTitle className="text-sm font-medium">{doctorName}</CardTitle>
+                    <p className="text-xs text-curex-light opacity-90">Online</p>
                   </div>
                 </div>
                 <Button
@@ -185,10 +160,14 @@ export function ChatPopup({
                         key={message.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${message.sender === "patient" ? "justify-end" : "justify-start"}`}
+                        className={`flex ${
+                          message.sender === "patient" ? "justify-end" : "justify-start"
+                        }`}
                       >
                         <div
-                          className={`max-w-[80%] ${message.sender === "patient" ? "order-2" : "order-1"}`}
+                          className={`max-w-[80%] ${
+                            message.sender === "patient" ? "order-2" : "order-1"
+                          }`}
                         >
                           <div
                             className={`rounded-lg px-3 py-2 text-sm ${
@@ -201,9 +180,7 @@ export function ChatPopup({
                           </div>
                           <p
                             className={`text-xs text-gray-500 mt-1 ${
-                              message.sender === "patient"
-                                ? "text-right"
-                                : "text-left"
+                              message.sender === "patient" ? "text-right" : "text-left"
                             }`}
                           >
                             {formatTime(message.timestamp)}
@@ -249,9 +226,7 @@ export function ChatPopup({
                       placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && handleSendMessage()
-                      }
+                      onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                       className="flex-1 border-0 bg-white focus-visible:ring-1 focus-visible:ring-curex"
                     />
                     <Button

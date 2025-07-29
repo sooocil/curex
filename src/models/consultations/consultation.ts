@@ -9,9 +9,8 @@ export interface IActiveConsultation extends Document {
   status: "In Progress" | "Completed" | "Ended";
   startTime: Date;
   endTime?: Date;
-  duration?: string; // can be computed or stored as string "mm:ss"
+  duration?: string;
   notes?: string;
-  // you can add fields for chatId, callRoomId, etc.
 }
 
 const ActiveConsultationSchema: Schema = new Schema({

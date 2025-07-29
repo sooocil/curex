@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, use } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,90 +8,37 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, X, Paperclip, Smile } from "lucide-react";
-import { socket } from "@/lib/socket";
+import { useAuthUser } from "@/helpers/getDataFromToken"; 
 
 interface Message {
   id: string;
-  sender: "doctor" | "patient";
+  sender: "patient" | "doctor";
   content: string;
   timestamp: Date;
   type: "text" | "file";
 }
 
 interface ChatPopupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  patientName: string;
-  patientAvatar?: string;
   consultationId: string;
+  onClose: () => void;
+  isOpen: boolean;
+  doctorName: string;
+  doctorAvatar?: string;
 }
 
 export function ChatPopup({
   isOpen,
   onClose,
-  patientName,
-  patientAvatar,
+  doctorName,
+  doctorAvatar,
   consultationId,
 }: ChatPopupProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      sender: "patient",
-      content: "Hello Doctor, I'm experiencing some chest pain.",
-      timestamp: new Date(Date.now() - 300000),
-      type: "text",
-    },
-    {
-      id: "2",
-      sender: "doctor",
-      content:
-        "I understand your concern. Can you describe the pain in more detail?",
-      timestamp: new Date(Date.now() - 240000),
-      type: "text",
-    },
-    {
-      id: "3",
-      sender: "patient",
-      content:
-        "It's a sharp pain that comes and goes, mostly when I breathe deeply.",
-      timestamp: new Date(Date.now() - 180000),
-      type: "text",
-    },
-  ]);
+  const { user, loading } = useAuthUser();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [transport, setTransport] = useState("N/A");
-
-  useEffect(() => {
-    if (socket.connected) {
-      onConnect();
-    }
-
-    function onConnect() {
-      setIsConnected(true);
-      setTransport(socket.io.engine.transport.name);
-
-      socket.io.engine.on("upgrade", (transport: any) => {
-        setTransport(transport.name);
-      });
-    }
-
-    function onDisconnect() {
-      setIsConnected(false);
-      setTransport("N/A");
-    }
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-    };
-  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -118,43 +65,55 @@ export function ChatPopup({
   }, [isOpen, onClose]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const message: Message = {
-        id: Date.now().toString(),
-        sender: "doctor",
-        content: newMessage.trim(),
-        timestamp: new Date(),
-        type: "text",
-      };
+    if (!user || !newMessage.trim()) return;
 
-      // Emit to server
-      socket.emit("message:send", {
-        consultationId,
-        message,
-      });
+    const senderRole = user.role === "doctor" ? "doctor" : "patient";
 
-      setMessages((prev) => [...prev, message]);
-      setNewMessage("");
-    }
+    const message: Message = {
+      id: Date.now().toString(),
+      sender: senderRole,
+      content: newMessage.trim(),
+      timestamp: new Date(),
+      type: "text",
+    };
+
+    setMessages((prev) => [...prev, message]);
+    setNewMessage("");
+
+    // Simulate response for demo, replace with real backend logic later
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      if (senderRole === "patient") {
+        const doctorResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          sender: "doctor",
+          content: "Thank you for the info. Let me review your case.",
+          timestamp: new Date(),
+          type: "text",
+        };
+        setMessages((prev) => [...prev, doctorResponse]);
+      }
+    }, 2000);
   };
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
+
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  if (loading) return null;
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 bg-black/20 z-40"
             onClick={onClose}
           />
 
-          {/* Chat Window */}
           <motion.div
             ref={chatRef}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -163,31 +122,24 @@ export function ChatPopup({
             transition={{ type: "spring", duration: 0.3 }}
             className="fixed bottom-4 right-4 w-96 h-[500px] z-50"
           >
-            <Card className=" h-full flex flex-col shadow-2xl border-0 bg-white">
-              <p>Status: {isConnected ? "connected" : "disconnected"}</p>
-              <p>Transport: {transport}</p>
-
+            <Card className="h-full flex flex-col shadow-2xl border-0 bg-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 bg-curex text-white rounded-t-lg">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={patientAvatar || "/placeholder.svg"}
-                      alt={patientName}
+                      src={doctorAvatar || "/placeholder.svg"}
+                      alt={doctorName}
                     />
                     <AvatarFallback className="bg-white text-curex text-sm">
-                      {patientName
+                      {doctorName
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-sm font-medium">
-                      {patientName}
-                    </CardTitle>
-                    <p className="text-xs text-curex-light opacity-90">
-                      Online
-                    </p>
+                    <CardTitle className="text-sm font-medium">{doctorName}</CardTitle>
+                    <p className="text-xs text-curex-light opacity-90">Online</p>
                   </div>
                 </div>
                 <Button
@@ -200,7 +152,7 @@ export function ChatPopup({
                 </Button>
               </CardHeader>
 
-              <CardContent className=" flex-1 flex flex-col p-0">
+              <CardContent className="flex-1 flex flex-col p-0">
                 <ScrollArea className="flex-1 p-4">
                   <div className="space-y-4">
                     {messages.map((message) => (
@@ -208,14 +160,18 @@ export function ChatPopup({
                         key={message.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${message.sender === "doctor" ? "justify-end" : "justify-start"}`}
+                        className={`flex ${
+                          message.sender === "patient" ? "justify-end" : "justify-start"
+                        }`}
                       >
                         <div
-                          className={`max-w-[80%] ${message.sender === "doctor" ? "order-2" : "order-1"}`}
+                          className={`max-w-[80%] ${
+                            message.sender === "patient" ? "order-2" : "order-1"
+                          }`}
                         >
                           <div
                             className={`rounded-lg px-3 py-2 text-sm ${
-                              message.sender === "doctor"
+                              message.sender === "patient"
                                 ? "bg-curex text-white"
                                 : "bg-gray-100 text-gray-900"
                             }`}
@@ -224,9 +180,7 @@ export function ChatPopup({
                           </div>
                           <p
                             className={`text-xs text-gray-500 mt-1 ${
-                              message.sender === "doctor"
-                                ? "text-right"
-                                : "text-left"
+                              message.sender === "patient" ? "text-right" : "text-left"
                             }`}
                           >
                             {formatTime(message.timestamp)}
@@ -272,9 +226,7 @@ export function ChatPopup({
                       placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && handleSendMessage()
-                      }
+                      onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                       className="flex-1 border-0 bg-white focus-visible:ring-1 focus-visible:ring-curex"
                     />
                     <Button

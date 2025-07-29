@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { ToasterClient } from "@/components/toast-wrapper";
+import { SocketInitializer } from "@/components/SocketInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
 
 export const metadata: Metadata = {
   title: "Curex - Your Health, Our Priority",
@@ -20,11 +20,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
-    <html lang="en"  >
-      <body className={`${geistSans.variable}  antialiased`}
-      >
+    <html lang="en">
+      <body className={`${geistSans.variable}  antialiased`}>
         {children}
+        <SocketInitializer />
         <ToasterClient />
       </body>
     </html>
