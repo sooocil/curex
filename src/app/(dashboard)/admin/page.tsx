@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { DashboardStats } from "@/components/admin/dashboard-stats"
+import { DashboardStats } from "@/components/admin/admin-dashboard-stats"
 import { RecentDoctorApplications } from "@/components/admin/recent-doctor-applications"
 import { DoctorApprovalRate } from "@/components/admin/doctor-approval-rate"
 
