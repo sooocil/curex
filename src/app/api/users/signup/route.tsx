@@ -1,12 +1,11 @@
 import { connectDB } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
+import PatientStats from "@/models/PatientStats";  
 import { NextResponse, NextRequest } from "next/server";
 import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/helpers/mailer";
 
-
 export async function POST(request: NextRequest) {
-  
   try {
     await connectDB();
     const reqBody = await request.json();
@@ -20,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existingUser = await User.findOne({ email });
-    
+
     if (existingUser) {
       return NextResponse.json(
         { message: "User already exists." },
@@ -41,6 +40,22 @@ export async function POST(request: NextRequest) {
     console.log("User created:", savedUser);
 
     try {
+      const existingStats = await PatientStats.findOne({ userId: savedUser._id });
+      if (!existingStats) {
+        await PatientStats.create({
+          userId: savedUser._id,
+          heartRate: 72,
+          bloodPressure: "120/80",
+          temperature: 98.6,
+          bloodGlucose: 95,
+        });
+        console.log("Default PatientStats created for user:", savedUser._id);
+      }
+    } catch (statsErr) {
+      console.error("Failed to create PatientStats for new user:", statsErr);
+    }
+
+    try {
       await sendEmail({
         email,
         emailType: "VERIFY",
@@ -59,7 +74,7 @@ export async function POST(request: NextRequest) {
         message: "User created successfully. Verification email sent.",
         success: true,
         userId: savedUser._id,
-        
+
         user: {
           username: savedUser.username,
           email: savedUser.email,

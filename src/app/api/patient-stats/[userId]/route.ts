@@ -1,4 +1,3 @@
-// app/api/patient-stats/[userId]/route.ts
 import { NextResponse } from "next/server";
 import PatientStats from "@/models/PatientStats";
 import { connectDB } from "@/dbConfig/dbConfig";
@@ -17,6 +16,9 @@ export async function GET(request: Request, { params }: { params: { userId: stri
 
   return NextResponse.json(stats);
 }
+
+
+
 
 export async function PUT(request: Request, { params }: { params: { userId: string } }) {
   const { userId } = params;
