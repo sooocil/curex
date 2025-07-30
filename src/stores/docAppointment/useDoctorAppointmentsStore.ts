@@ -7,7 +7,7 @@ interface Appointment {
   user: { username: string; email: string ; mode: string; status: string; time: string };
   doctor: { name: string; specialty: string; rate: number };
   date: string;
-  // Add more as needed
+  
 }
 
 interface AppointmentState {

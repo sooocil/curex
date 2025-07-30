@@ -19,7 +19,7 @@ import {
   Maximize2,
   Minimize2,
 } from "lucide-react"
-import { ChatPopup } from "./chat-popup"
+import { ChatPopup } from "./ChatPopupDoctor"
 
 interface WebRTCVideoCallProps {
   isOpen: boolean

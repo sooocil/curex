@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Video, Phone, MessageSquare, Clock, FileText } from "lucide-react";
-import { ChatPopup } from "./chat-popup";
+import { ChatPopup } from "./ChatPopupDoctor";
 import { WebRTCVideoCall } from "./webrtc-video-call";
 import { useAppointmentStore } from "@/stores/docAppointment/useDoctorAppointmentsStore";
 
@@ -292,6 +292,8 @@ export function ConsultationsContent({ doctorId }: { doctorId: string }) {
           doctorName={chatOpen.consultation.patient}
           doctorAvatar={chatOpen.consultation.avatar}
           consultationId={chatOpen.consultation.id.toString()}
+          userId={""}
+          receiverName={""}
         />
       )}
 

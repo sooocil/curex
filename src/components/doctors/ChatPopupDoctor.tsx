@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, X, Paperclip, Smile } from "lucide-react";
-import { useAuthUser } from "@/helpers/getDataFromToken"; // <-- your hook path
+import { useAuthUser } from "@/helpers/getDataFromToken";
 
 interface Message {
   id: string;
@@ -19,18 +19,21 @@ interface Message {
 }
 
 interface ChatPopupProps {
-  consultationId: string;
-  onClose: () => void;
   isOpen: boolean;
-  doctorName: string;
+  onClose: () => void;
+  doctorName: string; 
   doctorAvatar?: string;
+  consultationId: string;
+  userId: string;
+  receiverName: string;
+  receiverAvatar?: string;
 }
 
 export function ChatPopup({
   isOpen,
   onClose,
-  doctorName,
-  doctorAvatar,
+  receiverName,
+  receiverAvatar,
   consultationId,
 }: ChatPopupProps) {
   const { user, loading } = useAuthUser();
@@ -80,19 +83,18 @@ export function ChatPopup({
     setMessages((prev) => [...prev, message]);
     setNewMessage("");
 
-    // Simulate response for demo, replace with real backend logic later
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
       if (senderRole === "patient") {
-        const doctorResponse: Message = {
+        const response: Message = {
           id: (Date.now() + 1).toString(),
           sender: "doctor",
           content: "Thank you for the info. Let me review your case.",
           timestamp: new Date(),
           type: "text",
         };
-        setMessages((prev) => [...prev, doctorResponse]);
+        setMessages((prev) => [...prev, response]);
       }
     }, 2000);
   };
@@ -127,19 +129,23 @@ export function ChatPopup({
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={doctorAvatar || "/placeholder.svg"}
-                      alt={doctorName}
+                      src={receiverAvatar || "/placeholder.svg"}
+                      alt={receiverName}
                     />
                     <AvatarFallback className="bg-white text-curex text-sm">
-                      {doctorName
+                      {receiverName
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-sm font-medium">{doctorName}</CardTitle>
-                    <p className="text-xs text-curex-light opacity-90">Online</p>
+                    <CardTitle className="text-sm font-medium">
+                      {receiverName}
+                    </CardTitle>
+                    <p className="text-xs text-curex-light opacity-90">
+                      Online
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -161,17 +167,21 @@ export function ChatPopup({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex ${
-                          message.sender === "patient" ? "justify-end" : "justify-start"
+                          message.sender === user?.role
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
                         <div
                           className={`max-w-[80%] ${
-                            message.sender === "patient" ? "order-2" : "order-1"
+                            message.sender === user?.role
+                              ? "order-2"
+                              : "order-1"
                           }`}
                         >
                           <div
                             className={`rounded-lg px-3 py-2 text-sm ${
-                              message.sender === "patient"
+                              message.sender === user?.role
                                 ? "bg-curex text-white"
                                 : "bg-gray-100 text-gray-900"
                             }`}
@@ -180,7 +190,9 @@ export function ChatPopup({
                           </div>
                           <p
                             className={`text-xs text-gray-500 mt-1 ${
-                              message.sender === "patient" ? "text-right" : "text-left"
+                              message.sender === user?.role
+                                ? "text-right"
+                                : "text-left"
                             }`}
                           >
                             {formatTime(message.timestamp)}
@@ -226,7 +238,9 @@ export function ChatPopup({
                       placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleSendMessage()
+                      }
                       className="flex-1 border-0 bg-white focus-visible:ring-1 focus-visible:ring-curex"
                     />
                     <Button

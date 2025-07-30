@@ -2,15 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-// Update these import paths to the actual locations of your UI components.
-// For example, if you are using shadcn/ui, the imports might look like this:
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Maximize2, Minimize2, X } from "lucide-react";
-import { ChatPopup } from "./chat-popup";
-
+import { PatientChatPopup } from "./ChatPopupPatient";
 import {
   LiveKitRoom,
   GridLayout,
@@ -28,6 +25,8 @@ interface VideoCallWindowProps {
   patientAvatar?: string;
   consultationId: string;
   callDuration?: string;
+  userId: string; 
+  doctorName: string;
 }
 
 export function VideoCallWindow({
@@ -37,6 +36,8 @@ export function VideoCallWindow({
   patientAvatar,
   consultationId,
   callDuration = "00:00",
+  userId,
+  doctorName,
 }: VideoCallWindowProps) {
   const [token, setToken] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -157,12 +158,12 @@ export function VideoCallWindow({
                 </div>
 
                 {isChatOpen && (
-                  <ChatPopup
+                  <PatientChatPopup
                     isOpen={isChatOpen}
                     onClose={() => setIsChatOpen(false)}
                     consultationId={consultationId}
-                    userId={""}
-                    doctorName={""}
+                    userId={userId}
+                    doctorName={doctorName}
                   />
                 )}
               </CardContent>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";
-import { PatientConsultationsContent } from "@/components/dashboard/consultations-content";
+import  PatientConsultationPage  from "@/components/dashboard/consultations-content";
 
 export const metadata: Metadata = {
   title: "Consultations | Curex Doctor",
@@ -25,7 +25,7 @@ export default async function PatientConsultationsPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold tracking-tight">Consultations</h1>
-        <PatientConsultationsContent />
+        <PatientConsultationPage />
       </div>
     );
   } catch (err) {
