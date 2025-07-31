@@ -1,14 +1,19 @@
-import { NextResponse } from "next/server";
+import { Request, Response } from "express";
 import { ChatMessage } from "@/models/consultations/ChatMessage";
-import { connectDB } from "@/dbConfig/dbConfig";
 
-export async function POST(req: Request) {
+export const storeMessage = async (req: Request, res: Response) => {
   try {
-    await connectDB();
-    const body = await req.json();
-    const message = await ChatMessage.create(body);
-    return NextResponse.json({ message }, { status: 200 });
+    const { consultationId, senderId, senderRole, message, timestamp } = req.body;
+    const newMessage = new ChatMessage({
+      consultationId,
+      senderId,
+      senderRole,
+      message,
+      timestamp: new Date(timestamp),
+    });
+    await newMessage.save();
+    res.status(201).json(newMessage);
   } catch (error) {
-    return NextResponse.json({ error: "Message storing failed" }, { status: 500 });
+    res.status(500).json({ error: "Failed to store message" });
   }
-}
+};

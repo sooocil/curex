@@ -9,11 +9,11 @@ export interface IChatMessage extends Document {
 }
 
 const ChatMessageSchema = new Schema<IChatMessage>({
-  consultationId: { type: Schema.Types.ObjectId, ref: "ActiveConsultation", required: true },
+  consultationId: { type: Schema.Types.ObjectId, ref: "ActiveConsultation", required: true, index: true },
   senderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   senderRole: { type: String, enum: ["doctor", "patient"], required: true },
   message: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
 
 export const ChatMessage = mongoose.model<IChatMessage>("ChatMessage", ChatMessageSchema);

@@ -1,4 +1,3 @@
-// stores/doctorStores/fetchedpatientStore.ts
 import { create } from "zustand";
 
 export interface FetchedPatient {
