@@ -92,6 +92,13 @@ const HomeNav = () => {
               >
                 Become a Doctor
               </Button>
+              <Button
+                type="submit"
+                onClick={() => (window.location.href = "/doctors")}
+                className="bg-curex hover:bg-curex-dark text-white"
+              >
+                Login as Existing Doctor
+              </Button>
             </>
           ) : (
             <ProfileDropdown />

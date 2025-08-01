@@ -18,9 +18,11 @@ interface Appointment {
 
 interface AppointmentState {
   appointments: Appointment[] | null;
+  approvedAppointments: Appointment[] | null;
   loading: boolean;
   error: string | null;
   fetchAppointmentsByDoctorId: (doctorId: string) => Promise<void>;
+  fetchAllApprovedAppointmentsByDoctorId: (doctorId: string) => Promise<void>;
   fetchAppointmentsByPatientId: (patientId: string) => Promise<void>;
   approveAppointment: (appointmentId: string) => Promise<void>;
   markBusyAppointment: (appointmentId: string) => void;
@@ -28,6 +30,7 @@ interface AppointmentState {
 
 export const useAppointmentStore = create<AppointmentState>((set) => ({
   appointments: null,
+  approvedAppointments: null,
   loading: false,
   error: null,
 
@@ -51,6 +54,30 @@ export const useAppointmentStore = create<AppointmentState>((set) => ({
         error: err.message || "Unknown error",
         loading: false,
         appointments: null,
+      });
+    }
+  },
+
+  fetchAllApprovedAppointmentsByDoctorId: async (doctorId) => {
+    if (!doctorId) return;
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch("/api/doctorsApi/appointments/fetchapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ doctorId, status: "approved" }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to fetch approved appointments");
+      }
+      const data = await res.json();
+      set({ approvedAppointments: data, loading: false, error: null });
+    } catch (err: any) {
+      set({
+        error: err.message || "Unknown error",
+        loading: false,
+        approvedAppointments: null,
       });
     }
   },

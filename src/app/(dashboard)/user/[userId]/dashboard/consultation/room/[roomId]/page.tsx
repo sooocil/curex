@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Video,
   VideoOff,
@@ -17,54 +17,71 @@ import {
   Maximize2,
   Minimize2,
   Share,
-} from "lucide-react"
+} from "lucide-react";
 
 interface Message {
-  id: string
-  sender: "patient" | "doctor"
-  message: string
-  timestamp: Date
-  type: "text" | "file" | "prescription"
+  id: string;
+  sender: "patient" | "doctor";
+  message: string;
+  timestamp: Date;
+  type: "text" | "file" | "prescription";
 }
 
 interface Note {
-  id: string
-  content: string
-  timestamp: Date
-  category: "symptoms" | "diagnosis" | "treatment" | "general"
+  id: string;
+  content: string;
+  timestamp: Date;
+  category: "symptoms" | "diagnosis" | "treatment" | "general";
 }
 
-export default function ConsultationRoomPage({ params }: { params: { roomId: string } }) {
-  const router = useRouter()
-  const [isVideoOn, setIsVideoOn] = useState(true)
-  const [isAudioOn, setIsAudioOn] = useState(true)
-  const [isFullScreen, setIsFullScreen] = useState(false)
-  const [activeTab, setActiveTab] = useState<"chat" | "notes">("chat")
-  const [chatMessage, setChatMessage] = useState("")
-  const [newNote, setNewNote] = useState("")
-  const [noteCategory, setNoteCategory] = useState<"symptoms" | "diagnosis" | "treatment" | "general">("symptoms")
-  const [consultationStartTime] = useState(new Date())
-  const [duration, setDuration] = useState("00:00")
+interface RoomPageProps {
+  params: {
+    userId: string;
+    roomId: string;
+  };
+}
 
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
+export default function ConsultationRoomPage({
+  params,
+}: {
+  params: { userId: string; roomId: string };
+}) {
+  const router = useRouter();
+  const { userId, roomId } = params;
+
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isAudioOn, setIsAudioOn] = useState(true);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"chat" | "notes">("chat");
+  const [chatMessage, setChatMessage] = useState("");
+  const [newNote, setNewNote] = useState("");
+  const [noteCategory, setNoteCategory] = useState<
+    "symptoms" | "diagnosis" | "treatment" | "general"
+  >("symptoms");
+  const [consultationStartTime] = useState(new Date());
+  const [duration, setDuration] = useState("00:00");
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       sender: "doctor",
-      message: "Hello! I can see you're here for your follow-up. How are you feeling today?",
+      message:
+        "Hello! I can see you're here for your follow-up. How are you feeling today?",
       timestamp: new Date(Date.now() - 300000),
       type: "text",
     },
     {
       id: "2",
       sender: "patient",
-      message: "Hi Doctor. I'm feeling much better since our last consultation. The medication has been helping.",
+      message:
+        "Hi Doctor. I'm feeling much better since our last consultation. The medication has been helping.",
       timestamp: new Date(Date.now() - 240000),
       type: "text",
     },
-  ])
+  ]);
 
   const [notes, setNotes] = useState<Note[]>([
     {
@@ -73,27 +90,29 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
       timestamp: new Date(Date.now() - 240000),
       category: "general",
     },
-  ])
+  ]);
 
   const consultationInfo = {
     patientName: "Sarah Johnson",
     doctorName: "Dr. Michael Chen",
     roomId: params.roomId,
     consultationType: "Follow-up",
-  }
+  };
 
   // Update duration every second
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date()
-      const diff = now.getTime() - consultationStartTime.getTime()
-      const minutes = Math.floor(diff / 60000)
-      const seconds = Math.floor((diff % 60000) / 1000)
-      setDuration(`${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`)
-    }, 1000)
+      const now = new Date();
+      const diff = now.getTime() - consultationStartTime.getTime();
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setDuration(
+        `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+      );
+    }, 1000);
 
-    return () => clearInterval(interval)
-  }, [consultationStartTime])
+    return () => clearInterval(interval);
+  }, [consultationStartTime]);
 
   const sendMessage = () => {
     if (chatMessage.trim()) {
@@ -103,11 +122,11 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
         message: chatMessage,
         timestamp: new Date(),
         type: "text",
-      }
-      setMessages([...messages, newMessage])
-      setChatMessage("")
+      };
+      setMessages([...messages, newMessage]);
+      setChatMessage("");
     }
-  }
+  };
 
   const addNote = () => {
     if (newNote.trim()) {
@@ -116,21 +135,22 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
         content: newNote,
         timestamp: new Date(),
         category: noteCategory,
-      }
-      setNotes([...notes, note])
-      setNewNote("")
+      };
+      setNotes([...notes, note]);
+      setNewNote("");
     }
-  }
+  };
 
   const endCall = () => {
-    router.push("/consultation/patient")
-  }
+    router.push("/consultation/patient");
+  };
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -140,7 +160,9 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Video className="w-6 h-6 text-[#00AD9B]" />
-              <h1 className="text-xl font-semibold text-gray-800">Consultation Room</h1>
+              <h1 className="text-xl font-semibold text-gray-800">
+                Consultation Room
+              </h1>
             </div>
             <div className="hidden md:flex items-center space-x-4 text-sm text-gray-600">
               <span>Patient: {consultationInfo.patientName}</span>
@@ -177,7 +199,9 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
                 <div className="w-24 h-24 bg-[#00AD9B] rounded-full flex items-center justify-center mx-auto mb-4">
                   <User className="w-12 h-12" />
                 </div>
-                <p className="text-lg font-medium">{consultationInfo.doctorName}</p>
+                <p className="text-lg font-medium">
+                  {consultationInfo.doctorName}
+                </p>
                 <p className="text-sm text-gray-300">Video connected</p>
               </div>
             </div>
@@ -200,26 +224,41 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
                 <button
                   onClick={() => setIsVideoOn(!isVideoOn)}
                   className={`p-3 rounded-full transition-colors ${
-                    isVideoOn ? "bg-gray-600 hover:bg-gray-700" : "bg-red-600 hover:bg-red-700"
+                    isVideoOn
+                      ? "bg-gray-600 hover:bg-gray-700"
+                      : "bg-red-600 hover:bg-red-700"
                   }`}
                 >
-                  {isVideoOn ? <Video className="w-5 h-5 text-white" /> : <VideoOff className="w-5 h-5 text-white" />}
+                  {isVideoOn ? (
+                    <Video className="w-5 h-5 text-white" />
+                  ) : (
+                    <VideoOff className="w-5 h-5 text-white" />
+                  )}
                 </button>
 
                 <button
                   onClick={() => setIsAudioOn(!isAudioOn)}
                   className={`p-3 rounded-full transition-colors ${
-                    isAudioOn ? "bg-gray-600 hover:bg-gray-700" : "bg-red-600 hover:bg-red-700"
+                    isAudioOn
+                      ? "bg-gray-600 hover:bg-gray-700"
+                      : "bg-red-600 hover:bg-red-700"
                   }`}
                 >
-                  {isAudioOn ? <Mic className="w-5 h-5 text-white" /> : <MicOff className="w-5 h-5 text-white" />}
+                  {isAudioOn ? (
+                    <Mic className="w-5 h-5 text-white" />
+                  ) : (
+                    <MicOff className="w-5 h-5 text-white" />
+                  )}
                 </button>
 
                 <button className="p-3 bg-gray-600 hover:bg-gray-700 rounded-full transition-colors">
                   <Share className="w-5 h-5 text-white" />
                 </button>
 
-                <button onClick={endCall} className="p-3 bg-red-600 hover:bg-red-700 rounded-full transition-colors">
+                <button
+                  onClick={endCall}
+                  className="p-3 bg-red-600 hover:bg-red-700 rounded-full transition-colors"
+                >
                   <Phone className="w-5 h-5 text-white" />
                 </button>
 
@@ -270,7 +309,10 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
           {activeTab === "chat" && (
             <div className="flex-1 flex flex-col">
               {/* Messages */}
-              <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto p-4 space-y-4"
+              >
                 {messages.map((message) => (
                   <div
                     key={message.id}
@@ -278,16 +320,23 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
                   >
                     <div
                       className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.sender === "patient" ? "bg-[#00AD9B] text-white" : "bg-gray-100 text-gray-800"
+                        message.sender === "patient"
+                          ? "bg-[#00AD9B] text-white"
+                          : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       <p className="text-sm">{message.message}</p>
                       <p
                         className={`text-xs mt-1 ${
-                          message.sender === "patient" ? "text-[#00AD9B]/70" : "text-gray-500"
+                          message.sender === "patient"
+                            ? "text-[#00AD9B]/70"
+                            : "text-gray-500"
                         }`}
                       >
-                        {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                     </div>
                   </div>
@@ -338,7 +387,10 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
                         {note.category}
                       </span>
                       <span className="text-xs text-gray-500">
-                        {note.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {note.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </span>
                     </div>
                     <p className="text-sm text-gray-800">{note.content}</p>
@@ -380,5 +432,5 @@ export default function ConsultationRoomPage({ params }: { params: { roomId: str
         </div>
       </div>
     </div>
-  )
+  );
 }
