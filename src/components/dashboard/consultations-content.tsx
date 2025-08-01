@@ -16,7 +16,7 @@ import {
   Play,
 } from "lucide-react";
 
-import { usePatientRoomStore } from "@/stores/usePatientRooms";
+import {usePatientRoomStore} from "@/stores/usePatientRooms";
 import { useAppointmentStore } from "@/stores/doctorStores/appointmentStore";
 
 export default function PatientConsultationPage() {

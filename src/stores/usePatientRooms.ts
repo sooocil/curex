@@ -23,10 +23,13 @@ export const usePatientRoomStore = create<PatientRoomStore>((set) => ({
   fetchRooms: async (userId: string) => {
     set({ loading: true });
     try {
-      const res = await axios.get(`/api/consultation-room/getPatient/${userId}`);
+      const res = await axios.get(
+        `/api/consultation/consultation-room/getPatient/${userId}`
+      );
       set({ rooms: res.data });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch rooms:", err);
+      set({ rooms: [] });
     } finally {
       set({ loading: false });
     }

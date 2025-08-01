@@ -1,25 +1,20 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose from "mongoose";
 
-export interface IConsultationRoom extends Document {
-  roomId: string;
-  patientId: mongoose.Types.ObjectId;
-  doctorId: mongoose.Types.ObjectId;
-  startTime: Date;
-  endTime: Date;
-  status: "ready" | "in-progress" | "ended";
-  consultationType: "Video Call" | "Phone Call";
-  appointmentId: mongoose.Types.ObjectId;
-}
-
-const ConsultationRoomSchema = new Schema<IConsultationRoom>({
-  roomId: { type: String, required: true, unique: true },
-  patientId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  doctorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  appointmentId: { type: Schema.Types.ObjectId, ref: "Appointment", required: true },
+const ConsultationRoomSchema = new mongoose.Schema({
+  roomId: {
+    type: String,
+    required: true,
+    unique: true,
+    default: () => `RM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+  },
+  patientId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  doctorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointment", required: true },
   consultationType: { type: String, enum: ["Video Call", "Phone Call"], required: true },
   startTime: { type: Date, required: true },
   endTime: { type: Date, required: true },
   status: { type: String, enum: ["ready", "in-progress", "ended"], default: "ready" },
 });
 
-export const ConsultationRoom = mongoose.models.ConsultationRoom || mongoose.model("ConsultationRoom", ConsultationRoomSchema);
+export const ConsultationRoom = mongoose.models?.ConsultationRoom
+  || mongoose.model("ConsultationRoom", ConsultationRoomSchema);

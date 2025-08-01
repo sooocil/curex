@@ -22,8 +22,8 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable}  antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable}  antialiased`} suppressHydrationWarning>
         {children}
         <SocketInitializer />
         <ToasterClient />
